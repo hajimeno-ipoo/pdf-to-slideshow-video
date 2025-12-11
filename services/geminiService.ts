@@ -2,6 +2,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { TokenUsage } from "../types";
 import { getUserApiKey } from "../utils/apiKeyStore";
+import { sanitizeMessage } from "../utils/sanitize";
 
 let cachedClient: GoogleGenAI | null = null;
 let cachedKey: string | null = null;
@@ -158,8 +159,6 @@ const getErrorMessage = (error: any): string => {
         // Sometimes the error is wrapped in a response object or just stringifiable
         try {
             const str = JSON.stringify(error);
-            // If stringified is not empty object, check if we can parse it back to find inner message
-            // or just return it if short.
             if (str !== '{}') {
                 const parsed = JSON.parse(str);
                 if (parsed.error && parsed.error.message) return parsed.error.message;
@@ -412,13 +411,13 @@ export const generateImage = async (prompt: string): Promise<{ imageData: string
 
       return { imageData, usage };
 
-    } catch (error: any) {
+  } catch (error: any) {
       const msg = getErrorMessage(error);
-      console.error("Image Gen Error:", error);
+      console.error("Image Gen Error:", sanitizeMessage(error));
       if (msg.includes('quota') || msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) {
            throw new Error(RATE_LIMIT_ERROR_MESSAGE);
       }
-      throw new Error(msg || "画像生成中にエラーが発生しました");
+      throw new Error(sanitizeMessage(msg) || "画像生成中にエラーが発生しました");
     }
   });
 };

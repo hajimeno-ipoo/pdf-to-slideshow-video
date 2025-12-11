@@ -4,19 +4,24 @@ interface Props {
   open: boolean;
   initialKey?: string;
   initialRemember?: boolean;
-  onSave: (key: string, remember: boolean) => void;
+  initialPassphrase?: string;
+  onSave: (key: string, options: { remember: boolean; mode: 'memory' | 'session' | 'local'; passphrase?: string; }) => void;
   onClose: () => void;
   onClear: () => void;
 }
 
-const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember = false, onSave, onClose, onClear }) => {
+const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember = false, initialPassphrase = '', onSave, onClose, onClear }) => {
   const [key, setKey] = useState(initialKey);
   const [remember, setRemember] = useState(initialRemember);
+  const [mode, setMode] = useState<'memory' | 'session' | 'local'>(initialRemember ? 'local' : 'session');
+  const [usePass, setUsePass] = useState(!!initialPassphrase);
+  const [pass, setPass] = useState(initialPassphrase || '');
   const [show, setShow] = useState(false);
 
   useEffect(() => {
     setKey(initialKey);
     setRemember(initialRemember);
+    setMode(initialRemember ? 'local' : 'session');
   }, [initialKey, initialRemember, open]);
 
   if (!open) return null;
@@ -45,17 +50,37 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
           </div>
           <p className="text-[11px] text-slate-500">キーはサーバーに送信しません。この端末だけで使います。</p>
         </div>
-        <label className="flex items-center gap-2 text-xs text-slate-300">
-          <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-          この端末に保存する（共有PCではオフ推奨）
-        </label>
+        <div className="space-y-2">
+          <div className="text-xs text-slate-400">保存先</div>
+          <div className="grid grid-cols-3 gap-2 text-[11px]">
+            <button onClick={() => { setMode('memory'); setRemember(false); }} className={`py-2 rounded border ${mode==='memory'?'border-emerald-500 text-emerald-300 bg-emerald-900/30':'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}>メモリのみ</button>
+            <button onClick={() => { setMode('session'); setRemember(false); }} className={`py-2 rounded border ${mode==='session'?'border-emerald-500 text-emerald-300 bg-emerald-900/30':'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}>このタブだけ</button>
+            <button onClick={() => { setMode('local'); setRemember(true); }} className={`py-2 rounded border ${mode==='local'?'border-emerald-500 text-emerald-300 bg-emerald-900/30':'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}>この端末に保存</button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-xs text-slate-300">
+            <input type="checkbox" checked={usePass} onChange={(e) => setUsePass(e.target.checked)} />
+            パスフレーズで暗号化（共有端末におすすめ）
+          </label>
+          {usePass && (
+            <input
+              type="password"
+              value={pass}
+              onChange={(e) => setPass(e.target.value)}
+              className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-slate-100 text-sm"
+              placeholder="パスフレーズ"
+            />
+          )}
+        </div>
         <div className="flex justify-between items-center">
           <button onClick={onClear} className="text-xs text-red-300 hover:text-red-200">キーを削除</button>
           <div className="flex gap-2">
             <button onClick={onClose} className="px-3 py-2 text-sm bg-slate-800 border border-slate-700 rounded text-slate-200">キャンセル</button>
             <button
               disabled={!key.trim()}
-              onClick={() => onSave(key.trim(), remember)}
+              onClick={() => onSave(key.trim(), { remember: mode === 'local', mode, passphrase: usePass ? pass : undefined })}
               className={`px-4 py-2 text-sm rounded text-white ${key.trim() ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-slate-700 cursor-not-allowed'}`}
             >
               保存して使う

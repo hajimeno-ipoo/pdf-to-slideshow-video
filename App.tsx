@@ -11,7 +11,7 @@ import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, Transiti
 import { analyzePdf, generateVideoFromSlides } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
-import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey } from './utils/apiKeyStore';
+import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey, hasEncryptedStored, PersistMode } from './utils/apiKeyStore';
 
 const LIFETIME_TOKENS_KEY = 'pdf_video_creator_lifetime_tokens';
 const RPD_KEY = 'pdf_video_creator_rpd_counter';
@@ -34,7 +34,9 @@ const App: React.FC = () => {
   const tokenTimestampsRef = useRef<{time: number, count: number}[]>([]);
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [apiKeyRemember, setApiKeyRemember] = useState<boolean>(hasStoredApiKey());
-  const [apiKeyValue, setApiKeyValue] = useState<string>(getUserApiKey() || '');
+  const [apiKeyEncrypted, setApiKeyEncrypted] = useState<boolean>(hasEncryptedStored());
+  const [apiKeyValue, setApiKeyValue] = useState<string>('');
+  const [apiKeyMode, setApiKeyMode] = useState<PersistMode>('session');
 
   // Cooldown State
   const [cooldown, setCooldown] = useState({ isActive: false, remainingMs: 0, reason: '' });
@@ -140,11 +142,20 @@ const App: React.FC = () => {
   useEffect(() => {
       const init = async () => {
           // load stored key into memory
-          const stored = getUserApiKey();
-          if (stored) {
-              setUserApiKey(stored, true);
-              setApiKeyValue(stored);
-              setApiKeyRemember(true);
+          try {
+              const stored = await getUserApiKey();
+              if (stored) {
+                  setApiKeyValue(stored);
+                  setApiKeyRemember(hasStoredApiKey());
+                  setApiKeyEncrypted(hasEncryptedStored());
+                  setApiStatus('checking');
+                  const ok = await checkApiConnection();
+                  setApiStatus(ok ? 'connected' : 'error');
+              }
+          } catch {
+              // passphrase required or failed
+              setApiKeyValue('');
+              setApiStatus('error');
           }
 
           setApiStatus('checking');
@@ -418,22 +429,29 @@ const App: React.FC = () => {
         initialRemember={apiKeyRemember}
         onClose={() => setApiKeyModalOpen(false)}
         onClear={() => {
-          clearUserApiKey();
-          setApiKeyValue('');
-          setApiKeyRemember(false);
-          setApiStatus('error');
-          setApiKeyModalOpen(false);
+          if (window.confirm('保存されたAPIキーを削除しますか？')) {
+            clearUserApiKey();
+            setApiKeyValue('');
+            setApiKeyRemember(false);
+            setApiKeyEncrypted(false);
+            setApiStatus('error');
+            setApiKeyModalOpen(false);
+          }
         }}
-        onSave={async (key, remember) => {
-          setUserApiKey(key, remember);
-          setApiKeyValue(key);
-          setApiKeyRemember(remember);
-          setApiStatus('checking');
-          setApiKeyModalOpen(false);
+        onSave={async (key, { remember, mode, passphrase }) => {
           try {
+            await setUserApiKey(key, { mode, passphrase });
+            const plain = await getUserApiKey(passphrase); // ensure decryptable
+            setApiKeyValue(plain || '');
+            setApiKeyRemember(mode === 'local');
+            setApiKeyEncrypted(!!passphrase);
+            setApiKeyMode(mode);
+            setApiStatus('checking');
+            setApiKeyModalOpen(false);
             const ok = await checkApiConnection();
             setApiStatus(ok ? 'connected' : 'error');
-          } catch {
+          } catch (e) {
+            console.error(e);
             setApiStatus('error');
           }
         }}
