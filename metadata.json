@@ -1,0 +1,7 @@
+{
+  "name": "PDF to Slideshow Video",
+  "description": "PDFのスライドを読み込み、スライドショー動画を作成するツールです。Gemini AIによるナレーション生成機能や、マイク録音機能を搭載しています。",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
