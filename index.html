@@ -47,6 +47,71 @@
         0% { width: 0%; }
         100% { width: 100%; }
       }
+
+      /* --- Custom Palette Override ------------------------------- */
+      :root {
+        --bg-950: #0b1220;
+        --bg-900: #0e1a2b;
+        --bg-800: #14233a;
+        --bg-700: #1d2a3d;
+        --border-800: #1f2937;
+        --border-700: #243349;
+        --text-main: #e5e7eb;
+        --text-sub: #9ca3af;
+        --text-muted: #6b7280;
+        --accent-primary: #16a34a;
+        --accent-primary-hover: #22c55e;
+        --accent-ring: #0ea5e9;
+        --accent-info: #0ea5e9;
+        --accent-danger: #ef4444;
+        --accent-danger-border: #b91c1c;
+      }
+
+      body {
+        background-color: var(--bg-900);
+        color: var(--text-main);
+      }
+
+      /* Base surfaces */
+      .bg-slate-950 { background-color: var(--bg-950) !important; }
+      .bg-slate-900 { background-color: var(--bg-900) !important; }
+      .bg-slate-800 { background-color: var(--bg-800) !important; }
+      .bg-slate-700 { background-color: var(--bg-700) !important; }
+
+      /* Borders */
+      .border-slate-800 { border-color: var(--border-800) !important; }
+      .border-slate-700 { border-color: var(--border-700) !important; }
+
+      /* Text */
+      .text-slate-100, .text-slate-200 { color: var(--text-main) !important; }
+      .text-slate-300 { color: #cbd5e1 !important; }
+      .text-slate-400 { color: var(--text-sub) !important; }
+      .text-slate-500 { color: var(--text-muted) !important; }
+
+      /* Primary (emerald) */
+      .bg-emerald-600 { background-color: var(--accent-primary) !important; }
+      .bg-emerald-500, .hover\:bg-emerald-500:hover { background-color: var(--accent-primary-hover) !important; }
+      .border-emerald-600 { border-color: var(--accent-primary) !important; }
+      .text-emerald-400 { color: var(--accent-primary) !important; }
+
+      /* Info (blue) */
+      .bg-blue-600 { background-color: #2563eb !important; }
+      .hover\:bg-blue-500:hover { background-color: #3b82f6 !important; }
+      .text-blue-400 { color: #60a5fa !important; }
+
+      /* Danger */
+      .bg-red-500 { background-color: var(--accent-danger) !important; }
+      .hover\:bg-red-500:hover { background-color: #f87171 !important; }
+      .border-red-600 { border-color: var(--accent-danger-border) !important; }
+
+      /* Rings / focus */
+      .focus\:ring-emerald-500:focus { --tw-ring-color: var(--accent-ring) !important; }
+      .focus\:ring-blue-500:focus { --tw-ring-color: var(--accent-ring) !important; }
+
+      /* Cards shadow subtle tweak */
+      .shadow, .shadow-md, .shadow-lg {
+        box-shadow: 0 10px 25px -12px rgba(0,0,0,0.45);
+      }
     </style>
   <script type="importmap">
 {
