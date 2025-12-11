@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Overlay, OverlayType, AnimationType } from '../../types';
 import { FONTS, ANIMATION_VALUES, getAnimationLabel, parseColor } from './constants';
+import InlineColorPicker from './InlineColorPicker';
 
 interface OverlaySettingsPanelProps {
   selectedOverlay: Overlay | undefined;
@@ -173,10 +174,16 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
           {activePropertyTab === 'style' && (
               <div className="space-y-3">
                   <div className="grid grid-cols-2 gap-3">
-                     <div className="space-y-1"><label className="text-xs text-slate-400">色</label><input type="color" value={selectedOverlay.color || '#ffffff'} onChange={(e) => onUpdateOverlay({ color: e.target.value })} className="h-8 w-full bg-transparent cursor-pointer rounded" /></div>
+                     <div className="space-y-1">
+                        <label className="text-xs text-slate-400">色</label>
+                        <InlineColorPicker value={selectedOverlay.color || '#ffffff'} onChange={(hex) => onUpdateOverlay({ color: hex })} />
+                     </div>
                      {selectedOverlay.type === 'text' && (
                          <div className="space-y-1">
-                             <label className="text-xs text-slate-400 flex justify-between"><span>サイズ</span><span>{selectedOverlay.fontSize || 5}px</span></label>
+                             <label className="text-xs text-slate-400 flex justify-between">
+                               <span>サイズ</span>
+                               <span>{((selectedOverlay.fontSize ?? 5)).toFixed(1)}px</span>
+                             </label>
                              <input type="range" min="1" max="100" step="0.5" value={selectedOverlay.fontSize || 5} onChange={(e) => onUpdateOverlay({ fontSize: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
                          </div>
                      )}
@@ -209,7 +216,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                       <div className="space-y-1">
                          <label className="text-xs text-slate-400">塗りつぶし</label>
                          <div className="flex flex-col gap-2">
-                             <input type="color" value={bgColorState.hex} onChange={(e) => updateBgColorHex(e.target.value)} className="h-8 w-full bg-transparent cursor-pointer rounded" />
+                             <InlineColorPicker value={bgColorState.hex} onChange={updateBgColorHex} />
                              <div className="space-y-1">
                                  <label className="text-[10px] text-slate-400 flex justify-between"><span>透明度</span><span>{Math.round(bgColorState.alpha * 100)}%</span></label>
                                  <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
@@ -222,7 +229,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                         <div className="space-y-1">
                             <label className="text-xs text-slate-400">背景色</label>
                             <div className="flex flex-col gap-2">
-                                <input type="color" value={bgColorState.hex} onChange={(e) => updateBgColorHex(e.target.value)} className="h-8 w-full bg-transparent cursor-pointer rounded" />
+                                <InlineColorPicker value={bgColorState.hex} onChange={updateBgColorHex} />
                                 <div className="space-y-1">
                                     <label className="text-[10px] text-slate-400 flex justify-between"><span>透明度</span><span>{Math.round(bgColorState.alpha * 100)}%</span></label>
                                     <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
@@ -242,7 +249,11 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
               <div className="space-y-3">
                  <div className="space-y-1">
                      <label className="text-xs text-slate-400 flex justify-between"><span>{selectedOverlay.type === 'line' ? '太さ' : '線'}</span><span>{selectedOverlay.strokeWidth || 0}px</span></label>
-                     {selectedOverlay.type === 'text' && <input type="color" value={selectedOverlay.strokeColor || '#000000'} onChange={(e) => onUpdateOverlay({ strokeColor: e.target.value })} className="h-8 w-full bg-transparent cursor-pointer rounded mb-2" />}
+                     {selectedOverlay.type === 'text' && (
+                        <div className="mb-2">
+                          <InlineColorPicker value={selectedOverlay.strokeColor || '#000000'} onChange={(hex) => onUpdateOverlay({ strokeColor: hex })} />
+                        </div>
+                     )}
                      <input type="range" min="0" max="100" step="0.5" value={selectedOverlay.strokeWidth || 0} onChange={(e) => onUpdateOverlay({ strokeWidth: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
                  </div>
                  {selectedOverlay.type === 'rect' && (
@@ -276,7 +287,10 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
           )}
           {activePropertyTab === 'shadow' && (
               <div className="space-y-3">
-                  <div className="space-y-1"><label className="text-xs text-slate-400">影色</label><input type="color" value={selectedOverlay.shadowColor || '#000000'} onChange={(e) => onUpdateOverlay({ shadowColor: e.target.value })} className="h-8 w-full bg-transparent cursor-pointer rounded" /></div>
+                  <div className="space-y-1">
+                    <label className="text-xs text-slate-400">影色</label>
+                    <InlineColorPicker value={selectedOverlay.shadowColor || '#000000'} onChange={(hex) => onUpdateOverlay({ shadowColor: hex })} />
+                  </div>
                   <div className="space-y-1">
                       <label className="text-xs text-slate-400 flex justify-between"><span>ぼかし</span><span>{selectedOverlay.shadowBlur || 0}px</span></label>
                       <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />

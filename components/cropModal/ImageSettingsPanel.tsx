@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react';
 import { Overlay, TokenUsage, AnimationType } from '../../types';
 import { generateImage } from '../../services/geminiService';
 import { ANIMATION_VALUES, getAnimationLabel } from './constants';
+import InlineColorPicker from './InlineColorPicker';
 
 interface ImageSettingsPanelProps {
   onAddImage: (imageData: string) => void; 
@@ -163,7 +164,10 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                   </div>
                   <div className="space-y-3 pt-2 border-t border-slate-800">
                       <h5 className="text-xs text-slate-400 font-bold">影 (ドロップシャドウ)</h5>
-                      <div className="space-y-1"><label className="text-xs text-slate-400">影の色</label><input type="color" value={selectedOverlay.shadowColor || '#000000'} onChange={(e) => onUpdateOverlay({ shadowColor: e.target.value })} className="h-8 w-full bg-transparent cursor-pointer rounded" /></div>
+                      <div className="space-y-1">
+                        <label className="text-xs text-slate-400">影の色</label>
+                        <InlineColorPicker value={selectedOverlay.shadowColor || '#000000'} onChange={(hex) => onUpdateOverlay({ shadowColor: hex })} />
+                      </div>
                       <div className="space-y-1">
                           <label className="text-xs text-slate-400 flex justify-between"><span>ぼかし</span><span>{selectedOverlay.shadowBlur || 0}px</span></label>
                           <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />

@@ -539,8 +539,8 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                style={{ backgroundColor: getBackgroundColor() }}
           >
               {pendingAddType && (
-                  <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-full shadow-lg z-50 pointer-events-none animate-bounce">
-                      場所をダブルクリックして配置
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[11px] px-2.5 py-1 rounded-full shadow-lg z-50 pointer-events-none animate-bounce">
+                      ダブルクリックして配置
                   </div>
               )}
               <div className="relative inline-block shadow-2xl" ref={containerRef}

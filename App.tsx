@@ -6,10 +6,12 @@ import ProcessingStep from './components/ProcessingStep';
 import SlideEditor from './components/SlideEditor';
 import RestoreModal from './components/RestoreModal';
 import CooldownNotification from './components/CooldownNotification';
+import ApiKeyModal from './components/ApiKeyModal';
 import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions } from './types';
 import { analyzePdf, generateVideoFromSlides } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
+import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey } from './utils/apiKeyStore';
 
 const LIFETIME_TOKENS_KEY = 'pdf_video_creator_lifetime_tokens';
 const RPD_KEY = 'pdf_video_creator_rpd_counter';
@@ -30,6 +32,9 @@ const App: React.FC = () => {
   const [reqStats, setReqStats] = useState<RequestStats>({ rpm: 0, tpm: 0, rpd: 0 });
   const requestTimestampsRef = useRef<number[]>([]);
   const tokenTimestampsRef = useRef<{time: number, count: number}[]>([]);
+  const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
+  const [apiKeyRemember, setApiKeyRemember] = useState<boolean>(hasStoredApiKey());
+  const [apiKeyValue, setApiKeyValue] = useState<string>(getUserApiKey() || '');
 
   // Cooldown State
   const [cooldown, setCooldown] = useState({ isActive: false, remainingMs: 0, reason: '' });
@@ -134,6 +139,14 @@ const App: React.FC = () => {
   // Initial Connection Check & Restore Check & Load Lifetime Usage
   useEffect(() => {
       const init = async () => {
+          // load stored key into memory
+          const stored = getUserApiKey();
+          if (stored) {
+              setUserApiKey(stored, true);
+              setApiKeyValue(stored);
+              setApiKeyRemember(true);
+          }
+
           setApiStatus('checking');
           const isConnected = await checkApiConnection();
           setApiStatus(isConnected ? 'connected' : 'error');
@@ -395,6 +408,35 @@ const App: React.FC = () => {
         requestStats={reqStats}
         saveStatus={saveStatus}
         lastSavedTime={lastSavedTime}
+        hasApiKey={!!apiKeyValue}
+        onOpenApiKey={() => setApiKeyModalOpen(true)}
+      />
+
+      <ApiKeyModal
+        open={apiKeyModalOpen}
+        initialKey={apiKeyValue}
+        initialRemember={apiKeyRemember}
+        onClose={() => setApiKeyModalOpen(false)}
+        onClear={() => {
+          clearUserApiKey();
+          setApiKeyValue('');
+          setApiKeyRemember(false);
+          setApiStatus('error');
+          setApiKeyModalOpen(false);
+        }}
+        onSave={async (key, remember) => {
+          setUserApiKey(key, remember);
+          setApiKeyValue(key);
+          setApiKeyRemember(remember);
+          setApiStatus('checking');
+          setApiKeyModalOpen(false);
+          try {
+            const ok = await checkApiConnection();
+            setApiStatus(ok ? 'connected' : 'error');
+          } catch {
+            setApiStatus('error');
+          }
+        }}
       />
       
       {/* Global Notification */}

@@ -9,6 +9,8 @@ interface HeaderProps {
   requestStats?: RequestStats;
   saveStatus?: 'idle' | 'pending' | 'saving' | 'saved';
   lastSavedTime?: Date | null;
+  hasApiKey?: boolean;
+  onOpenApiKey?: () => void;
 }
 
 const WARNING_THRESHOLD = 500000;
@@ -22,7 +24,9 @@ const Header: React.FC<HeaderProps> = ({
     lifetimeUsage = 0,
     requestStats = { rpm: 0, tpm: 0, rpd: 0 },
     saveStatus = 'idle',
-    lastSavedTime = null
+    lastSavedTime = null,
+    hasApiKey = false,
+    onOpenApiKey
 }) => {
   const [showDevMode, setShowDevMode] = useState(false);
 
@@ -83,6 +87,14 @@ const Header: React.FC<HeaderProps> = ({
                     <div className="absolute top-0.5 left-0.5 bg-slate-500 w-3 h-3 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-emerald-400"></div>
                 </div>
             </label>
+            
+            {/* API Key Button */}
+            <button
+              onClick={onOpenApiKey}
+              className={`px-3 py-1.5 rounded text-xs font-semibold border transition-colors ${hasApiKey ? 'border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
+            >
+              APIキー
+            </button>
 
             {/* Stats Block (Only visible in Dev Mode) */}
             {showDevMode && (

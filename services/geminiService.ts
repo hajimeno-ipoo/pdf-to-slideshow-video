@@ -1,10 +1,19 @@
 
 import { GoogleGenAI } from "@google/genai";
 import { TokenUsage } from "../types";
+import { getUserApiKey } from "../utils/apiKeyStore";
 
-// Initialize Gemini API
-// API Key is injected via process.env.API_KEY as per guidelines
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+let cachedClient: GoogleGenAI | null = null;
+let cachedKey: string | null = null;
+
+const getClient = () => {
+  const key = getUserApiKey();
+  if (!key) throw new Error("Gemini APIキーを設定してください");
+  if (cachedClient && cachedKey === key) return cachedClient;
+  cachedKey = key;
+  cachedClient = new GoogleGenAI({ apiKey: key });
+  return cachedClient;
+};
 
 // Constants
 const TTS_MODEL = "gemini-2.5-flash-preview-tts";
@@ -278,6 +287,7 @@ export const checkApiConnection = async (): Promise<boolean> => {
     await callWithRetry(async () => {
       // Direct call, bypassing queue for quick check
       if (requestListener) requestListener();
+      const ai = getClient();
       return await ai.models.generateContent({
         model: VISION_MODEL,
         contents: { parts: [{ text: "hi" }] },
@@ -319,6 +329,7 @@ export const generateSpeech = async (text: string, voiceName: string = 'Kore', s
 
     try {
       const response = await callWithRetry(async () => {
+          const ai = getClient();
           return await ai.models.generateContent({
             model: TTS_MODEL,
             contents: {
@@ -368,6 +379,7 @@ export const generateImage = async (prompt: string): Promise<{ imageData: string
 
     try {
       const response = await callWithRetry(async () => {
+          const ai = getClient();
           return await ai.models.generateContent({
             model: IMAGE_GEN_MODEL,
             contents: {
@@ -433,6 +445,7 @@ export const generateSlideScript = async (imageBase64: string, previousContext?:
 
         try {
             const response = await callWithRetry(async () => {
+                const ai = getClient();
                 return await ai.models.generateContent({
                     model: VISION_MODEL,
                     contents: {
