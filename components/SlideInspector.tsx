@@ -7,6 +7,7 @@ import ColorSettingsPanel from './cropModal/ColorSettingsPanel';
 import AudioSettingsPanel from './cropModal/AudioSettingsPanel';
 import ImageSettingsPanel from './cropModal/ImageSettingsPanel';
 import OverlaySettingsPanel from './cropModal/OverlaySettingsPanel';
+import { safeRandomUUID } from '../utils/uuid';
 
 interface SlideInspectorProps {
   slide: Slide;
@@ -41,11 +42,13 @@ const getCursorStyle = (handle: ResizeHandleType, rotation: number = 0): string 
     return 'nwse-resize';
 };
 
+const SOLID_PREVIEW_WIDTH = 400; // 無地スライド用のデフォルト描画幅
+
 const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsageUpdate, sourceFile, onClose }) => {
   const { videoSettings } = useEditor(); // Get global settings
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-  const solidRef = useRef<HTMLDivElement>(null);
+  const [imageSize, setImageSize] = useState<{ width: number; height: number }>({ width: 0, height: 0 });
   
   const [activeTab, setActiveTab] = useState<'crop' | 'overlay' | 'image' | 'color' | 'audio'>('crop');
   const [overviewImage, setOverviewImage] = useState<string>("");
@@ -80,6 +83,16 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   const isSolidSlide = !!slide.backgroundColor;
 
+  // プレビュー縮尺に応じて角丸をスケールする
+  const getScaledRadiusPx = () => {
+      const baseW = slide.width || slide.originalWidth || 1920;
+      const baseH = slide.height || slide.originalHeight || 1080;
+      const dispW = imageSize.width || baseW;
+      const dispH = imageSize.height || baseH;
+      const ratio = Math.min(dispW / baseW, dispH / baseH);
+      return videoSettings.slideBorderRadius * ratio;
+  };
+
   // Sync with prop changes
   useEffect(() => {
       setCrop(slide.crop);
@@ -90,9 +103,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       setLocalDuration(slide.duration);
       setSelectedOverlayId(null);
       setPendingAddType(null);
-      
-      if (slide.backgroundColor && activeTab === 'crop') setActiveTab('color'); // Switch to color if crop is invalid for solid
-      if (!slide.backgroundColor && activeTab === 'color') setActiveTab('crop');
+      setImageSize({ width: 0, height: 0 });
 
       // Load Overview Image
       const loadOverview = async () => {
@@ -182,19 +193,30 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   // --- Input Handlers (Crop, Overlay, etc.) ---
   
   const getScreenRect = () => {
-    if (isSolidSlide) {
-        if (!solidRef.current) return { x: 0, y: 0, width: 0, height: 0 };
-        return { x: 0, y: 0, width: solidRef.current.clientWidth, height: solidRef.current.clientHeight }
-    } else {
-        if (!imageRef.current || !slide) return { x: 0, y: 0, width: 0, height: 0 };
-        const img = imageRef.current;
-        const scaleX = img.width / slide.originalWidth;
-        const scaleY = img.height / slide.originalHeight;
+    const aspect = slide.width && slide.height ? slide.width / slide.height : 16 / 9;
+    const fallbackWidth = SOLID_PREVIEW_WIDTH;
+    const fallbackHeight = fallbackWidth / aspect;
+    const refWidth = imageSize.width || imageRef.current?.clientWidth || imageRef.current?.naturalWidth || 0;
+    const refHeight = imageSize.height || imageRef.current?.clientHeight || imageRef.current?.naturalHeight || 0;
+
+    if (refWidth > 0 && refHeight > 0) {
+        const scaleX = refWidth / slide.originalWidth;
+        const scaleY = refHeight / slide.originalHeight;
         return {
           x: crop.x * scaleX, y: crop.y * scaleY,
           width: crop.width * scaleX, height: crop.height * scaleY
         };
     }
+
+    // fallback when ref size not ready
+    const scaleX = fallbackWidth / slide.width;
+    const scaleY = fallbackHeight / slide.height;
+    return {
+        x: crop.x * scaleX,
+        y: crop.y * scaleY,
+        width: crop.width * scaleX,
+        height: crop.height * scaleY
+    };
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
@@ -238,7 +260,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
       const type = pendingAddType;
       const newOverlay: Overlay = { 
-        id: crypto.randomUUID(), 
+            id: safeRandomUUID(), 
         type: type, 
         x: relativeX, 
         y: relativeY, 
@@ -380,8 +402,8 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   const handleAddOverlay = (type: OverlayType, imageData?: string) => { 
     if (type === 'image' && imageData) { 
-        const newOverlay: Overlay = { 
-            id: crypto.randomUUID(), 
+        const newOverlay: Overlay = {
+            id: safeRandomUUID(), 
             type: 'image', 
             x: 0.5, 
             y: 0.5, 
@@ -464,6 +486,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   const screenRect = getScreenRect();
   const selectedOverlay = overlays.find(t => t.id === selectedOverlayId);
 
+  // インスペクタの周囲背景は常に動画設定の塗りに従う（黒基調）
   const getBackgroundColor = () => {
       if (videoSettings.backgroundFill === 'white') return '#ffffff';
       if (videoSettings.backgroundFill === 'black') return '#000000';
@@ -494,8 +517,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
               </button>
           </div>
           <div className="flex bg-slate-800 rounded p-0.5 overflow-x-auto">
-              {!isSolidSlide && <button onClick={() => setActiveTab('crop')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'crop' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>トリミング</button>}
-              {isSolidSlide && <button onClick={() => setActiveTab('color')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'color' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>背景色</button>}
+              <button onClick={() => setActiveTab('crop')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'crop' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>トリミング</button>
               <button onClick={() => setActiveTab('overlay')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'overlay' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>装飾</button>
               <button onClick={() => setActiveTab('image')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'image' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>画像</button>
               <button onClick={() => setActiveTab('audio')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'audio' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>音声</button>
@@ -532,19 +554,29 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
               >
                   {/* Content Wrapper for clipping */}
                   <div style={{
-                      borderRadius: activeTab === 'crop' ? '0px' : `${videoSettings.slideBorderRadius}px`,
+                      borderRadius: activeTab === 'crop' ? '0px' : `${getScaledRadiusPx()}px`,
                       overflow: 'hidden',
                       position: 'relative'
                   }}>
-                      {isSolidSlide ? (
-                          <div ref={solidRef} style={{ backgroundColor: solidColor, width: '100%', maxWidth: '400px', aspectRatio: `${slide.width}/${slide.height}` }} className="shadow-lg border border-white/10" />
-                      ) : (
-                          <img ref={imageRef} src={overviewImage || slide.thumbnailUrl} alt="Slide" className="max-h-[220px] w-auto max-w-full object-contain pointer-events-none block" draggable={false} />
-                      )}
+                      <img 
+                        ref={imageRef} 
+                        src={overviewImage || slide.thumbnailUrl} 
+                        alt="Slide" 
+                        className="max-h-[260px] w-auto max-w-full object-contain pointer-events-none block" 
+                        draggable={false} 
+                        style={{ backgroundColor: 'transparent', borderRadius: activeTab === 'crop' ? '0px' : `${getScaledRadiusPx()}px` }}
+                        onLoad={() => {
+                          if (!imageRef.current) return;
+                          setImageSize({
+                            width: imageRef.current.clientWidth || imageRef.current.naturalWidth || 0,
+                            height: imageRef.current.clientHeight || imageRef.current.naturalHeight || 0,
+                          });
+                        }}
+                      />
                   </div>
 
                   {/* Crop Overlay */}
-                  {activeTab === 'crop' && !isSolidSlide && (
+                  {activeTab === 'crop' && (
                     <>
                       <div className="absolute inset-0 bg-black/50 pointer-events-none">
                          <div className="w-full h-full" style={{ clipPath: `polygon(0% 0%, 0% 100%, ${screenRect.x}px 100%, ${screenRect.x}px ${screenRect.y}px, ${screenRect.x + screenRect.width}px ${screenRect.y}px, ${screenRect.x + screenRect.width}px ${screenRect.y + screenRect.height}px, ${screenRect.x}px ${screenRect.y + screenRect.height}px, ${screenRect.x}px 100%, 100% 100%, 100% 0%)` }} />
@@ -647,7 +679,6 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                     <button onClick={handleResetCrop} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs">範囲リセット</button>
                  </div>
               )}
-              {activeTab === 'color' && <ColorSettingsPanel color={solidColor} onChange={setSolidColor} />}
               {activeTab === 'audio' && (
                   <AudioSettingsPanel 
                       audioFile={audioFile}

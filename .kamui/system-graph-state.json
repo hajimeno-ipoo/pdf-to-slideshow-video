@@ -5,9 +5,9 @@
   "graphRenderingMode": "multi-agent",
   "linkDisplayMode": "all",
   "graphStats": {
-    "totalNodes": 19,
-    "folders": 8,
-    "files": 11,
+    "totalNodes": 22,
+    "folders": 10,
+    "files": 12,
     "images": 0,
     "videos": 0,
     "audio": 0,
@@ -15,7 +15,7 @@
     "text": 1,
     "html": 1,
     "yaml": 0,
-    "json": 3,
+    "json": 4,
     "other": 2,
     "totalLines": 0,
     "maxLines": 0
@@ -50,6 +50,20 @@
         "name": "components",
         "type": "directory",
         "path": "components",
+        "children": [],
+        "hasMore": true
+      },
+      {
+        "name": "dist",
+        "type": "directory",
+        "path": "dist",
+        "children": [],
+        "hasMore": true
+      },
+      {
+        "name": "node_modules",
+        "type": "directory",
+        "path": "node_modules",
         "children": [],
         "hasMore": true
       },
@@ -105,6 +119,11 @@
         "path": "metadata.json"
       },
       {
+        "name": "package-lock.json",
+        "type": "file",
+        "path": "package-lock.json"
+      },
+      {
         "name": "package.json",
         "type": "file",
         "path": "package.json"
@@ -147,13 +166,13 @@
         "glowIntensity": 0,
         "highlighted": false,
         "parentPath": null,
-        "childFileCount": 11,
-        "x": 0.13773227044239236,
-        "y": 0.6854228550752804,
-        "z": 0.23254894016027694,
-        "vx": 1.7260194099277068e-9,
-        "vy": -1.336563060662946e-9,
-        "vz": -8.26676889132857e-10
+        "childFileCount": 12,
+        "x": 0.16341864285889807,
+        "y": 0.1639706638636659,
+        "z": 0.0592110284328945,
+        "vx": -6.293657414586093e-16,
+        "vy": 3.994546115340428e-16,
+        "vz": -6.745499569823413e-16
       },
       {
         "id": "pdf-to-slideshow-video/.kamui",
@@ -170,12 +189,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 30.434150726722464,
-        "y": 6.768059916049501,
-        "z": 30.56256190686074,
-        "vx": 1.916702851998149e-9,
-        "vy": -1.1980238024990315e-9,
-        "vz": -9.793288877718312e-10
+        "x": 25.783736424302532,
+        "y": -5.7639956313743275,
+        "z": 36.25170201307315,
+        "vx": -6.67836321160036e-16,
+        "vy": 7.445004144154973e-16,
+        "vz": -6.099852661230388e-16
       },
       {
         "id": "pdf-to-slideshow-video/.serena",
@@ -192,12 +211,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 36.12658435169199,
-        "y": 21.980691082655056,
-        "z": -9.236218057099041,
-        "vx": 1.4636777421520724e-9,
-        "vy": -1.8942459862541286e-9,
-        "vz": -1.2118625633287638e-9
+        "x": 36.70088171493828,
+        "y": 20.756151873087543,
+        "z": -15.143473259737856,
+        "vx": -7.800201651688874e-16,
+        "vy": 5.128677241530838e-16,
+        "vz": -8.144588721288884e-16
       },
       {
         "id": "pdf-to-slideshow-video/.worktrees",
@@ -214,12 +233,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -13.971011229023178,
-        "y": -13.889931789109776,
-        "z": -37.76095173126932,
-        "vx": 1.6847500504180633e-9,
-        "vy": -1.6001777927454524e-9,
-        "vz": -7.608467951316458e-10
+        "x": -21.763531292768697,
+        "y": 4.172132377440269,
+        "z": -38.373775649407285,
+        "vx": -5.499651069902397e-16,
+        "vy": 2.8269928245941115e-16,
+        "vz": -8.743507035980313e-16
       },
       {
         "id": "pdf-to-slideshow-video/components",
@@ -236,12 +255,56 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -23.09298918411341,
-        "y": -35.238022895471325,
-        "z": 4.766281777002848,
-        "vx": 1.5382305826208619e-9,
-        "vy": -1.188081707617444e-9,
-        "vz": -5.670915587107844e-10
+        "x": -42.35852249923057,
+        "y": 3.3517026640387546,
+        "z": -12.469344335935203,
+        "vx": -5.456100125442454e-16,
+        "vy": 4.538090641566819e-16,
+        "vz": -1.0578564001871735e-15
+      },
+      {
+        "id": "pdf-to-slideshow-video/dist",
+        "name": "dist",
+        "path": "pdf-to-slideshow-video/dist",
+        "type": "directory",
+        "lines": 0,
+        "val": 14,
+        "color": "#2c3038",
+        "baseColor": "#4ec9b0",
+        "originalColor": "#4ec9b0",
+        "defaultGlow": 0.18,
+        "glowIntensity": 0,
+        "highlighted": false,
+        "parentPath": "pdf-to-slideshow-video",
+        "childFileCount": 0,
+        "x": 24.347843071710145,
+        "y": -37.30080806460067,
+        "z": 3.5197661457302893,
+        "vx": -4.485080393447626e-16,
+        "vy": 5.137623222901418e-16,
+        "vz": -2.958668541316062e-16
+      },
+      {
+        "id": "pdf-to-slideshow-video/node_modules",
+        "name": "node_modules",
+        "path": "pdf-to-slideshow-video/node_modules",
+        "type": "directory",
+        "lines": 0,
+        "val": 14,
+        "color": "#2c3038",
+        "baseColor": "#4ec9b0",
+        "originalColor": "#4ec9b0",
+        "defaultGlow": 0.18,
+        "glowIntensity": 0,
+        "highlighted": false,
+        "parentPath": "pdf-to-slideshow-video",
+        "childFileCount": 0,
+        "x": 10.344234926994023,
+        "y": 43.5377826549738,
+        "z": -3.9447602257442926,
+        "vx": -7.956687922129544e-16,
+        "vy": 7.962885480219369e-16,
+        "vz": -9.800660899692747e-16
       },
       {
         "id": "pdf-to-slideshow-video/services",
@@ -258,12 +321,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -30.057118885669603,
-        "y": -11.938859961962764,
-        "z": 27.838144500636048,
-        "vx": 2.1771246619331774e-9,
-        "vy": -1.4395984464130607e-9,
-        "vz": -4.015671817517355e-10
+        "x": -28.53050589546904,
+        "y": 34.178219744523574,
+        "z": -3.308293641539018,
+        "vx": -6.233017933176917e-16,
+        "vy": 3.2849361290790033e-16,
+        "vz": -1.083183802549999e-15
       },
       {
         "id": "pdf-to-slideshow-video/types",
@@ -280,12 +343,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 26.200450119797033,
-        "y": -12.10994447797898,
-        "z": -31.06633019816697,
-        "vx": 1.2893279984287672e-9,
-        "vy": -1.1242727437285971e-9,
-        "vz": -1.2605808751799313e-9
+        "x": 14.141779874642054,
+        "y": 9.243743852091916,
+        "z": -41.30869665972049,
+        "vx": -4.628911812066982e-16,
+        "vy": -2.8475673190587085e-16,
+        "vz": -6.966327972861982e-16
       },
       {
         "id": "pdf-to-slideshow-video/utils",
@@ -302,12 +365,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 25.77770227621214,
-        "y": -33.602716369461824,
-        "z": 4.700580304652364,
-        "vx": 1.7426425350684946e-9,
-        "vy": -1.0465882817812888e-9,
-        "vz": -1.3466734817038373e-10
+        "x": 7.368110109199209,
+        "y": -23.637895138315564,
+        "z": -36.99761584483564,
+        "vx": -8.247109101836017e-16,
+        "vy": -2.113091867362596e-16,
+        "vz": -2.811798431560329e-16
       },
       {
         "id": "pdf-to-slideshow-video/.env.local",
@@ -324,12 +387,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -26.86154107330017,
-        "y": 22.088228268323075,
-        "z": -25.81076856061182,
-        "vx": 1.2298887897664941e-9,
-        "vy": -6.218873810920795e-10,
-        "vz": 2.916771270019623e-10
+        "x": -22.929233011793407,
+        "y": -13.55944077334247,
+        "z": 35.90332702500168,
+        "vx": -9.491388534024605e-16,
+        "vy": 3.2705903615974387e-16,
+        "vz": -4.164598992406869e-16
       },
       {
         "id": "pdf-to-slideshow-video/.gitignore",
@@ -346,12 +409,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 6.545599783534534,
-        "y": -30.874049431050274,
-        "z": 28.58760693138089,
-        "vx": 2.466622198107558e-9,
-        "vy": -5.970656724990849e-10,
-        "vz": -2.9481412998587096e-10
+        "x": 2.875789300200256,
+        "y": -32.71494293839757,
+        "z": 30.264790029839638,
+        "vx": -6.658810072273723e-16,
+        "vy": 6.458958516343318e-16,
+        "vz": -2.5495341504979606e-16
       },
       {
         "id": "pdf-to-slideshow-video/App.tsx",
@@ -368,12 +431,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -2.8752937667944796,
-        "y": 3.4888184758663012,
-        "z": 43.41212905876398,
-        "vx": 1.6317441435946993e-9,
-        "vy": -3.9901443059791105e-10,
-        "vz": -8.401523424282412e-10
+        "x": -2.4787839431305896,
+        "y": 10.352389721250933,
+        "z": 44.095468768794156,
+        "vx": -8.553968059661734e-16,
+        "vy": 4.860119479702386e-16,
+        "vz": -6.6602068371464e-16
       },
       {
         "id": "pdf-to-slideshow-video/index.html",
@@ -386,16 +449,16 @@
         "baseColor": "#e44d26",
         "originalColor": "#e44d26",
         "defaultGlow": 0.18,
-        "glowIntensity": 2.4,
-        "highlighted": true,
+        "glowIntensity": 0,
+        "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -38.05615836024839,
-        "y": -13.102072877286888,
-        "z": -14.365802778826877,
-        "vx": 1.398773108547888e-9,
-        "vy": 3.93081089723177e-10,
-        "vz": -2.1064392791232408e-9
+        "x": -37.089440069150974,
+        "y": -22.949545253349655,
+        "z": 6.303536650959544,
+        "vx": -6.904041739004338e-16,
+        "vy": 4.655216847827017e-16,
+        "vz": -7.864894409697716e-16
       },
       {
         "id": "pdf-to-slideshow-video/index.tsx",
@@ -412,12 +475,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 42.990728490466836,
-        "y": -5.833583054498918,
-        "z": 3.257264701646037,
-        "vx": 1.9224102398537363e-9,
-        "vy": -7.310164092367963e-10,
-        "vz": -2.011307834628823e-9
+        "x": 44.29591013232368,
+        "y": -5.415096491551952,
+        "z": 8.638429152816608,
+        "vx": -5.931741612654189e-16,
+        "vy": 3.8635976042680917e-16,
+        "vz": -6.861162289659065e-16
       },
       {
         "id": "pdf-to-slideshow-video/metadata.json",
@@ -434,12 +497,34 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -40.89341740227575,
-        "y": 12.751085465474036,
-        "z": 4.122057248365074,
-        "vx": 1.4878556978668695e-9,
-        "vy": -2.060181450695771e-9,
-        "vz": -2.77259607828402e-10
+        "x": -36.56747865617386,
+        "y": 13.410053570718341,
+        "z": 20.77555979487827,
+        "vx": -7.990065418825861e-16,
+        "vy": 5.29001411817081e-16,
+        "vz": -1.078280721873823e-15
+      },
+      {
+        "id": "pdf-to-slideshow-video/package-lock.json",
+        "name": "package-lock.json",
+        "path": "pdf-to-slideshow-video/package-lock.json",
+        "type": "file",
+        "lines": 0,
+        "val": 6,
+        "color": "#2c3038",
+        "baseColor": "#8e44ad",
+        "originalColor": "#8e44ad",
+        "defaultGlow": 0.18,
+        "glowIntensity": 0,
+        "highlighted": false,
+        "parentPath": "pdf-to-slideshow-video",
+        "childFileCount": 0,
+        "x": -21.589548407794332,
+        "y": -28.779270577063002,
+        "z": -26.91521680573861,
+        "vx": -6.571403671098782e-16,
+        "vy": 1.0004640481723242e-16,
+        "vz": -3.5124124318366235e-16
       },
       {
         "id": "pdf-to-slideshow-video/package.json",
@@ -456,12 +541,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 4.357485084874982,
-        "y": -36.96388942288162,
-        "z": -19.97566117127988,
-        "vx": 1.720077452990753e-9,
-        "vy": -1.2162735491065063e-9,
-        "vz": -4.773725141799354e-10
+        "x": -8.658305640516542,
+        "y": -43.16444380250881,
+        "z": -2.112070332735666,
+        "vx": -2.9676048515015334e-16,
+        "vy": 3.682900812302682e-16,
+        "vz": -2.0023232429930485e-16
       },
       {
         "id": "pdf-to-slideshow-video/README.md",
@@ -478,12 +563,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 7.9091155327176415,
-        "y": 15.02442219704022,
-        "z": -39.244322963500075,
-        "vx": 1.0402963804996128e-9,
-        "vy": -4.953471920527858e-10,
-        "vz": -7.721530059925386e-10
+        "x": 35.030442273453396,
+        "y": -19.00162800981208,
+        "z": -20.26861275332751,
+        "vx": -5.439329691127576e-16,
+        "vy": 5.02130221468804e-16,
+        "vz": -6.653711311220288e-16
       },
       {
         "id": "pdf-to-slideshow-video/tsconfig.json",
@@ -500,12 +585,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": 16.470183318857895,
-        "y": 37.077000305042034,
-        "z": 17.075488882409953,
-        "vx": 2.304386121550957e-9,
-        "vy": -1.2260923530996747e-9,
-        "vz": -7.470305388924396e-10
+        "x": 30.51117584830913,
+        "y": 26.26559931946172,
+        "z": 21.09802983367524,
+        "vx": -4.825487590342401e-16,
+        "vy": 5.333705437234933e-16,
+        "vz": -8.726032459080389e-16
       },
       {
         "id": "pdf-to-slideshow-video/types.ts",
@@ -522,12 +607,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -17.657319984561205,
-        "y": 31.630879918274882,
-        "z": 24.182180378962844,
-        "vx": 2.8798919191940642e-9,
-        "vy": -1.067223674926611e-9,
-        "vz": -1.5682622632059375e-9
+        "x": -3.500240879933479,
+        "y": 36.63181350852729,
+        "z": 25.40421957593709,
+        "vx": -6.810373879926375e-16,
+        "vy": 4.30605324628343e-16,
+        "vz": -6.456484016437989e-16
       },
       {
         "id": "pdf-to-slideshow-video/vite.config.ts",
@@ -544,12 +629,12 @@
         "highlighted": false,
         "parentPath": "pdf-to-slideshow-video",
         "childFileCount": 0,
-        "x": -3.4848820351232224,
-        "y": 42.05846177582333,
-        "z": -11.276789185515462,
-        "vx": 2.5880928771512044e-9,
-        "vy": -1.2300725325838076e-9,
-        "vz": -4.826742289850698e-10
+        "x": -6.097732022970118,
+        "y": 30.2235067303383,
+        "z": -31.47218051041699,
+        "vx": 1.2060213803471076e-17,
+        "vy": 2.8738000865633987e-16,
+        "vz": -9.713525826839093e-16
       }
     ],
     "links": [
@@ -571,6 +656,16 @@
       {
         "source": "pdf-to-slideshow-video",
         "target": "pdf-to-slideshow-video/components",
+        "type": "tree"
+      },
+      {
+        "source": "pdf-to-slideshow-video",
+        "target": "pdf-to-slideshow-video/dist",
+        "type": "tree"
+      },
+      {
+        "source": "pdf-to-slideshow-video",
+        "target": "pdf-to-slideshow-video/node_modules",
         "type": "tree"
       },
       {
@@ -620,6 +715,11 @@
       },
       {
         "source": "pdf-to-slideshow-video",
+        "target": "pdf-to-slideshow-video/package-lock.json",
+        "type": "tree"
+      },
+      {
+        "source": "pdf-to-slideshow-video",
         "target": "pdf-to-slideshow-video/package.json",
         "type": "tree"
       },
@@ -651,6 +751,13 @@
     ".kamui/prompt/merge-prompt.txt",
     ".kamui/system-graph-state.json",
     ".kamui/tasks-state.json",
+    ".serena/.gitignore",
+    ".serena/memories/progress_app_display_20251211.md",
+    ".serena/memories/project_overview.md",
+    ".serena/memories/style_conventions.md",
+    ".serena/memories/suggested_commands.md",
+    ".serena/memories/task_completion.md",
+    ".serena/project.yml",
     "App.tsx",
     "README.md",
     "components/BgmWaveformEditor.tsx",
@@ -677,6 +784,7 @@
     "index.html",
     "index.tsx",
     "metadata.json",
+    "package-lock.json",
     "package.json",
     "services/geminiService.ts",
     "services/pdfVideoService.ts",
@@ -700,7 +808,15 @@
       "pdf-to-slideshow-video/pdf-to-slideshow-video/.serena",
       "pdf-to-slideshow-video/.serena/memories",
       "pdf-to-slideshow-video/pdf-to-slideshow-video/.serena/memories",
-      "pdf-to-slideshow-video"
+      "pdf-to-slideshow-video",
+      "pdf-to-slideshow-video/components",
+      "pdf-to-slideshow-video/pdf-to-slideshow-video/components",
+      "pdf-to-slideshow-video/components/slideEditor",
+      "pdf-to-slideshow-video/pdf-to-slideshow-video/components/slideEditor",
+      "pdf-to-slideshow-video/services",
+      "pdf-to-slideshow-video/pdf-to-slideshow-video/services",
+      "pdf-to-slideshow-video/utils",
+      "pdf-to-slideshow-video/pdf-to-slideshow-video/utils"
     ],
     "selectedPath": "pdf-to-slideshow-video/index.html"
   },
@@ -714,36 +830,18 @@
     "mode": "full",
     "isPartial": false,
     "branchPulse": {
-      "generatedAt": 1765442935834,
+      "generatedAt": 1765451919105,
       "targets": [
         "main",
-        "task/task-1765441468708-45424f",
         "master"
       ],
       "statsByBranch": {
-        "task/task-1765441468708-45424f": {
-          "branch": "task/task-1765441468708-45424f",
-          "head": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-          "baseRef": "main",
-          "baseHead": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-          "mergeBase": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-          "divergence": {
-            "aheadCount": 0,
-            "fileCount": 0
-          },
-          "baseline": {
-            "aheadCount": 0,
-            "behindCount": 0,
-            "fileCount": 0
-          },
-          "upstream": null
-        },
         "main": {
           "branch": "main",
-          "head": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+          "head": "e50bae0dccb1430fdd15270e3f84952879558561",
           "baseRef": "origin/main",
-          "baseHead": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-          "mergeBase": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+          "baseHead": "e50bae0dccb1430fdd15270e3f84952879558561",
+          "mergeBase": "e50bae0dccb1430fdd15270e3f84952879558561",
           "divergence": {
             "aheadCount": 0,
             "fileCount": 0
@@ -767,9 +865,9 @@
         "label": "現在のコードベース",
         "files": [],
         "branch": "main",
-        "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+        "targetCommitHash": "e50bae0dccb1430fdd15270e3f84952879558561",
         "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
-        "timestamp": 1765442937676,
+        "timestamp": 1765451919129,
         "lane": 0,
         "branchLabel": "main",
         "branchTags": [
@@ -781,21 +879,22 @@
       },
       {
         "type": "unstaged",
-        "label": "未ステージ (8)",
+        "label": "未ステージ (9)",
         "files": [
           ".kamui/system-graph-state.json",
           ".kamui/tasks-state.json",
-          ".serena/.gitignore",
-          ".serena/memories/project_overview.md",
-          ".serena/memories/style_conventions.md",
-          ".serena/memories/suggested_commands.md",
-          ".serena/memories/task_completion.md",
-          ".serena/project.yml"
+          "components/CropModal.tsx",
+          "components/SlideInspector.tsx",
+          "components/slideEditor/SlideGrid.tsx",
+          "services/pdfVideoService.ts",
+          ".kamui/dev.pid",
+          ".serena/memories/progress_uuid_fix_20251211.md",
+          "utils/uuid.ts"
         ],
         "branch": "main",
-        "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+        "targetCommitHash": "e50bae0dccb1430fdd15270e3f84952879558561",
         "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
-        "timestamp": 1765442937676,
+        "timestamp": 1765451919129,
         "sortOrder": 0,
         "lane": 0,
         "branchColor": "#4f85e8",
@@ -808,108 +907,135 @@
           "kamui/model-versions-cache.json"
         ],
         "branch": "main",
-        "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+        "targetCommitHash": "e50bae0dccb1430fdd15270e3f84952879558561",
         "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
-        "timestamp": 1765442937676,
+        "timestamp": 1765451919129,
         "sortOrder": 1,
         "lane": 0,
         "branchColor": "#4f85e8",
         "index": 2
       },
       {
-        "type": "unstaged",
-        "label": "未ステージ [task/task-1765441468708-45424f] (7)",
-        "files": [
-          ".kamui/prompt/merge-prompt.txt",
-          ".kamui/system-graph-state.json",
-          ".kamui/tasks-state.json",
-          "App.tsx",
-          "index.html",
-          "index.tsx",
-          "types/pdfTypes.ts"
-        ],
-        "branch": "task/task-1765441468708-45424f",
-        "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-        "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-        "timestamp": 1765442935699,
-        "sortOrder": 0,
-        "lane": 1,
-        "branchColor": "#e84f7f",
-        "index": 3
-      },
-      {
-        "type": "staged",
-        "label": "ステージ済み [task/task-1765441468708-45424f] (1)",
-        "files": [
-          "kamui/model-versions-cache.json"
-        ],
-        "branch": "task/task-1765441468708-45424f",
-        "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-        "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-        "timestamp": 1765442935699,
-        "sortOrder": 1,
-        "lane": 1,
-        "branchColor": "#e84f7f",
-        "index": 4
-      },
-      {
-        "type": "anchor",
-        "label": "[task/task-1765441468708-45424f]",
-        "branch": "task/task-1765441468708-45424f",
-        "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-        "parentCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-        "lane": 1,
-        "isMerged": false,
-        "mergeCommitHash": null,
-        "statusChildren": [
+        "type": "commit",
+        "label": "Refactor code structure for improved readability and maintai…",
+        "commit": {
+          "hash": "e50bae0dccb1430fdd15270e3f84952879558561",
+          "subject": "Refactor code structure for improved readability and maintainability",
+          "author": "hajimeno-ipoo",
+          "timestamp": 1765444871,
+          "parents": [
+            "b3232d35e6eed1d7d4dc383f23147a382f49429a"
+          ],
+          "parent": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+          "refs": "HEAD -> main, origin/main, origin/HEAD",
+          "branches": [
+            "HEAD -> main",
+            "origin/main",
+            "origin/HEAD",
+            "main"
+          ]
+        },
+        "commitHash": "e50bae0dccb1430fdd15270e3f84952879558561",
+        "lane": 0,
+        "parentLinks": [
           {
-            "type": "unstaged",
-            "label": "未ステージ [task/task-1765441468708-45424f] (7)",
-            "files": [
-              ".kamui/prompt/merge-prompt.txt",
-              ".kamui/system-graph-state.json",
-              ".kamui/tasks-state.json",
-              "App.tsx",
-              "index.html",
-              "index.tsx",
-              "types/pdfTypes.ts"
-            ],
-            "branch": "task/task-1765441468708-45424f",
-            "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-            "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-            "timestamp": 1765442935699,
-            "sortOrder": 0,
-            "lane": 1,
-            "branchColor": "#e84f7f",
-            "index": 3
-          },
-          {
-            "type": "staged",
-            "label": "ステージ済み [task/task-1765441468708-45424f] (1)",
-            "files": [
-              "kamui/model-versions-cache.json"
-            ],
-            "branch": "task/task-1765441468708-45424f",
-            "targetCommitHash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-            "worktreePath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-            "timestamp": 1765442935699,
-            "sortOrder": 1,
-            "lane": 1,
-            "branchColor": "#e84f7f",
-            "index": 4
+            "hash": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
+            "lane": 0
           }
         ],
-        "isDefaultWorktree": false,
-        "renderMode": "node",
-        "shouldHide": false,
-        "tagLabel": "task/task-1765441468708-45424f",
-        "taskId": "task-1765441468708-45424f",
-        "taskStatus": null,
-        "taskStatusLabel": null,
-        "taskName": null,
-        "tooltip": "ID: task-1765441468708-45424f\nBranch: task/task-1765441468708-45424f\nWorktree: Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-        "branchColor": "#e84f7f",
-        "index": 5
+        "primaryBranchName": "main",
+        "branchColor": "#4f85e8",
+        "branchTags": [
+          "main"
+        ],
+        "worktrees": [
+          {
+            "path": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
+            "head": "e50bae0dccb1430fdd15270e3f84952879558561",
+            "branch": "main",
+            "isMerged": false,
+            "mergeCommitHash": null,
+            "status": {
+              "staged": [
+                {
+                  "path": "kamui/model-versions-cache.json",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": "kamui/model-versions-cache.json",
+                  "timestamp": 1765451918996
+                }
+              ],
+              "unstaged": [
+                {
+                  "path": ".kamui/system-graph-state.json",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": ".kamui/system-graph-state.json",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": ".kamui/tasks-state.json",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": ".kamui/tasks-state.json",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": "components/CropModal.tsx",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": "components/CropModal.tsx",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": "components/SlideInspector.tsx",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": "components/SlideInspector.tsx",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": "components/slideEditor/SlideGrid.tsx",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": "components/slideEditor/SlideGrid.tsx",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": "services/pdfVideoService.ts",
+                  "originalPath": null,
+                  "status": "modified",
+                  "rawPath": "services/pdfVideoService.ts",
+                  "timestamp": 1765451918996
+                }
+              ],
+              "untracked": [
+                {
+                  "path": ".kamui/dev.pid",
+                  "status": "untracked",
+                  "rawPath": ".kamui/dev.pid",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": ".serena/memories/progress_uuid_fix_20251211.md",
+                  "status": "untracked",
+                  "rawPath": ".serena/memories/progress_uuid_fix_20251211.md",
+                  "timestamp": 1765451918996
+                },
+                {
+                  "path": "utils/uuid.ts",
+                  "status": "untracked",
+                  "rawPath": "utils/uuid.ts",
+                  "timestamp": 1765451918996
+                }
+              ],
+              "capturedAt": 1765451918996
+            },
+            "normalizedPath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
+            "lane": 0
+          }
+        ],
+        "index": 3
       },
       {
         "type": "commit",
@@ -921,11 +1047,8 @@
           "timestamp": 1765439374,
           "parents": [],
           "parent": null,
-          "refs": "HEAD -> main, origin/main, origin/HEAD, task/task-1765441472936-80bfc2, task/task-1765441470845-c0e409, task/task-1765441468708-45424f, task/task-1765439512144-13ec53",
+          "refs": "task/task-1765441472936-80bfc2, task/task-1765441470845-c0e409, task/task-1765441468708-45424f, task/task-1765439512144-13ec53",
           "branches": [
-            "HEAD -> main",
-            "origin/main",
-            "origin/HEAD",
             "task/task-1765441472936-80bfc2",
             "task/task-1765441470845-c0e409",
             "task/task-1765441468708-45424f",
@@ -939,178 +1062,22 @@
         "primaryBranchName": "main",
         "branchColor": "#4f85e8",
         "branchTags": [
-          "main",
           "task/task-1765439512144-13ec53",
+          "task/task-1765441468708-45424f",
           "task/task-1765441470845-c0e409",
           "task/task-1765441472936-80bfc2"
         ],
-        "worktrees": [
-          {
-            "path": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
-            "head": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-            "branch": "main",
-            "isMerged": false,
-            "mergeCommitHash": null,
-            "status": {
-              "staged": [
-                {
-                  "path": "kamui/model-versions-cache.json",
-                  "originalPath": null,
-                  "status": "modified",
-                  "rawPath": "kamui/model-versions-cache.json",
-                  "timestamp": 1765442935699
-                }
-              ],
-              "unstaged": [
-                {
-                  "path": ".kamui/system-graph-state.json",
-                  "originalPath": null,
-                  "status": "modified",
-                  "rawPath": ".kamui/system-graph-state.json",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".kamui/tasks-state.json",
-                  "originalPath": null,
-                  "status": "modified",
-                  "rawPath": ".kamui/tasks-state.json",
-                  "timestamp": 1765442935699
-                }
-              ],
-              "untracked": [
-                {
-                  "path": ".serena/.gitignore",
-                  "status": "untracked",
-                  "rawPath": ".serena/.gitignore",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".serena/memories/project_overview.md",
-                  "status": "untracked",
-                  "rawPath": ".serena/memories/project_overview.md",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".serena/memories/style_conventions.md",
-                  "status": "untracked",
-                  "rawPath": ".serena/memories/style_conventions.md",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".serena/memories/suggested_commands.md",
-                  "status": "untracked",
-                  "rawPath": ".serena/memories/suggested_commands.md",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".serena/memories/task_completion.md",
-                  "status": "untracked",
-                  "rawPath": ".serena/memories/task_completion.md",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".serena/project.yml",
-                  "status": "untracked",
-                  "rawPath": ".serena/project.yml",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".worktrees/task-1765441468708-45424f/",
-                  "status": "untracked",
-                  "rawPath": ".worktrees/task-1765441468708-45424f/",
-                  "timestamp": 1765442935699
-                }
-              ],
-              "capturedAt": 1765442935699
-            },
-            "normalizedPath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
-            "lane": 0
-          },
-          {
-            "path": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-            "head": "b3232d35e6eed1d7d4dc383f23147a382f49429a",
-            "branch": "task/task-1765441468708-45424f",
-            "isMerged": false,
-            "mergeCommitHash": null,
-            "status": {
-              "staged": [
-                {
-                  "path": "kamui/model-versions-cache.json",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": "kamui/model-versions-cache.json",
-                  "timestamp": 1765442935699
-                }
-              ],
-              "unstaged": [
-                {
-                  "path": ".kamui/prompt/merge-prompt.txt",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": ".kamui/prompt/merge-prompt.txt",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".kamui/system-graph-state.json",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": ".kamui/system-graph-state.json",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": ".kamui/tasks-state.json",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": ".kamui/tasks-state.json",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": "App.tsx",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": "App.tsx",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": "index.html",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": "index.html",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": "index.tsx",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": "index.tsx",
-                  "timestamp": 1765442935699
-                },
-                {
-                  "path": "types/pdfTypes.ts",
-                  "originalPath": null,
-                  "status": "deleted",
-                  "rawPath": "types/pdfTypes.ts",
-                  "timestamp": 1765442935699
-                }
-              ],
-              "untracked": [],
-              "capturedAt": 1765442935699
-            },
-            "normalizedPath": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video/.worktrees/task-1765441468708-45424f",
-            "lane": 1
-          }
-        ],
-        "index": 6
+        "index": 4
       },
       {
         "type": "empty",
         "label": "初期状態 (初回コミット以前)",
         "files": [],
         "marker": "pre-history",
-        "index": 7
+        "index": 5
       }
     ]
   },
   "projectRoot": "/Users/apple/Desktop/Dev_App/pdf-to-slideshow-video",
-  "savedAt": 1765442947361
+  "savedAt": 1765451942881
 }

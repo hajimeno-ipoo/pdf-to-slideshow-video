@@ -4,6 +4,7 @@ import { PDFDocumentProxy, PDFPageProxy, PDFJSStatic } from '../types/pdfTypes';
 import { generateSlideScript, wait } from './geminiService';
 import { fileToBase64 } from '../utils/fileUtils';
 import { VIDEO_WORKER_CODE } from './videoWorkerScript';
+import { safeRandomUUID } from '../utils/uuid';
 
 declare const pdfjsLib: PDFJSStatic;
 
@@ -389,9 +390,9 @@ export const renderPageOverview = async (sourceFile: File | null, slide: Slide):
         return canvas.toDataURL('image/jpeg', 0.8);
     }
     if (slide.backgroundColor) {
-        const canvas = document.createElement('canvas'); canvas.width = 320; canvas.height = 180;
-        const ctx = canvas.getContext('2d'); if(ctx){ ctx.fillStyle = slide.backgroundColor; ctx.fillRect(0,0,320,180); }
-        return canvas.toDataURL('image/jpeg');
+        const canvas = document.createElement('canvas'); canvas.width = 1920; canvas.height = 1080;
+        const ctx = canvas.getContext('2d'); if(ctx){ ctx.fillStyle = slide.backgroundColor; ctx.fillRect(0,0,1920,1080); }
+        return canvas.toDataURL('image/jpeg', 0.8);
     }
     return "";
 };
@@ -434,7 +435,7 @@ export const analyzePdf = async (
     }
 
     slides.push({
-      id: crypto.randomUUID(),
+      id: safeRandomUUID(),
       pageIndex: i,
       thumbnailUrl,
       duration: durationPerSlide,
@@ -468,7 +469,7 @@ export const createSlideFromImage = async (file: File, duration: number, transit
     });
     
     return {
-        id: crypto.randomUUID(),
+        id: safeRandomUUID(),
         pageIndex: -1, 
         thumbnailUrl: `data:${file.type};base64,${base64}`,
         duration: duration,
@@ -488,12 +489,13 @@ export const createSolidColorSlide = async (color: string, duration: number, tra
     const width = 1920;
     const height = 1080;
     const canvas = document.createElement('canvas');
-    canvas.width = 320; canvas.height = 180;
+    // 無地でもPDFと同じ見た目に揃えるため、プレビュー生成をフルHD黒背景で固定
+    canvas.width = width; canvas.height = height;
     const ctx = canvas.getContext('2d');
-    if (ctx) { ctx.fillStyle = color; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+    if (ctx) { ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
     
     return {
-        id: crypto.randomUUID(),
+        id: safeRandomUUID(),
         pageIndex: -1,
         thumbnailUrl: canvas.toDataURL('image/jpeg'),
         duration: duration,

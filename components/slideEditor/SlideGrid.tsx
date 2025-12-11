@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useEditor } from './SlideEditorContext';
 import { TransitionType, EffectType, Slide, Overlay } from '../../types';
+import { safeRandomUUID } from '../../utils/uuid';
 
 interface SlideGridProps {
   onSelect: (id: string | null) => void;
@@ -58,7 +59,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
     const index = slides.findIndex(s => s.id === id);
     if (index === -1) return;
     const original = slides[index];
-    const duplicated: Slide = { ...original, id: crypto.randomUUID(), overlays: original.overlays?.map(o => ({ ...o, id: crypto.randomUUID() })), };
+    const duplicated: Slide = { ...original, id: safeRandomUUID(), overlays: original.overlays?.map(o => ({ ...o, id: safeRandomUUID() })), };
     const newSlides = [...slides];
     newSlides.splice(index + 1, 0, duplicated);
     updateSlides(newSlides, true);
@@ -102,6 +103,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 p-1 pb-20">
       {slides.map((slide, index) => {
         const isSelected = slide.id === selectedId;
+        const isSolid = slide.pageIndex <= 0 && !!slide.backgroundColor && !slide.customImageFile;
         return (
         <div 
             key={slide.id} 
@@ -132,11 +134,18 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
                     overflow: 'hidden'
                 }}
             >
-                <img 
-                    src={slide.thumbnailUrl} 
-                    alt={`Slide ${index + 1}`} 
-                    className="object-contain pointer-events-none w-full h-full" 
-                />
+                {isSolid ? (
+                    <div 
+                      className="w-full h-full pointer-events-none" 
+                      style={{ backgroundColor: slide.backgroundColor }}
+                    />
+                ) : (
+                    <img 
+                        src={slide.thumbnailUrl} 
+                        alt={`Slide ${index + 1}`} 
+                        className="object-contain pointer-events-none w-full h-full" 
+                    />
+                )}
                 
                 {/* Overlay Animations (GIFs) on Grid */}
                 {/* We render image overlays as separate DOM elements so GIFs animate */}

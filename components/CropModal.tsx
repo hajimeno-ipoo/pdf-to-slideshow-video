@@ -7,6 +7,7 @@ import AudioSettingsPanel from './cropModal/AudioSettingsPanel';
 import ImageSettingsPanel from './cropModal/ImageSettingsPanel';
 import OverlaySettingsPanel from './cropModal/OverlaySettingsPanel';
 import { useEditor } from './slideEditor/SlideEditorContext';
+import { safeRandomUUID } from '../utils/uuid';
 
 interface SlideEditModalProps {
   isOpen: boolean;
@@ -240,7 +241,7 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
     const rY = (Math.random() - 0.5) * 0.15;
 
     const newOverlay: Overlay = { 
-        id: crypto.randomUUID(), 
+        id: safeRandomUUID(), 
         type: type, 
         x: 0.5 + rX, 
         y: 0.5 + rY, 

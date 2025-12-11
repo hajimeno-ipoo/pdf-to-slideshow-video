@@ -12,6 +12,7 @@ export const Toolbar: React.FC = () => {
   const [globalSlideVolume, setGlobalSlideVolume] = useState<number>(1.0);
   const [globalTransitionType, setGlobalTransitionType] = useState<TransitionType>('fade');
   const [globalEffectType, setGlobalEffectType] = useState<EffectType>('none');
+  const [solidAddColor, setSolidAddColor] = useState<string>('#000000');
   
   // Insertion settings
   const [targetSlideIndex, setTargetSlideIndex] = useState<number>(1);
@@ -58,7 +59,7 @@ export const Toolbar: React.FC = () => {
 
   const handleAddSolidColorSlide = async () => {
       try {
-          const newSlide = await createSolidColorSlide("#000000", globalDuration, globalTransitionType);
+          const newSlide = await createSolidColorSlide(solidAddColor, globalDuration, globalTransitionType);
           const newSlides = [...slides];
           newSlides.splice(getInsertIndex(), 0, newSlide);
           updateSlides(newSlides, true);
@@ -201,10 +202,19 @@ export const Toolbar: React.FC = () => {
                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
                            画像
                          </button>
-                         <button onClick={handleAddSolidColorSlide} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-white transition-colors border border-slate-600 shadow-sm whitespace-nowrap font-medium">
+                         <div className="flex items-center gap-2 bg-slate-800 px-2 py-1.5 rounded border border-slate-700">
+                           <input 
+                              type="color" 
+                              value={solidAddColor} 
+                              onChange={(e) => setSolidAddColor(e.target.value)} 
+                              className="w-8 h-8 rounded cursor-pointer bg-transparent border border-slate-600"
+                              title="無地スライドの背景色"
+                           />
+                           <button onClick={handleAddSolidColorSlide} className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 text-xs bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-white transition-colors border border-slate-600 shadow-sm whitespace-nowrap font-medium">
                           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path d="M2 3a1 1 0 011-1h14a1 1 0 011 1v14a1 1 0 01-1 1H3a1 1 0 01-1-1V3z" /></svg>
                           無地
-                         </button>
+                           </button>
+                         </div>
                      </div>
                  </div>
              )}
