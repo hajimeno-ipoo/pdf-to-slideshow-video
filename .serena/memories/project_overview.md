@@ -1,0 +1,13 @@
+# プロジェクト概要
+- 名前: PDF to Slideshow Video
+- 目的: PDFの各ページをスライドとして読み込み、Geminiでナレーションを生成しつつ動画(スライドショー/GIF)を作成するWebアプリ。マイク録音もサポートし、BGMやオーバーレイ編集も可能。
+- メイン技術: React 19 + TypeScript + Vite 6、Gemini API(@google/genai)、gifenc、PDF.js(CDN)。
+- ディレクトリざっくり
+  - `components/` スライド編集UI、ヘッダー、アップロード、プレビュー、モーダル類
+  - `services/` PDF→スライド変換、Gemini連携、Voicevox、動画生成ワーカー、ローカル保存
+  - `utils/` ファイル変換・プロジェクトシリアライズ
+  - `types/` 型定義(スライド、設定、PDF型)
+  - `App.tsx` ルートコンポーネント、状態管理/自動保存/レート制御
+  - `index.tsx` エントリーポイント、`index.html` Viteテンプレ
+- 環境変数: `GEMINI_API_KEY` を `.env.local` に設定必要(README記載)。
+- その他: `metadata.json` でアプリ説明とマイク権限要求。

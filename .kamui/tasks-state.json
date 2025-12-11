@@ -1,1 +1,47 @@
-[]
+[
+  {
+    "id": "task-1765441045242-dfd026",
+    "name": "プロジェクトを確認して",
+    "model": "Claude Code",
+    "status": "completed",
+    "importance": "medium",
+    "urgency": "medium",
+    "createdAt": "2025-12-11T08:17:25.242Z",
+    "updatedAt": "2025-12-11T08:23:59.489Z",
+    "requiresTerminal": false,
+    "createWorktree": false,
+    "branchName": null,
+    "baseBranch": null,
+    "useTmux": false,
+    "aiCompetitionEntry": false,
+    "aiCompetitionResult": null,
+    "aiCompetitionGroupId": null,
+    "aiCompetitionGroupName": null,
+    "aiCompetitionMonitor": false,
+    "monitorTargets": null,
+    "scoringConfig": null
+  },
+  {
+    "id": "task-1765441470845-c0e409",
+    "name": "CodexCLI2: プロジェクトの評価をして",
+    "model": "Codex CLI",
+    "status": "completed",
+    "importance": "medium",
+    "urgency": "medium",
+    "createdAt": "2025-12-11T08:24:30.845Z",
+    "updatedAt": "2025-12-11T08:48:50.706Z",
+    "requiresTerminal": false,
+    "createWorktree": true,
+    "branchName": "task/task-1765441470845-c0e409",
+    "baseBranch": "main",
+    "useTmux": true,
+    "aiCompetitionEntry": true,
+    "aiCompetitionResult": null,
+    "aiCompetitionGroupId": "comp-1765441468708-5pbktxzj",
+    "aiCompetitionGroupName": "プロジェクトの評価をして",
+    "aiCompetitionMonitor": false,
+    "monitorTargets": null,
+    "scoringConfig": null,
+    "worktreePath": null
+  }
+]
