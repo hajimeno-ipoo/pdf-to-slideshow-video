@@ -494,7 +494,7 @@ export const createSolidColorSlide = async (color: string, duration: number, tra
     // 無地でもPDFと同じ見た目に揃えるため、プレビュー生成をフルHD黒背景で固定
     canvas.width = width; canvas.height = height;
     const ctx = canvas.getContext('2d');
-    if (ctx) { ctx.fillStyle = '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
+    if (ctx) { ctx.fillStyle = color || '#000000'; ctx.fillRect(0, 0, canvas.width, canvas.height); }
     
     return {
         id: safeRandomUUID(),
@@ -513,70 +513,101 @@ export const createSolidColorSlide = async (color: string, duration: number, tra
     };
 };
 
-export const updateThumbnail = async (sourceFile: File | null, slide: Slide): Promise<string> => {
-    let canvas: HTMLCanvasElement | null = null;
-    let ctx: CanvasRenderingContext2D | null = null;
+export const updateThumbnail = async (sourceFile: File | null, slide: Slide, settings?: VideoSettings): Promise<string> => {
+    // サムネ生成を本番描画パイプラインに寄せて、装飾反映漏れを防ぐ
+    const canvas = document.createElement('canvas');
+    // 16:9 前提サムネ。少し解像度高めでアウトライン潰れを防止
+    canvas.width = 640;
+    canvas.height = 360;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return slide.thumbnailUrl;
 
-    if (slide.customImageFile) {
-        const bitmap = await createImageBitmap(slide.customImageFile);
-        canvas = document.createElement('canvas');
-        // Resize for thumbnail
-        const maxDim = 640;
-        let w = bitmap.width;
-        let h = bitmap.height;
-        if (w > maxDim || h > maxDim) {
-            const ratio = w / h;
-            if (w > h) { w = maxDim; h = maxDim / ratio; }
-            else { h = maxDim; w = maxDim * ratio; }
+    // 背景画像または solid を bitmap にする
+    let slideImage: ImageBitmap | null = null;
+    try {
+        if (slide.customImageFile) {
+            slideImage = await createImageBitmap(slide.customImageFile);
+        } else if (sourceFile && slide.pageIndex > 0) {
+            initPdfJs();
+            const arrayBuffer = await sourceFile.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+            const page = await pdf.getPage(slide.pageIndex);
+            const targetW = 640; // サムネ用
+            const scale = Math.min(3.0, targetW / slide.crop.width);
+            const viewport = page.getViewport({ scale });
+            const tmp = document.createElement('canvas');
+            tmp.width = slide.crop.width * scale;
+            tmp.height = slide.crop.height * scale;
+            const tctx = tmp.getContext('2d');
+            if (tctx) {
+                tctx.fillStyle = '#ffffff';
+                tctx.fillRect(0, 0, tmp.width, tmp.height);
+                const renderContext = {
+                    canvasContext: tctx,
+                    viewport,
+                    transform: [1, 0, 0, 1, -slide.crop.x * scale, -slide.crop.y * scale]
+                };
+                await page.render(renderContext).promise;
+            }
+            slideImage = await createImageBitmap(tmp);
+        } else {
+            // solid 色スライド
+            const tmp = document.createElement('canvas');
+            tmp.width = 640; tmp.height = 360;
+            const tctx = tmp.getContext('2d');
+            if (tctx) { tctx.fillStyle = slide.backgroundColor || '#000'; tctx.fillRect(0,0,tmp.width,tmp.height); }
+            slideImage = await createImageBitmap(tmp);
         }
-        canvas.width = w;
-        canvas.height = h;
-        
-        ctx = canvas.getContext('2d');
-        if (ctx) {
-            ctx.drawImage(bitmap, 0, 0, w, h);
-        }
-        bitmap.close();
-    } else if (sourceFile && slide.pageIndex > 0) {
-        initPdfJs();
-        const arrayBuffer = await sourceFile.arrayBuffer();
-        const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-        const page = await pdf.getPage(slide.pageIndex);
-        const scale = 300 / slide.crop.width;
-        const viewport = page.getViewport({ scale });
-        
-        canvas = document.createElement('canvas');
-        canvas.width = slide.crop.width * scale;
-        canvas.height = slide.crop.height * scale;
-        ctx = canvas.getContext('2d');
-        
-        if (ctx) {
-            ctx.fillStyle = '#ffffff';
+    } catch (e) {
+        console.error('updateThumbnail: slide bitmap failed', e);
+    }
+
+    // スライドフレーム＋装飾を描画
+    try {
+        const vs: VideoSettings = settings || {
+            resolution: '1080p',
+            aspectRatio: '16:9',
+            format: 'mp4',
+            frameRate: 30,
+            transitionDuration: 0.5,
+            slideScale: 100,
+            slideBorderRadius: 0,
+            bgColor: '#000000',
+            motionBlur: false,
+            audioFade: true,
+        } as unknown as VideoSettings;
+
+        if (slideImage) {
+            await drawSlideFrame(
+                ctx,
+                slideImage,
+                canvas.width,
+                canvas.height,
+                slide.effectType,
+                slide.effectType === 'kenburns' ? getKenBurnsParams(slide.id) : null,
+                0,
+                slide,
+                vs,
+                0,
+                undefined,
+                false // skipOverlays=false → オーバーレイを描画
+            );
+        } else {
+            // bitmap 化に失敗したときのフォールバック：背景を塗ってオーバーレイだけ描画
+            ctx.fillStyle = slide.backgroundColor || '#000';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const renderContext = {
-                canvasContext: ctx,
-                viewport: viewport,
-                transform: [1, 0, 0, 1, -slide.crop.x * scale, -slide.crop.y * scale]
-            };
-            await page.render(renderContext).promise;
+            await drawOverlays(ctx, slide.overlays || [], canvas.width, canvas.height);
         }
-    } else if (slide.backgroundColor) {
-        canvas = document.createElement('canvas'); 
-        // サムネでも枠線が潰れないよう解像度を上げる
-        canvas.width = 640; canvas.height = 360;
-        ctx = canvas.getContext('2d'); 
-        if(ctx){ ctx.fillStyle = slide.backgroundColor; ctx.fillRect(0,0,canvas.width,canvas.height); }
+    } catch (e) {
+        console.error('updateThumbnail: drawSlideFrame failed', e);
+        // フォールバック：背景＋オーバーレイのみ
+        ctx.fillStyle = slide.backgroundColor || '#000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        try { await drawOverlays(ctx, slide.overlays || [], canvas.width, canvas.height); } catch (_) {}
     }
 
-    // Draw Overlays on Thumbnail
-    if (canvas && ctx && slide.overlays && slide.overlays.length > 0) {
-        await drawOverlays(ctx, slide.overlays, canvas.width, canvas.height);
-    }
-
-    if (canvas) {
-        return canvas.toDataURL('image/jpeg', 0.8);
-    }
-    return slide.thumbnailUrl;
+    slideImage?.close?.();
+    return canvas.toDataURL('image/jpeg', 0.8);
 };
 
 export const generateVideoFromSlides = async (

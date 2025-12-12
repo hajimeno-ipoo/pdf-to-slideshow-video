@@ -183,7 +183,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       
       try {
           // Generate thumbnail with baked-in overlays for grid view
-          const newThumb = await updateThumbnail(sourceFile, updatedSlide);
+          const newThumb = await updateThumbnail(sourceFile, updatedSlide, videoSettings);
           updatedSlide.thumbnailUrl = newThumb;
           onUpdate(updatedSlide);
       } catch(e) { console.error("Update failed", e); }

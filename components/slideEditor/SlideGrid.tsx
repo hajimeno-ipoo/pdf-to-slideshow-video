@@ -134,18 +134,12 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
                     overflow: 'hidden'
                 }}
             >
-                {isSolid ? (
-                    <div 
-                      className="w-full h-full pointer-events-none" 
-                      style={{ backgroundColor: slide.backgroundColor }}
-                    />
-                ) : (
-                    <img 
-                        src={slide.thumbnailUrl} 
-                        alt={`Slide ${index + 1}`} 
-                        className="object-contain pointer-events-none w-full h-full" 
-                    />
-                )}
+                <img 
+                    src={slide.thumbnailUrl} 
+                    alt={`Slide ${index + 1}`} 
+                    className="object-contain pointer-events-none w-full h-full" 
+                    style={{ backgroundColor: isSolid ? slide.backgroundColor : undefined }}
+                />
                 
                 {/* Overlay Animations (GIFs) on Grid */}
                 {/* We render image overlays as separate DOM elements so GIFs animate */}
