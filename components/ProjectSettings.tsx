@@ -65,68 +65,68 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     <div className="flex flex-col h-full bg-slate-900 text-slate-300">
        <div className="p-4 border-b border-slate-800 bg-slate-900 sticky top-0 z-10 flex items-center gap-2">
            {onClose && (
-               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-xs font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
+               <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-sm font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
                    閉じる
                </button>
            )}
-           <h3 className="text-sm font-bold text-white uppercase tracking-wider">プロジェクト設定</h3>
+           <h3 className="text-base font-bold text-white uppercase tracking-wider">プロジェクト設定</h3>
        </div>
        
        <div className="p-4 space-y-6 overflow-y-auto custom-scrollbar flex-1">
            {/* Video Format */}
            <div className="space-y-3">
-              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">動画出力</h4>
+              <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-2">動画出力</h4>
               
               <div className="grid grid-cols-2 gap-3">
                  <div className="space-y-1">
-                   <label className="text-[10px] text-slate-500 uppercase">フォーマット</label>
-                   <select value={videoSettings.format} onChange={(e) => setVideoSettings({ format: e.target.value as OutputFormat })} className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-emerald-500">
+                   <label className="text-[12px] text-slate-300 uppercase">フォーマット</label>
+                   <select value={videoSettings.format} onChange={(e) => setVideoSettings({ format: e.target.value as OutputFormat })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
                      <option value="mp4">MP4 (Video)</option><option value="gif">GIF (Anim)</option>
                    </select>
                  </div>
                  <div className="space-y-1">
-                   <label className="text-[10px] text-slate-500 uppercase">アスペクト比</label>
-                   <select value={videoSettings.aspectRatio} onChange={(e) => setVideoSettings({ aspectRatio: e.target.value as AspectRatio })} className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-emerald-500">
+                   <label className="text-[12px] text-slate-300 uppercase">アスペクト比</label>
+                   <select value={videoSettings.aspectRatio} onChange={(e) => setVideoSettings({ aspectRatio: e.target.value as AspectRatio })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
                      <option value="16:9">16:9 (Landscape)</option><option value="4:3">4:3 (Slide)</option><option value="1:1">1:1 (Square)</option><option value="9:16">9:16 (Portrait)</option>
                    </select>
                  </div>
                  <div className="space-y-1">
-                   <label className="text-[10px] text-slate-500 uppercase">解像度</label>
-                   <select value={videoSettings.resolution} onChange={(e) => setVideoSettings({ resolution: e.target.value as Resolution })} className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-emerald-500">
+                   <label className="text-[12px] text-slate-300 uppercase">解像度</label>
+                   <select value={videoSettings.resolution} onChange={(e) => setVideoSettings({ resolution: e.target.value as Resolution })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
                      <option value="1080p">1080p (FHD)</option><option value="720p">720p (HD)</option>
                    </select>
                  </div>
                  <div className="space-y-1">
-                   <label className="text-[10px] text-slate-500 uppercase">背景処理</label>
-                   <select value={videoSettings.backgroundFill} onChange={(e) => setVideoSettings({ backgroundFill: e.target.value as BackgroundFill })} className="w-full bg-slate-800 border border-slate-700 rounded px-2 py-1.5 text-xs text-white outline-none focus:border-emerald-500">
+                   <label className="text-[12px] text-slate-300 uppercase">背景処理</label>
+                   <select value={videoSettings.backgroundFill} onChange={(e) => setVideoSettings({ backgroundFill: e.target.value as BackgroundFill })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
                      <option value="black">黒帯</option><option value="white">白帯</option><option value="custom_image">画像</option>
                    </select>
                  </div>
               </div>
 
               {videoSettings.backgroundFill === 'custom_image' && (
-                <div className="mt-2 p-2 bg-slate-800/50 rounded border border-slate-700 border-dashed flex items-center gap-2">
-                    <div className="text-xs text-slate-400 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "背景画像を選択..."}</div>
+                <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-700 border-dashed flex items-center gap-2">
+                    <div className="text-sm text-slate-300 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "背景画像を選択..."}</div>
                     <input type="file" accept="image/*" ref={bgImageInputRef} className="hidden" onChange={handleBgImageSelect} />
                     {videoSettings.backgroundImageFile && (
-                        <button onClick={handleBgImageClear} className="px-2 py-1 text-[11px] text-red-400 hover:text-red-200 border border-red-500/50 rounded transition-colors whitespace-nowrap">削除</button>
+                        <button onClick={handleBgImageClear} className="px-3 py-1 text-[12px] text-red-400 hover:text-red-200 border border-red-500/50 rounded transition-colors whitespace-nowrap">削除</button>
                     )}
-                    <button onClick={() => bgImageInputRef.current?.click()} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded transition-colors whitespace-nowrap">選択</button>
+                    <button onClick={() => bgImageInputRef.current?.click()} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-sm text-white rounded transition-colors whitespace-nowrap">選択</button>
                 </div>
               )}
 
               <div className="space-y-3 pt-2">
                  <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-slate-500 uppercase"><label>スライド縮小</label><span>{videoSettings.slideScale}%</span></div>
+                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>スライド縮小</label><span>{videoSettings.slideScale}%</span></div>
                     <input type="range" min="50" max="100" value={videoSettings.slideScale} onChange={(e) => setVideoSettings({ slideScale: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                  </div>
                  <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-slate-500 uppercase"><label>角丸半径</label><span>{videoSettings.slideBorderRadius}px</span></div>
+                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>角丸半径</label><span>{videoSettings.slideBorderRadius}px</span></div>
                     <input type="range" min="0" max="50" value={videoSettings.slideBorderRadius} onChange={(e) => setVideoSettings({ slideBorderRadius: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                  </div>
                  <div className="space-y-1">
-                    <div className="flex justify-between text-[10px] text-slate-500 uppercase"><label>標準切替時間</label><span>{videoSettings.transitionDuration.toFixed(1)}s</span></div>
+                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>標準切替時間</label><span>{videoSettings.transitionDuration.toFixed(1)}s</span></div>
                     <input type="range" min="0.1" max="3.0" step="0.1" value={videoSettings.transitionDuration} onChange={(e) => setVideoSettings({ transitionDuration: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                  </div>
               </div>

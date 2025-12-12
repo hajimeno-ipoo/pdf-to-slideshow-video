@@ -34,10 +34,15 @@ export const Toolbar: React.FC = () => {
               setTargetSlideIndex(index + 1);
           }
       } else {
-          // Default to last if nothing selected
-          setTargetSlideIndex(slides.length > 0 ? slides.length : 1);
+          // 何も選択されていないときは常に先頭(1)をデフォルトにする
+          setTargetSlideIndex(1);
       }
   }, [selectedSlideId, slides.length]);
+
+  // スライド総数が変わったときも先頭にリセット
+  useEffect(() => {
+      setTargetSlideIndex(1);
+  }, [slides.length]);
 
   const getInsertIndex = () => {
       if (slides.length === 0) return 0;
@@ -110,39 +115,39 @@ export const Toolbar: React.FC = () => {
              </button>
              
              {isGlobalSettingsOpen && (
-                 <div className="p-3 flex flex-wrap items-center gap-2 animate-fade-in-down">
+                 <div className="p-3 flex flex-wrap items-center gap-3 animate-fade-in-down">
                      {/* Duration */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 p-1 pl-2">
-                         <span className="text-xs text-slate-400 mr-2 whitespace-nowrap">時間</span>
-                         <input type="number" min="1" value={globalDuration} onChange={(e) => setGlobalDuration(parseInt(e.target.value) || 1)} className="w-10 bg-slate-800 border border-slate-600 rounded px-1 py-0.5 text-white text-center text-xs focus:ring-1 focus:ring-emerald-500 outline-none" />
-                         <button onClick={handleApplyGlobalDuration} className="ml-1 text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200 transition-colors border border-slate-600">適用</button>
+                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+                         <span className="text-xs text-slate-400 whitespace-nowrap">時間</span>
+                         <input type="number" min="1" value={globalDuration} onChange={(e) => setGlobalDuration(parseInt(e.target.value) || 1)} className="w-14 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-center text-xs focus:ring-1 focus:ring-emerald-500 outline-none" />
+                         <button onClick={handleApplyGlobalDuration} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
                      </div>
 
                      {/* Volume */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 p-1 pl-2">
-                         <span className="text-xs text-slate-400 mr-2 whitespace-nowrap">音量</span>
-                         <input type="number" min="0" max="200" step="10" value={Math.round(globalSlideVolume * 100)} onChange={(e) => setGlobalSlideVolume(Math.max(0, parseInt(e.target.value) || 0) / 100)} className="w-10 bg-slate-800 border border-slate-600 rounded px-1 py-0.5 text-white text-right text-xs focus:ring-1 focus:ring-emerald-500 outline-none" />
-                         <span className="text-[10px] text-slate-500 mx-0.5">%</span>
-                         <button onClick={handleApplyGlobalSlideVolume} className="ml-1 text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200 transition-colors border border-slate-600">適用</button>
+                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+                         <span className="text-xs text-slate-400 whitespace-nowrap">音量</span>
+                         <input type="number" min="0" max="200" step="10" value={Math.round(globalSlideVolume * 100)} onChange={(e) => setGlobalSlideVolume(Math.max(0, parseInt(e.target.value) || 0) / 100)} className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-right text-xs focus:ring-1 focus:ring-emerald-500 outline-none" />
+                         <span className="text-[10px] text-slate-500">%</span>
+                         <button onClick={handleApplyGlobalSlideVolume} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
                      </div>
                      
                      {/* Transition */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 p-1 pl-2">
-                         <span className="text-xs text-slate-400 mr-2 whitespace-nowrap">効果</span>
-                         <select value={globalTransitionType} onChange={(e) => setGlobalTransitionType(e.target.value as TransitionType)} className="bg-slate-800 border border-slate-600 rounded px-1 py-0.5 text-white text-xs outline-none max-w-[80px]">
+                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+                         <span className="text-xs text-slate-400 whitespace-nowrap">効果</span>
+                         <select value={globalTransitionType} onChange={(e) => setGlobalTransitionType(e.target.value as TransitionType)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none min-w-[96px]">
                              <option value="none">なし</option><option value="fade">フェード</option><option value="slide">スライド</option><option value="zoom">ズーム</option>
                              <option value="wipe">ワイプ</option><option value="flip">フリップ</option><option value="cross-zoom">クロスズーム</option>
                          </select>
-                         <button onClick={handleApplyGlobalTransition} className="ml-1 text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200 transition-colors border border-slate-600">適用</button>
+                         <button onClick={handleApplyGlobalTransition} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
                      </div>
 
                      {/* Motion */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 p-1 pl-2">
-                        <span className="text-xs text-slate-400 mr-2 whitespace-nowrap">モーション</span>
-                        <select value={globalEffectType} onChange={(e) => setGlobalEffectType(e.target.value as EffectType)} className="bg-slate-800 border border-slate-600 rounded px-1 py-0.5 text-white text-xs outline-none max-w-[80px]">
+                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+                        <span className="text-xs text-slate-400 whitespace-nowrap">モーション</span>
+                        <select value={globalEffectType} onChange={(e) => setGlobalEffectType(e.target.value as EffectType)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none min-w-[96px]">
                             <option value="none">なし</option><option value="kenburns">Ken Burns</option>
                         </select>
-                        <button onClick={handleApplyGlobalEffect} className="ml-1 text-[10px] bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded text-slate-200 transition-colors border border-slate-600">適用</button>
+                        <button onClick={handleApplyGlobalEffect} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
                       </div>
                  </div>
              )}
