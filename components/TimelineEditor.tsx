@@ -508,6 +508,18 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   const formatTime = (seconds: number) => { const m = Math.floor(seconds / 60); const s = Math.floor(seconds % 60); return `${m}:${s.toString().padStart(2, '0')}`; };
   const getDropLineX = () => { if (dropTargetIndex === null) return -1; let x = 0; for (let i = 0; i < dropTargetIndex; i++) { x += displaySlides[i].duration * scale; } return x; };
   const getTransitionLabel = (type: string) => { switch(type) { case 'fade': return 'F'; case 'slide': return 'S'; case 'zoom': return 'Z'; case 'wipe': return 'W'; case 'flip': return 'Fl'; case 'cross-zoom': return 'Cr'; default: return ''; } };
+  // タイムラインのトランジション色を「一括設定」と同じ系統に合わせる
+  const getTransitionColors = (type: string) => {
+      switch(type) {
+          case 'fade':       return { base: '#10b981', stripe: '#34d399', text: '#d1fae5' }; // emerald
+          case 'slide':      return { base: '#3b82f6', stripe: '#60a5fa', text: '#dbeafe' }; // blue
+          case 'zoom':       return { base: '#7c3aed', stripe: '#a855f7', text: '#ede9fe' }; // violet (SlideGrid系統)
+          case 'wipe':       return { base: '#f59e0b', stripe: '#fbbf24', text: '#fffbeb' }; // amber
+          case 'flip':       return { base: '#fbbf24', stripe: '#facc15', text: '#fef9c3' }; // yellow系
+          case 'cross-zoom': return { base: '#ec4899', stripe: '#f472b6', text: '#fdf2f8' }; // pink系
+          default:           return { base: '#6b7280', stripe: '#9ca3af', text: '#f3f4f6' }; // gray fallback
+      }
+  };
 
   // Determine preview popup position based on playhead and scroll
   const playheadX = (currentTime * scale) - scrollLeft;
@@ -609,17 +621,23 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                                      )}
                                  </div>
                                  {hasTransition && transWidth > 0 && (
-                                     <div className="absolute top-0 bottom-0 right-0 bg-purple-500/20 border-l border-purple-500/50 flex items-center justify-center pointer-events-none overflow-hidden no-drag" style={{ width: `${transWidth}px` }}>
-                                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 5px, #a855f7 5px, #a855f7 10px)' }}></div>
+                                     (() => {
+                                         const tc = getTransitionColors(slide.transitionType);
+                                         return (
+                                         <div className="absolute top-0 bottom-0 right-0 flex items-center justify-center pointer-events-none overflow-hidden no-drag"
+                                              style={{ width: `${transWidth}px`, backgroundColor: tc.base + '33', borderLeft: `1px solid ${tc.base}` }}>
+                                             <div className="absolute inset-0 opacity-25" style={{ backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${tc.stripe} 5px, ${tc.stripe} 10px)` }}></div>
                                          <div className="z-10 flex flex-col items-center justify-center">
-                                             {transWidth > 15 && <span className="text-[8px] font-bold text-purple-300 drop-shadow-md leading-none">{getTransitionLabel(slide.transitionType)}</span>}
-                                             {(transWidth > 25 || isBeingResized) && <span className="text-[7px] text-white font-mono bg-purple-900/60 px-0.5 rounded mt-0.5 backdrop-blur-sm shadow-sm scale-90">{transDur.toFixed(1)}s</span>}
+                                             {transWidth > 15 && <span className="text-[9px] font-bold drop-shadow-md leading-none" style={{ color: tc.text }}>{getTransitionLabel(slide.transitionType)}</span>}
+                                             {(transWidth > 25 || isBeingResized) && <span className="text-[8px] font-mono px-1 rounded mt-0.5 backdrop-blur-sm shadow-sm scale-90" style={{ color: '#fff', backgroundColor: tc.base + '99' }}>{transDur.toFixed(1)}s</span>}
                                          </div>
-                                     </div>
+                                         </div>
+                                         );
+                                     })()
                                  )}
                                  {hasTransition && (
-                                     <div className="absolute top-0 bottom-0 w-3 cursor-ew-resize flex items-center justify-center hover:bg-purple-500/30 z-30 no-drag opacity-0 group-hover:opacity-100 transition-opacity" style={{ right: `${transWidth - 1}px` }} onMouseDown={(e) => handleTransitionResizeStart(e, slide.id, transDur)} title={`Transition: ${transDur.toFixed(1)}s`}>
-                                         <div className="w-0.5 h-4 bg-purple-400/80 shadow-sm"></div>
+                                     <div className="absolute top-0 bottom-0 w-3 cursor-ew-resize flex items-center justify-center z-30 no-drag opacity-0 group-hover:opacity-100 transition-opacity" style={{ right: `${transWidth - 1}px`, backgroundColor: 'transparent' }} onMouseDown={(e) => handleTransitionResizeStart(e, slide.id, transDur)} title={`Transition: ${transDur.toFixed(1)}s`}>
+                                         <div className="w-0.5 h-4 rounded-full shadow-sm" style={{ backgroundColor: getTransitionColors(slide.transitionType).stripe }}></div>
                                      </div>
                                  )}
                                  <div className="h-4 bg-slate-900/50 flex items-center justify-center text-[9px] text-slate-300 truncate px-1 border-t border-slate-800/50 pointer-events-none">{width > 25 ? `${slide.duration}s` : ''}</div>
