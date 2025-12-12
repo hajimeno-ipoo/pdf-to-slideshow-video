@@ -418,6 +418,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bgmSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const bgmGainRef = useRef<GainNode | null>(null);
+  const duckingGainRef = useRef<GainNode | null>(null);
   const globalAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const globalAudioGainRef = useRef<GainNode | null>(null);
   const narrationSourcesRef = useRef<AudioBufferSourceNode[]>([]);
@@ -620,17 +621,22 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
               src.loopEnd = bgmTimeRange.end;
           }
 
-          // Create Gain Nodes Chain: Src -> FadeGain -> MasterGain -> Destination
+          // Create Gain Nodes Chain: Src -> FadeGain -> DuckingGain -> MasterGain -> Destination
           const gain = ctx.createGain();
           const fadeGain = ctx.createGain();
+          const duckGain = ctx.createGain();
           fadeGain.gain.value = 1.0; 
+          duckGain.gain.value = 1.0;
           
           gain.gain.value = bgmVolume; // Master volume for BGM channel
 
           src.connect(fadeGain);
-          fadeGain.connect(gain);
+          fadeGain.connect(duckGain);
+          duckGain.connect(gain);
           gain.connect(ctx.destination);
           
+          duckingGainRef.current = duckGain;
+
           // Basic start logic
           let offset = startOffset;
           if (bgmTimeRange && bgmTimeRange.end > bgmTimeRange.start) {
@@ -727,6 +733,21 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
                   }
                   
                   src.start(ctx.currentTime + delay, offsetInFile);
+                  
+                  // Ducking schedule: lower BGM during narration if enabled and bgm is present
+                  if (duckingGainRef.current && duckingOptions?.enabled) {
+                      const duckVol = duckingOptions.duckingVolume;
+                      const attack = 0.1;
+                      const startT = ctx.currentTime + delay;
+                      const endT = startT + (buffer.duration - offsetInFile);
+                      
+                      duckingGainRef.current.gain.cancelScheduledValues(startT);
+                      duckingGainRef.current.gain.setValueAtTime(1.0, startT);
+                      duckingGainRef.current.gain.linearRampToValueAtTime(duckVol, startT + attack);
+                      duckingGainRef.current.gain.setValueAtTime(duckVol, endT);
+                      duckingGainRef.current.gain.linearRampToValueAtTime(1.0, endT + attack);
+                  }
+                  
                   narrationSourcesRef.current.push(src);
               }
           }
@@ -738,6 +759,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       try {
           if (bgmSourceRef.current) { bgmSourceRef.current.stop(); bgmSourceRef.current.disconnect(); }
           if (globalAudioSourceRef.current) { globalAudioSourceRef.current.stop(); globalAudioSourceRef.current.disconnect(); }
+          if (duckingGainRef.current) { duckingGainRef.current.gain.cancelScheduledValues(0); duckingGainRef.current.gain.setValueAtTime(1.0, 0); duckingGainRef.current.disconnect(); duckingGainRef.current = null; }
           narrationSourcesRef.current.forEach(src => { try { src.stop(); src.disconnect(); } catch(e){} });
           narrationSourcesRef.current = [];
       } catch (e) { /* ignore */ }

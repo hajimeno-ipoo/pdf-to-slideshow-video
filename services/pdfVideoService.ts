@@ -685,6 +685,9 @@ export const generateVideoFromSlides = async (
         const safeDuration = Math.max(0.1, totalDuration);
         const offlineCtx = new OfflineAudioContext(2, Math.ceil(44100 * (safeDuration + 1)), 44100);
         
+        // Ducking Gain is shared between BGM and narration scheduling
+        let duckingGain: GainNode | null = null;
+
         if (bgmFile) {
             const ab = await bgmFile.arrayBuffer();
             const b = await offlineCtx.decodeAudioData(ab);
@@ -704,7 +707,7 @@ export const generateVideoFromSlides = async (
 
             // Create Gain Nodes Chain: Src -> FadeGain -> DuckingGain -> Destination
             const fadeGain = offlineCtx.createGain();
-            const duckingGain = offlineCtx.createGain();
+            duckingGain = offlineCtx.createGain();
             
             src.connect(fadeGain);
             fadeGain.connect(duckingGain);
@@ -735,31 +738,8 @@ export const generateVideoFromSlides = async (
                 }
             }
 
-            // 2. Apply Ducking to duckingGain
-            // Default to 1.0 (pass-through)
-            duckingGain.gain.value = 1.0;
-
-            if (duckingOptions?.enabled) {
-                const duckVol = duckingOptions.duckingVolume;
-                let t = 0;
-                slides.forEach(s => {
-                    if (s.audioFile) {
-                        // Start ducking
-                        duckingGain.gain.setValueAtTime(1.0, t + (s.audioOffset||0));
-                        duckingGain.gain.linearRampToValueAtTime(duckVol, t + (s.audioOffset||0) + 0.1);
-                        
-                        // NOTE: Logic to return volume to 1.0 is approximated or needs precise duration.
-                        // Assuming narration duration is available, we could restore it. 
-                        // Current implementation logic in previous version didn't restore it explicitly, 
-                        // relying on next slide or end.
-                        // Since we don't have exact duration here easily without decoding everything again 
-                        // (though we might have duration in slide metadata if we passed it), 
-                        // we'll leave it as per previous implementation logic but applied to correct node.
-                        // Ideally, we should ramp back up after audio ends.
-                    }
-                    t += s.duration;
-                });
-            }
+            // 2. Apply Ducking to duckingGain (schedule is set later when narration buffers are decoded)
+            duckingGain.gain.setValueAtTime(1.0, 0);
         }
         
         if (globalAudioFile) {
@@ -787,6 +767,19 @@ export const generateVideoFromSlides = async (
                 gain.connect(offlineCtx.destination);
                 const startT = cursor + (s.audioOffset || 0);
                 src.start(startT);
+
+                // Schedule ducking only if BGM exists and ducking is enabled
+                if (duckingGain && duckingOptions?.enabled) {
+                    const duckVol = duckingOptions.duckingVolume;
+                    const attack = 0.1;
+                    const holdEnd = startT + b.duration;
+
+                    duckingGain.gain.cancelScheduledValues(startT);
+                    duckingGain.gain.setValueAtTime(1.0, startT);
+                    duckingGain.gain.linearRampToValueAtTime(duckVol, startT + attack);
+                    duckingGain.gain.setValueAtTime(duckVol, holdEnd);
+                    duckingGain.gain.linearRampToValueAtTime(1.0, holdEnd + attack);
+                }
             }
             cursor += s.duration;
         }
