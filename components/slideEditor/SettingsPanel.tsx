@@ -47,6 +47,11 @@ export const SettingsPanel: React.FC = () => {
     }
   };
 
+  const handleBgImageClear = () => {
+    setVideoSettings({ backgroundImageFile: undefined, backgroundFill: 'black' });
+    if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+  };
+
   const handleFitToAudio = () => {
     if (!bgmFile || slides.length === 0) return;
     const duration = bgmRange.end - bgmRange.start;
@@ -93,9 +98,13 @@ export const SettingsPanel: React.FC = () => {
              <div className="space-y-1"><label className="text-xs text-slate-400">トランジション時間 ({videoSettings.transitionDuration.toFixed(1)}秒)</label><input type="range" min="0.1" max="3.0" step="0.1" value={videoSettings.transitionDuration} onChange={(e) => setVideoSettings({ transitionDuration: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
           </div>
           {videoSettings.backgroundFill === 'custom_image' && (
-            <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-600 border-dashed">
+            <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-600 border-dashed flex items-center gap-3">
                 <input type="file" accept="image/*" ref={bgImageInputRef} className="hidden" onChange={handleBgImageSelect} />
-                <div className="flex items-center gap-3"><button onClick={() => bgImageInputRef.current?.click()} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded transition-colors whitespace-nowrap">画像を選択...</button><div className="text-xs text-slate-400 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "未選択"}</div></div>
+                <button onClick={() => bgImageInputRef.current?.click()} className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded transition-colors whitespace-nowrap">画像を選択...</button>
+                <div className="text-xs text-slate-400 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "未選択"}</div>
+                {videoSettings.backgroundImageFile && (
+                  <button onClick={handleBgImageClear} className="px-2 py-1 text-[11px] text-red-400 hover:text-red-200 border border-red-500/50 rounded transition-colors whitespace-nowrap">削除</button>
+                )}
             </div>
           )}
        </div>

@@ -47,6 +47,11 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     }
   };
 
+  const handleBgImageClear = () => {
+    setVideoSettings({ backgroundImageFile: undefined, backgroundFill: 'black' });
+    if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+  };
+
   const handleFitToAudio = () => {
     if (!bgmFile || slides.length === 0) return;
     const duration = bgmRange.end - bgmRange.start;
@@ -101,9 +106,12 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               </div>
 
               {videoSettings.backgroundFill === 'custom_image' && (
-                <div className="mt-2 p-2 bg-slate-800/50 rounded border border-slate-700 border-dashed flex items-center justify-between">
-                    <div className="text-xs text-slate-400 truncate flex-1 mr-2">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "背景画像を選択..."}</div>
+                <div className="mt-2 p-2 bg-slate-800/50 rounded border border-slate-700 border-dashed flex items-center gap-2">
+                    <div className="text-xs text-slate-400 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "背景画像を選択..."}</div>
                     <input type="file" accept="image/*" ref={bgImageInputRef} className="hidden" onChange={handleBgImageSelect} />
+                    {videoSettings.backgroundImageFile && (
+                        <button onClick={handleBgImageClear} className="px-2 py-1 text-[11px] text-red-400 hover:text-red-200 border border-red-500/50 rounded transition-colors whitespace-nowrap">削除</button>
+                    )}
                     <button onClick={() => bgImageInputRef.current?.click()} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded transition-colors whitespace-nowrap">選択</button>
                 </div>
               )}
