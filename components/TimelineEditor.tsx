@@ -517,16 +517,16 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   return (
     <div className="w-full bg-slate-950 border-t border-slate-800 select-none flex flex-col relative group/timeline h-full">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-1 border-b border-slate-800 bg-slate-900/50 flex-none h-8">
+      <div className="flex items-center justify-between px-4 py-1.5 border-b border-slate-800 bg-slate-900/50 flex-none h-10">
           <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Timeline</span>
-              <span className="text-[10px] text-slate-500 ml-2">Total: <span className="text-white">{totalDuration.toFixed(1)}s</span></span>
+              <span className="text-[12px] font-bold text-slate-300 uppercase tracking-wider">Timeline</span>
+              <span className="text-[12px] text-slate-400 ml-2">Total: <span className="text-white">{totalDuration.toFixed(1)}s</span></span>
               {/* Playhead Time Display */}
-              <span className="text-[10px] text-emerald-400 font-mono ml-4 bg-slate-950 px-2 py-0.5 rounded border border-slate-700">{formatTime(currentTime)}</span>
+              <span className="text-[12px] text-emerald-300 font-mono ml-4 bg-slate-950 px-2.5 py-0.5 rounded border border-slate-700">{formatTime(currentTime)}</span>
           </div>
           <div className="flex items-center gap-2">
-              <span className="text-[9px] text-slate-500">Zoom</span>
-              <input type="range" min="10" max="100" value={scale} onChange={(e) => setScale(Number(e.target.value))} className="w-20 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+              <span className="text-[11px] text-slate-400">Zoom</span>
+              <input type="range" min="10" max="100" value={scale} onChange={(e) => setScale(Number(e.target.value))} className="w-24 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
           </div>
       </div>
 
@@ -559,7 +559,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
          >
              
              {/* Ruler */}
-             <div className="h-5 w-full border-b border-slate-700 flex items-end text-[9px] text-slate-500 relative bg-slate-900/90 sticky top-0 z-30 pointer-events-none">
+             <div className="h-6 w-full border-b border-slate-700 flex items-end text-[11px] text-slate-400 relative bg-slate-900/90 sticky top-0 z-30 pointer-events-none">
                  {Array.from({ length: Math.ceil(totalDuration) + 2 }).map((_, i) => (
                      <div key={i} className="absolute bottom-0 border-l border-slate-700 pl-1 h-3 flex items-center" style={{ left: `${i * scale}px` }}>
                          {i % 5 === 0 && <span>{formatTime(i)}</span>}
