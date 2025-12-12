@@ -423,6 +423,8 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const globalAudioGainRef = useRef<GainNode | null>(null);
   const narrationSourcesRef = useRef<AudioBufferSourceNode[]>([]);
   const lastDuckEndRef = useRef<number>(0);
+  const previewRenderBufferRef = useRef<AudioBuffer | null>(null);
+  const previewRenderSourceRef = useRef<AudioBufferSourceNode | null>(null);
   
   const pdfDocRef = useRef<any>(null);
   
@@ -475,7 +477,10 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
 
   // Initialize
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+        cleanup();
+        return;
+    }
     
     let isMounted = true;
 
@@ -606,172 +611,143 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       overlayImageCache.current.clear();
   };
 
-  const playAudio = async (startOffset: number) => {
-      if (!audioCtxRef.current) return;
-      const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') await ctx.resume();
+  // Render full audio offline for preview, then play buffered result
+  const renderPreviewAudio = async (): Promise<AudioBuffer | null> => {
+      if (!audioCtxRef.current) return null;
+      const sampleRate = audioCtxRef.current.sampleRate || 44100;
+      const duration = Math.max(0.1, totalDuration);
+      const offlineCtx = new OfflineAudioContext(2, Math.ceil(sampleRate * (duration + 1)), sampleRate);
 
-      // BGM
+      // BGM chain
       if (bgmBufferRef.current) {
-          const src = ctx.createBufferSource();
+          const src = offlineCtx.createBufferSource();
           src.buffer = bgmBufferRef.current;
-          src.loop = true; 
-          
+          src.loop = true;
           if (bgmTimeRange && bgmTimeRange.end > bgmTimeRange.start) {
               src.loopStart = bgmTimeRange.start;
               src.loopEnd = bgmTimeRange.end;
+              src.start(0, bgmTimeRange.start);
+          } else {
+              src.start(0);
           }
 
-          // Create Gain Nodes Chain: Src -> FadeGain -> DuckingGain -> MasterGain -> Destination
-          const gain = ctx.createGain();
-          const fadeGain = ctx.createGain();
-          const duckGain = ctx.createGain();
-          fadeGain.gain.value = 1.0; 
-          duckGain.gain.value = 1.0;
-          
-          gain.gain.value = bgmVolume; // Master volume for BGM channel
+          const fadeGain = offlineCtx.createGain();
+          const duckGain = offlineCtx.createGain();
+          const masterGain = offlineCtx.createGain();
+
+          // 初期化：1.0基準で整える
+          fadeGain.gain.setValueAtTime(1.0, 0);
+          duckGain.gain.setValueAtTime(1.0, 0);
+          masterGain.gain.setValueAtTime(bgmVolume, 0); // 音量はここで一括
 
           src.connect(fadeGain);
           fadeGain.connect(duckGain);
-          duckGain.connect(gain);
-          gain.connect(ctx.destination);
-          
-          duckingGainRef.current = duckGain;
+          duckGain.connect(masterGain);
+          masterGain.connect(offlineCtx.destination);
 
-          // Basic start logic
-          let offset = startOffset;
-          if (bgmTimeRange && bgmTimeRange.end > bgmTimeRange.start) {
-              const dur = bgmTimeRange.end - bgmTimeRange.start;
-              offset = bgmTimeRange.start + (startOffset % dur);
-          }
-          src.start(0, offset);
-          
-          // --- Fade Logic for Preview ---
+          // Fade in/out（fadeは1.0基準、音量はmasterで保持）
           const FADE_DURATION = 2.0;
-          const now = ctx.currentTime;
-          
-          // Fade In
           if (fadeOptions?.fadeIn) {
-              if (startOffset < FADE_DURATION) {
-                  // We are in the fade-in zone
-                  const fadeRemaining = FADE_DURATION - startOffset;
-                  const startVal = startOffset / FADE_DURATION; // 0.0 to 1.0
-                  fadeGain.gain.setValueAtTime(startVal, now);
-                  fadeGain.gain.linearRampToValueAtTime(1.0, now + fadeRemaining);
-              } else {
-                  fadeGain.gain.setValueAtTime(1.0, now);
-              }
+              fadeGain.gain.setValueAtTime(0, 0);
+              fadeGain.gain.linearRampToValueAtTime(1.0, Math.min(FADE_DURATION, duration));
           } else {
-              fadeGain.gain.setValueAtTime(1.0, now);
+              fadeGain.gain.setValueAtTime(1.0, 0);
+          }
+          if (fadeOptions?.fadeOut) {
+              const fadeOutStart = Math.max(0, duration - FADE_DURATION);
+              fadeGain.gain.setValueAtTime(1.0, fadeOutStart);
+              fadeGain.gain.linearRampToValueAtTime(0, duration);
           }
 
-          // Fade Out
-          if (fadeOptions?.fadeOut) {
-              const timeUntilEnd = totalDuration - startOffset;
-              const fadeOutStartRel = timeUntilEnd - FADE_DURATION; // Time from now to start fading out
-              
-              if (fadeOutStartRel > 0) {
-                  // Fade out starts in future
-                  fadeGain.gain.setValueAtTime(1.0, now + fadeOutStartRel);
-                  fadeGain.gain.linearRampToValueAtTime(0, now + timeUntilEnd);
-              } else {
-                  // We are already in fade out zone
-                  const fadeOutStartPoint = totalDuration - FADE_DURATION;
-                  const progress = (startOffset - fadeOutStartPoint) / FADE_DURATION;
-                  const currentVal = Math.max(0, 1.0 - progress);
-                  
-                  fadeGain.gain.setValueAtTime(currentVal, now);
-                  fadeGain.gain.linearRampToValueAtTime(0, now + timeUntilEnd);
+          // Ducking envelopes from narration intervals
+          if (duckingOptions?.enabled) {
+              const duckVol = duckingOptions.duckingVolume;
+              const attack = 0.02;
+              const release = 0.02;
+
+              // ナレーション区間をマージ
+              const intervals: { start: number; end: number }[] = [];
+              let tCursor = 0;
+              for (const s of slides) {
+                  const narrationBuf = narrationBuffersRef.current.get(s.id);
+                  if (narrationBuf && s.audioFile) {
+                      const startT = tCursor + (s.audioOffset || 0);
+                      const endT = startT + narrationBuf.duration;
+                      intervals.push({ start: startT, end: endT });
+                  }
+                  tCursor += s.duration;
+              }
+              intervals.sort((a, b) => a.start - b.start);
+              const merged: { start: number; end: number }[] = [];
+              for (const it of intervals) {
+                  if (!merged.length || it.start > merged[merged.length - 1].end) {
+                      merged.push({ ...it });
+                  } else {
+                      merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, it.end);
+                  }
+              }
+              // カーブ適用（リニア）
+              for (const { start, end } of merged) {
+                  duckGain.gain.setValueAtTime(1.0, start);
+                  duckGain.gain.linearRampToValueAtTime(duckVol, start + attack);
+                  duckGain.gain.setValueAtTime(duckVol, end);
+                  duckGain.gain.linearRampToValueAtTime(1.0, end + release);
               }
           }
-
-          bgmSourceRef.current = src;
-          bgmGainRef.current = gain;
       }
 
       // Global Audio
       if (globalAudioBufferRef.current) {
-          const src = ctx.createBufferSource();
+          const src = offlineCtx.createBufferSource();
           src.buffer = globalAudioBufferRef.current;
-          const gain = ctx.createGain();
+          const gain = offlineCtx.createGain();
           gain.gain.value = globalAudioVolume;
           src.connect(gain);
-          gain.connect(ctx.destination);
-          if (startOffset < globalAudioBufferRef.current.duration) {
-              src.start(0, startOffset);
-          }
-          globalAudioSourceRef.current = src;
-          globalAudioGainRef.current = gain;
+          gain.connect(offlineCtx.destination);
+          src.start(0);
       }
 
       // Narration
       let cursor = 0;
-      narrationSourcesRef.current = [];
-      for (const slide of slides) {
-          const buffer = narrationBuffersRef.current.get(slide.id);
-          const slideStart = cursor;
-          
+      for (const s of slides) {
+          const buffer = narrationBuffersRef.current.get(s.id);
           if (buffer) {
-              const audioOffset = slide.audioOffset || 0;
-              const playStart = slideStart + audioOffset;
-              const playEnd = playStart + buffer.duration;
-              
-              if (startOffset < playEnd) {
-                  const src = ctx.createBufferSource();
-                  src.buffer = buffer;
-                  const gain = ctx.createGain();
-                  gain.gain.value = slide.audioVolume ?? 1.0;
-                  src.connect(gain);
-                  gain.connect(ctx.destination);
-                  
-                  let offsetInFile = 0;
-                  let delay = 0;
-                  
-                  if (startOffset > playStart) {
-                      offsetInFile = startOffset - playStart;
-                  } else {
-                      delay = playStart - startOffset;
-                  }
-                  
-                  src.start(ctx.currentTime + delay, offsetInFile);
-                  
-                  // Ducking schedule: lower BGM during narration if enabled and bgm is present
-                  if (duckingGainRef.current && duckingOptions?.enabled) {
-                      const g = duckingGainRef.current.gain;
-                      const duckVol = duckingOptions.duckingVolume;
-                      const ramp = 0.03; // 30msでクリックを抑制
-                      const now = ctx.currentTime;
-                      const startT = Math.max(now, ctx.currentTime + delay);
-                      const endT = startT + (buffer.duration - offsetInFile);
-                      const releaseEnd = endT + ramp;
-
-                      // 直前のダック中ならキャンセルせず延長のみ
-                      if (startT <= lastDuckEndRef.current + ramp) {
-                          g.cancelScheduledValues(startT);
-                          g.setValueAtTime(duckVol, startT);
-                          g.setValueAtTime(duckVol, endT);
-                          g.linearRampToValueAtTime(1.0, releaseEnd);
-                          lastDuckEndRef.current = Math.max(lastDuckEndRef.current, releaseEnd);
-                      } else {
-                          if (typeof g.cancelAndHoldAtTime === 'function') {
-                              g.cancelAndHoldAtTime(startT);
-                          } else {
-                              g.cancelScheduledValues(startT);
-                              const currentVal = g.value;
-                              g.setValueAtTime(currentVal, startT);
-                          }
-                          g.linearRampToValueAtTime(duckVol, startT + ramp);
-                          g.setValueAtTime(duckVol, endT);
-                          g.linearRampToValueAtTime(1.0, releaseEnd);
-                          lastDuckEndRef.current = releaseEnd;
-                      }
-                  }
-                  
-                  narrationSourcesRef.current.push(src);
-              }
+              const src = offlineCtx.createBufferSource();
+              src.buffer = buffer;
+              const gain = offlineCtx.createGain();
+              gain.gain.value = s.audioVolume ?? 1.0;
+              src.connect(gain);
+              gain.connect(offlineCtx.destination);
+              const startT = cursor + (s.audioOffset || 0);
+              src.start(startT);
           }
-          cursor += slide.duration;
+          cursor += s.duration;
       }
+
+      const rendered = await offlineCtx.startRendering();
+      return rendered;
+  };
+
+  const playAudio = async (startOffset: number) => {
+      // Ensure no previous sources are playing
+      stopAudio();
+      if (!audioCtxRef.current) return;
+      const ctx = audioCtxRef.current;
+      if (ctx.state === 'suspended') await ctx.resume();
+
+      // Render preview audio offline each time to guarantee fresh mix
+      previewRenderBufferRef.current = await renderPreviewAudio();
+      if (!previewRenderBufferRef.current) return;
+
+      const src = ctx.createBufferSource();
+      src.buffer = previewRenderBufferRef.current;
+      src.connect(ctx.destination);
+
+      // 先頭から再生し、UIの時間表示は startTimeRef で合わせる
+      const clampedOffset = Math.min(startOffset, src.buffer.duration);
+      startTimeRef.current = performance.now() - clampedOffset * 1000;
+      src.start(0, clampedOffset);
+      previewRenderSourceRef.current = src;
   };
 
   const stopAudio = () => {
@@ -781,7 +757,12 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           if (duckingGainRef.current) { duckingGainRef.current.gain.cancelScheduledValues(0); duckingGainRef.current.gain.setValueAtTime(1.0, 0); duckingGainRef.current.disconnect(); duckingGainRef.current = null; }
           narrationSourcesRef.current.forEach(src => { try { src.stop(); src.disconnect(); } catch(e){} });
           narrationSourcesRef.current = [];
+          if (previewRenderSourceRef.current) { previewRenderSourceRef.current.stop(); previewRenderSourceRef.current.disconnect(); previewRenderSourceRef.current = null; }
+          previewRenderBufferRef.current = null;
           lastDuckEndRef.current = 0;
+          if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+              audioCtxRef.current.suspend().catch(() => {});
+          }
       } catch (e) { /* ignore */ }
   };
 
@@ -794,6 +775,12 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           requestRef.current = null;
       }
       isDrawingRef.current = false;
+  };
+
+  const handleClose = () => {
+      pausePlayback();
+      cleanup();
+      onClose();
   };
 
   const togglePlay = () => {
@@ -1080,7 +1067,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
                   <span className={`w-2 h-2 rounded-full ${isPlayingState ? 'bg-red-500 animate-pulse' : 'bg-slate-500'}`}></span>
                   プレビュー再生
               </h3>
-              <button onClick={onClose} className="text-slate-400 hover:text-white p-2">
+              <button onClick={handleClose} className="text-slate-400 hover:text-white p-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
