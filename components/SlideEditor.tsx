@@ -209,7 +209,7 @@ const SlideEditorLayout: React.FC<{
                 This ensures the preview popup (which uses absolute positioning upwards) 
                 is not clipped by this container and appears *above* the grid area.
             */}
-            <div className="flex-none border-t border-slate-800 bg-slate-950 z-20 overflow-visible h-[280px] transition-all relative">
+            <div className="flex-none border-t border-slate-800 bg-slate-950 z-20 overflow-visible h-[320px] transition-all relative">
                 <TimelineEditor 
                   slides={slides} 
                   onUpdateSlides={(updatedSlides) => updateSlides(updatedSlides, true)}

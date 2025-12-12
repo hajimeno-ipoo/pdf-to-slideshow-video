@@ -32,7 +32,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
     const loadAudio = async () => {
       setIsLoading(true);
       try {
-        if (!audioContextRef.current) {
+        if (!audioContextRef.current || audioContextRef.current.state === 'closed') {
           audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
         }
         const ctx = audioContextRef.current;
@@ -61,6 +61,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
       if (audioContextRef.current?.state !== 'closed') {
         audioContextRef.current?.close();
       }
+      audioContextRef.current = null;
     };
   }, [file]);
 
@@ -146,22 +147,27 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
   }, [readonly]);
 
   // Playback Control
-  const togglePlay = () => {
+  const togglePlay = async () => {
     if (isPlaying) {
       stopAudio();
     } else {
-      playAudio();
+      await playAudio();
     }
   };
 
-  const playAudio = () => {
+  const playAudio = async () => {
     if (!audioContextRef.current || !audioBufferRef.current) return;
     
     const ctx = audioContextRef.current;
     
-    // Ensure context is running
+    // Ensure context is running (await to satisfy Safari/Chrome autoplay policies)
     if (ctx.state === 'suspended') {
-        ctx.resume();
+        try {
+            await ctx.resume();
+        } catch (e) {
+            console.error('AudioContext resume failed', e);
+            return;
+        }
     }
 
     const source = ctx.createBufferSource();
@@ -467,9 +473,9 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
        </div>
 
        {/* Controls Bar */}
-       <div className="flex items-center justify-between bg-slate-900/50 p-2 rounded-lg border border-slate-700/50">
+       <div className="flex flex-wrap items-center gap-3 bg-slate-900/50 p-2 rounded-lg border border-slate-700/50">
            {/* Left Controls: Play + Time */}
-           <div className="flex items-center gap-4">
+           <div className="flex items-center gap-4 flex-1 min-w-[180px]">
                <button 
                  onClick={togglePlay}
                  className={`flex items-center justify-center w-10 h-10 rounded-full transition-all shadow-lg active:scale-95 ${isPlaying ? 'bg-yellow-500 hover:bg-yellow-400 text-slate-900 ring-2 ring-yellow-500/30' : (readonly ? 'bg-indigo-600 hover:bg-indigo-500 ring-2 ring-indigo-600/30' : 'bg-emerald-600 hover:bg-emerald-500 ring-2 ring-emerald-600/30') + ' text-white'}`}
@@ -514,7 +520,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
            </div>
            
            {/* Right Controls: Volume */}
-           <div className="flex items-center gap-3 flex-1 justify-end max-w-[200px]">
+          <div className="flex items-center gap-3 flex-1 justify-end min-w-[140px] max-w-[240px]">
                {volume === 0 ? (
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5 text-slate-600">
                         <path d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z" />
@@ -531,7 +537,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
                  step="0.01" 
                  value={volume}
                  onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                 className={`w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer ${readonly ? 'accent-indigo-500 hover:accent-indigo-400' : 'accent-emerald-500 hover:accent-emerald-400'}`}
+                 className={`w-full min-w-[100px] h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer ${readonly ? 'accent-indigo-500 hover:accent-indigo-400' : 'accent-emerald-500 hover:accent-emerald-400'}`}
                  title={`Volume: ${Math.round(volume * 100)}%`}
                />
                <span className="text-[10px] text-slate-500 w-8 text-right font-mono">{Math.round(volume * 100)}%</span>
