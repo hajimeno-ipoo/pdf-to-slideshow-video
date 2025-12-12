@@ -422,6 +422,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const globalAudioSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const globalAudioGainRef = useRef<GainNode | null>(null);
   const narrationSourcesRef = useRef<AudioBufferSourceNode[]>([]);
+  const lastDuckEndRef = useRef<number>(0);
   
   const pdfDocRef = useRef<any>(null);
   
@@ -736,16 +737,34 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
                   
                   // Ducking schedule: lower BGM during narration if enabled and bgm is present
                   if (duckingGainRef.current && duckingOptions?.enabled) {
+                      const g = duckingGainRef.current.gain;
                       const duckVol = duckingOptions.duckingVolume;
-                      const attack = 0.1;
-                      const startT = ctx.currentTime + delay;
+                      const ramp = 0.03; // 30msでクリックを抑制
+                      const now = ctx.currentTime;
+                      const startT = Math.max(now, ctx.currentTime + delay);
                       const endT = startT + (buffer.duration - offsetInFile);
-                      
-                      duckingGainRef.current.gain.cancelScheduledValues(startT);
-                      duckingGainRef.current.gain.setValueAtTime(1.0, startT);
-                      duckingGainRef.current.gain.linearRampToValueAtTime(duckVol, startT + attack);
-                      duckingGainRef.current.gain.setValueAtTime(duckVol, endT);
-                      duckingGainRef.current.gain.linearRampToValueAtTime(1.0, endT + attack);
+                      const releaseEnd = endT + ramp;
+
+                      // 直前のダック中ならキャンセルせず延長のみ
+                      if (startT <= lastDuckEndRef.current + ramp) {
+                          g.cancelScheduledValues(startT);
+                          g.setValueAtTime(duckVol, startT);
+                          g.setValueAtTime(duckVol, endT);
+                          g.linearRampToValueAtTime(1.0, releaseEnd);
+                          lastDuckEndRef.current = Math.max(lastDuckEndRef.current, releaseEnd);
+                      } else {
+                          if (typeof g.cancelAndHoldAtTime === 'function') {
+                              g.cancelAndHoldAtTime(startT);
+                          } else {
+                              g.cancelScheduledValues(startT);
+                              const currentVal = g.value;
+                              g.setValueAtTime(currentVal, startT);
+                          }
+                          g.linearRampToValueAtTime(duckVol, startT + ramp);
+                          g.setValueAtTime(duckVol, endT);
+                          g.linearRampToValueAtTime(1.0, releaseEnd);
+                          lastDuckEndRef.current = releaseEnd;
+                      }
                   }
                   
                   narrationSourcesRef.current.push(src);
@@ -762,6 +781,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           if (duckingGainRef.current) { duckingGainRef.current.gain.cancelScheduledValues(0); duckingGainRef.current.gain.setValueAtTime(1.0, 0); duckingGainRef.current.disconnect(); duckingGainRef.current = null; }
           narrationSourcesRef.current.forEach(src => { try { src.stop(); src.disconnect(); } catch(e){} });
           narrationSourcesRef.current = [];
+          lastDuckEndRef.current = 0;
       } catch (e) { /* ignore */ }
   };
 
