@@ -224,7 +224,7 @@ const OverlayLayer = React.memo(({
                     return null;
                 }
 
-                const strokeWidthPx = (ov.strokeWidth || 0) * (drawH / 500);
+                const strokeWidthPx = Math.max(1, (ov.strokeWidth || 0) * (drawH / 500));
                 const baseDuration = 1.0;
                 const animDuration = (duration < 2.0) ? Math.min(baseDuration, duration / 2) : baseDuration;
                 
@@ -296,6 +296,17 @@ const OverlayLayer = React.memo(({
                     clipPath: clipPath,
                 };
 
+                // テキスト枠線をプレビューでも出すためのスタイル
+                const textStrokeStyle: React.CSSProperties =
+                    strokeWidthPx > 0
+                        ? {
+                              WebkitTextStrokeWidth: `${strokeWidthPx}px`,
+                              WebkitTextStrokeColor: ov.strokeColor || '#000',
+                              WebkitTextStroke: `${strokeWidthPx}px ${ov.strokeColor || '#000'}`,
+                              paintOrder: 'stroke fill',
+                          }
+                        : {};
+
                 return (
                     <div key={ov.id} style={baseStyle}>
                         {ov.type === 'text' && (
@@ -313,6 +324,7 @@ const OverlayLayer = React.memo(({
                                 padding: ov.backgroundColor ? `${(ov.backgroundPadding||0) * ((ov.fontSize||5)/500 * drawH)}px` : undefined,
                                 borderRadius: `${(ov.borderRadius||0)}px`,
                                 filter: ov.shadowColor ? `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor})` : undefined,
+                                ...textStrokeStyle,
                             }}>
                                 {displayText}
                             </div>

@@ -211,32 +211,51 @@ const drawOverlays = async (ctx, overlays, canvasWidth, canvasHeight, currentTim
     if (rotation !== 0) ctx.rotate((rotation * Math.PI) / 180);
     ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
 
-    // Text & Shapes rendering (Omitted for brevity, assumed standard logic or handled by existing)
+    // Text & Shapes rendering
     if (overlay.type === 'text' && overlay.text) {
-        // ... Text Logic (simplified for update, full logic presumed existing)
         const fontSizePx = (overlay.fontSize || 5) / 100 * canvasHeight;
         const fontFamily = overlay.fontFamily || 'Noto Sans JP';
         const fontWeight = overlay.isBold ? 'bold' : 'normal';
         const fontStyle = overlay.isItalic ? 'italic' : 'normal';
-        ctx.font = \`\${fontStyle} \${fontWeight} \${fontSizePx}px "\${fontFamily}", sans-serif\`;
-        // ... (Drawing logic)
-        ctx.fillStyle = overlay.color || '#ffffff';
+        ctx.font = fontStyle + ' ' + fontWeight + ' ' + fontSizePx + 'px ' + '"' + fontFamily + '"' + ', sans-serif';
+
         let txt = overlay.text;
-        if(overlay.animationIn === 'typewriter' && typewriterProgress < 1.0) txt = txt.substring(0, Math.floor(txt.length * typewriterProgress));
-        // Simple draw for update brevity - real worker uses full logic
-        const lines = getWrappedLines(ctx, txt, overlay.width ? overlay.width * canvasWidth : 9999);
-        // ... (Background, Shadow)
+        if (overlay.animationIn === 'typewriter' && typewriterProgress < 1.0) {
+            txt = txt.substring(0, Math.floor(txt.length * typewriterProgress));
+        }
+
+        const maxWidth = overlay.width ? overlay.width * canvasWidth : 9999;
+        const linesWrapped = getWrappedLines(ctx, txt, maxWidth);
+        const lineHeight = fontSizePx * 1.2;
+        const padPx = (overlay.backgroundPadding || 0) * (fontSizePx / 5);
+        const totalTextHeight = linesWrapped.length * lineHeight;
+        const boxWidth = Math.max(...linesWrapped.map(l => ctx.measureText(l).width)) + padPx * 2;
+        const boxHeight = totalTextHeight + padPx * 2;
+
+        if (overlay.backgroundColor && overlay.backgroundColor !== 'transparent') {
+            ctx.fillStyle = overlay.backgroundColor;
+            ctx.fillRect(-boxWidth/2, -boxHeight/2, boxWidth, boxHeight);
+        }
         if (overlay.shadowColor) { ctx.shadowColor=overlay.shadowColor; ctx.shadowBlur=(overlay.shadowBlur||0)*shadowScale; ctx.shadowOffsetX=(overlay.shadowOffsetX||0)*shadowScale; ctx.shadowOffsetY=(overlay.shadowOffsetY||0)*shadowScale; }
-        if (overlay.backgroundColor) { ctx.fillStyle=overlay.backgroundColor; const pad=(overlay.backgroundPadding||0)*(fontSizePx/5); const h=lines.length*fontSizePx*1.2+pad*2; const w=ctx.measureText(txt).width+pad*2; ctx.fillRect(-w/2, -h/2, w, h); }
+
         ctx.fillStyle = overlay.color || '#ffffff';
         ctx.textAlign = overlay.textAlign || 'center';
         ctx.textBaseline = 'middle';
-        lines.forEach((l,i) => ctx.fillText(l, 0, (i-(lines.length-1)/2)*fontSizePx*1.2));
+        const startY = -boxHeight/2 + padPx + lineHeight/2;
+        const startX = overlay.textAlign === 'left' ? -boxWidth/2 + padPx : overlay.textAlign === 'right' ? boxWidth/2 - padPx : 0;
+        const strokeRaw = (overlay.strokeWidth || 0) * (canvasHeight / 500);
+        const strokeWidthPx = strokeRaw > 0 ? Math.max(1, strokeRaw) : 0;
+
+        linesWrapped.forEach((l,i) => {
+            const y = startY + i * lineHeight;
+            if (strokeWidthPx > 0 && overlay.strokeColor) { ctx.lineWidth = strokeWidthPx; ctx.strokeStyle = overlay.strokeColor; ctx.lineJoin='round'; ctx.strokeText(l, startX, y); }
+            ctx.fillText(l, startX, y);
+        });
     }
-    else if (overlay.type === 'rect' || overlay.type === 'circle' || overlay.type === 'arrow' || overlay.type === 'line') {
-        // Shape Logic
-        const w = (overlay.width||0.2)*canvasWidth; const h = (overlay.height||0.2)*canvasHeight;
-        if(overlay.shadowColor){ ctx.shadowColor=overlay.shadowColor; ctx.shadowBlur=(overlay.shadowBlur||0)*shadowScale; ctx.shadowOffsetX=(overlay.shadowOffsetX||0)*shadowScale; ctx.shadowOffsetY=(overlay.shadowOffsetY||0)*shadowScale; }
+        else if (overlay.type === 'rect' || overlay.type === 'circle' || overlay.type === 'arrow' || overlay.type === 'line') {
+            // Shape Logic
+            const w = (overlay.width||0.2)*canvasWidth; const h = (overlay.height||0.2)*canvasHeight;
+            if(overlay.shadowColor){ ctx.shadowColor=overlay.shadowColor; ctx.shadowBlur=(overlay.shadowBlur||0)*shadowScale; ctx.shadowOffsetX=(overlay.shadowOffsetX||0)*shadowScale; ctx.shadowOffsetY=(overlay.shadowOffsetY||0)*shadowScale; }
         ctx.fillStyle = overlay.backgroundColor || 'transparent'; ctx.strokeStyle = overlay.color || '#ff0000'; ctx.lineWidth = (overlay.strokeWidth||3)*(canvasHeight/500);
         ctx.beginPath();
         if(overlay.type==='rect') ctx.rect(-w/2,-h/2,w,h);

@@ -240,8 +240,10 @@ export const drawOverlays = async (ctx: CanvasRenderingContext2D, overlays: Over
         }
         lines.forEach((line, index) => {
             const yOffset = startY + index * lineHeight;
-            if (overlay.strokeWidth && overlay.strokeWidth > 0 && overlay.strokeColor) {
-                ctx.lineWidth = overlay.strokeWidth * (canvasHeight / 500); ctx.strokeStyle = overlay.strokeColor; ctx.lineJoin = 'round'; ctx.strokeText(line, startX, yOffset);
+            const strokeRaw = (overlay.strokeWidth || 0) * (canvasHeight / 500);
+            const strokeWidthPx = strokeRaw > 0 ? Math.max(1, strokeRaw) : 0;
+            if (strokeWidthPx > 0 && overlay.strokeColor) {
+                ctx.lineWidth = strokeWidthPx; ctx.strokeStyle = overlay.strokeColor; ctx.lineJoin = 'round'; ctx.strokeText(line, startX, yOffset);
             }
             ctx.fillStyle = overlay.color || '#ffffff'; ctx.fillText(line, startX, yOffset);
         });
@@ -560,9 +562,10 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide): Pr
         }
     } else if (slide.backgroundColor) {
         canvas = document.createElement('canvas'); 
-        canvas.width = 320; canvas.height = 180;
+        // サムネでも枠線が潰れないよう解像度を上げる
+        canvas.width = 640; canvas.height = 360;
         ctx = canvas.getContext('2d'); 
-        if(ctx){ ctx.fillStyle = slide.backgroundColor; ctx.fillRect(0,0,320,180); }
+        if(ctx){ ctx.fillStyle = slide.backgroundColor; ctx.fillRect(0,0,canvas.width,canvas.height); }
     }
 
     // Draw Overlays on Thumbnail
