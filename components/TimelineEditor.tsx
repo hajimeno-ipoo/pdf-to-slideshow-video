@@ -628,8 +628,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                                               style={{ width: `${transWidth}px`, backgroundColor: tc.base + '33', borderLeft: `1px solid ${tc.base}` }}>
                                              <div className="absolute inset-0 opacity-25" style={{ backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 5px, ${tc.stripe} 5px, ${tc.stripe} 10px)` }}></div>
                                          <div className="z-10 flex flex-col items-center justify-center">
-                                             {transWidth > 15 && <span className="text-[9px] font-bold drop-shadow-md leading-none" style={{ color: tc.text }}>{getTransitionLabel(slide.transitionType)}</span>}
-                                             {(transWidth > 25 || isBeingResized) && <span className="text-[8px] font-mono px-1 rounded mt-0.5 backdrop-blur-sm shadow-sm scale-90" style={{ color: '#fff', backgroundColor: tc.base + '99' }}>{transDur.toFixed(1)}s</span>}
+                                             {transWidth > 15 && <span className="text-[10px] font-bold drop-shadow-md leading-none" style={{ color: tc.text }}>{getTransitionLabel(slide.transitionType)}</span>}
+                                             {(transWidth > 25 || isBeingResized) && <span className="text-[9px] font-mono px-1.5 rounded mt-0.5 backdrop-blur-sm shadow-sm" style={{ color: '#fff', backgroundColor: tc.base + 'cc' }}>{transDur.toFixed(1)}s</span>}
                                          </div>
                                          </div>
                                          );
