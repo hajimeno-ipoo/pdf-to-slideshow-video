@@ -9,6 +9,7 @@ import {
   getVideoDimensions,
   renderBackground
 } from '../services/pdfVideoService';
+import { buildDuckingIntervals } from '../utils/duckingSchedule';
 
 declare const pdfjsLib: any;
 
@@ -662,36 +663,53 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           // Ducking envelopes from narration intervals
           if (duckingOptions?.enabled) {
               const duckVol = duckingOptions.duckingVolume;
-              const attack = 0.02;
-              const release = 0.02;
+              const attack = 0.25;
+              const release = 0.6;
+              const lead = 0.05;
+              const tail = 0.15;
 
-              // ナレーション区間をマージ
-              const intervals: { start: number; end: number }[] = [];
+              const renderEndTime = offlineCtx.length / offlineCtx.sampleRate;
+              const segments: { start: number; end: number }[] = [];
+
+              // Slide Narration
               let tCursor = 0;
               for (const s of slides) {
                   const narrationBuf = narrationBuffersRef.current.get(s.id);
-                  if (narrationBuf && s.audioFile) {
+                  if (narrationBuf) {
                       const startT = tCursor + (s.audioOffset || 0);
-                      const endT = startT + narrationBuf.duration;
-                      intervals.push({ start: startT, end: endT });
+                      segments.push({ start: startT, end: startT + narrationBuf.duration });
                   }
                   tCursor += s.duration;
               }
-              intervals.sort((a, b) => a.start - b.start);
-              const merged: { start: number; end: number }[] = [];
-              for (const it of intervals) {
-                  if (!merged.length || it.start > merged[merged.length - 1].end) {
-                      merged.push({ ...it });
-                  } else {
-                      merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, it.end);
-                  }
+
+              // Global Narration (1 file)
+              if (globalAudioBufferRef.current) {
+                  segments.push({ start: 0, end: globalAudioBufferRef.current.duration });
               }
-              // カーブ適用（リニア）
-              for (const { start, end } of merged) {
+
+              const intervals = buildDuckingIntervals(segments, renderEndTime, {
+                  lead,
+                  tail,
+                  mergeGap: release
+              });
+
+              // Apply curve (linear)
+              for (const { start, end } of intervals) {
+                  const downEnd = Math.min(start + attack, end);
+                  const upEnd = Math.min(end + release, renderEndTime);
+
                   duckGain.gain.setValueAtTime(1.0, start);
-                  duckGain.gain.linearRampToValueAtTime(duckVol, start + attack);
+                  if (downEnd > start) {
+                      duckGain.gain.linearRampToValueAtTime(duckVol, downEnd);
+                  } else {
+                      duckGain.gain.setValueAtTime(duckVol, start);
+                  }
                   duckGain.gain.setValueAtTime(duckVol, end);
-                  duckGain.gain.linearRampToValueAtTime(1.0, end + release);
+                  if (upEnd > end) {
+                      duckGain.gain.linearRampToValueAtTime(1.0, upEnd);
+                  } else {
+                      duckGain.gain.setValueAtTime(1.0, end);
+                  }
               }
           }
       }

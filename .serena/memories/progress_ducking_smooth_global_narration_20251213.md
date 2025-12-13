@@ -1,0 +1,12 @@
+## 2025-12-13
+- 目的: ダッキング（BGM自動音量調整）の in/out が急で不自然になりやすい問題を改善。
+- 変更: ナレーション区間（スライド音声 + 全体ナレーション=globalAudio）を集め、区間をマージしてから **1回だけ** duckingGain のスケジュールを組む方式に変更。
+  - パラメータ: lead=0.05s / tail=0.15s / attack=0.25s / release=0.60s / mergeGap=release
+  - 短い無音ではBGMが戻りにくくなり、説明系（ずっと喋る）でポンピングが出にくい。
+- 影響箇所:
+  - `services/pdfVideoService.ts`: 書き出し時の OfflineAudioContext ミックス
+  - `components/PreviewPlayer.tsx`: プレビュー音声の Offline レンダ
+- 追加: `utils/duckingSchedule.js`（区間の正規化/lead-tail/merge）
+- 単体テスト: `tests/duckingSchedule.test.js` 追加。
+  - `npm run test:coverage` で `utils/duckingSchedule.js` を line/branch/funcs すべて 100% カバー。
+- 検証: `npm test` / `npm run test:coverage` / `npm run build` OK。

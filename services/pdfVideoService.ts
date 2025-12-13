@@ -3,6 +3,7 @@ import { Slide, AspectRatio, Resolution, VideoSettings, EffectType, Overlay, Bgm
 import { PDFDocumentProxy, PDFPageProxy, PDFJSStatic } from '../types/pdfTypes';
 import { generateSlideScript, wait } from './geminiService';
 import { fileToBase64 } from '../utils/fileUtils';
+import { buildDuckingIntervals } from '../utils/duckingSchedule';
 import { VIDEO_WORKER_CODE } from './videoWorkerScript';
 import { safeRandomUUID } from '../utils/uuid';
 
@@ -685,6 +686,8 @@ export const generateVideoFromSlides = async (
 	        // Minimum duration check for OfflineAudioContext (avoid 0 or negative)
 	        const safeDuration = Math.max(0.1, totalDuration);
 	        const offlineCtx = new OfflineAudioContext(2, Math.ceil(44100 * (safeDuration + 1)), 44100);
+	        const renderEndTime = offlineCtx.length / offlineCtx.sampleRate;
+	        const narrationSegments: { start: number; end: number }[] = [];
         
         // Ducking Gain is shared between BGM and narration scheduling
         let duckingGain: GainNode | null = null;
@@ -753,6 +756,7 @@ export const generateVideoFromSlides = async (
             src.connect(gain);
             gain.connect(offlineCtx.destination);
             src.start(0);
+            narrationSegments.push({ start: 0, end: b.duration });
         }
         
         let cursor = 0;
@@ -768,21 +772,47 @@ export const generateVideoFromSlides = async (
                 gain.connect(offlineCtx.destination);
                 const startT = cursor + (s.audioOffset || 0);
                 src.start(startT);
-
-                // Schedule ducking only if BGM exists and ducking is enabled
-                if (duckingGain && duckingOptions?.enabled) {
-                    const duckVol = duckingOptions.duckingVolume;
-                    const attack = 0.1;
-                    const holdEnd = startT + b.duration;
-
-                    duckingGain.gain.cancelScheduledValues(startT);
-                    duckingGain.gain.setValueAtTime(1.0, startT);
-                    duckingGain.gain.linearRampToValueAtTime(duckVol, startT + attack);
-                    duckingGain.gain.setValueAtTime(duckVol, holdEnd);
-                    duckingGain.gain.linearRampToValueAtTime(1.0, holdEnd + attack);
-                }
+                narrationSegments.push({ start: startT, end: startT + b.duration });
             }
             cursor += s.duration;
+        }
+
+        // Schedule ducking once (merge close narration segments for smoother BGM in/out)
+        if (duckingGain && duckingOptions?.enabled && narrationSegments.length > 0) {
+            const duckVol = duckingOptions.duckingVolume;
+            const attack = 0.25;
+            const release = 0.6;
+            const lead = 0.05;
+            const tail = 0.15;
+
+            const intervals = buildDuckingIntervals(narrationSegments, renderEndTime, {
+                lead,
+                tail,
+                mergeGap: release
+            });
+
+            if (intervals.length > 0) {
+                duckingGain.gain.cancelScheduledValues(0);
+                duckingGain.gain.setValueAtTime(1.0, 0);
+
+                for (const { start, end } of intervals) {
+                    const downEnd = Math.min(start + attack, end);
+                    const upEnd = Math.min(end + release, renderEndTime);
+
+                    duckingGain.gain.setValueAtTime(1.0, start);
+                    if (downEnd > start) {
+                        duckingGain.gain.linearRampToValueAtTime(duckVol, downEnd);
+                    } else {
+                        duckingGain.gain.setValueAtTime(duckVol, start);
+                    }
+                    duckingGain.gain.setValueAtTime(duckVol, end);
+                    if (upEnd > end) {
+                        duckingGain.gain.linearRampToValueAtTime(1.0, upEnd);
+                    } else {
+                        duckingGain.gain.setValueAtTime(1.0, end);
+                    }
+                }
+            }
         }
         
         finalAudioBuffer = await offlineCtx.startRendering();
