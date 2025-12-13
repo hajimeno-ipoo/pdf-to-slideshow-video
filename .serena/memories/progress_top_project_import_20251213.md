@@ -1,0 +1,12 @@
+## 2025-12-13
+- 目的: トップページ（IDLE画面）から保存済みプロジェクトJSONを読み込んで、そのまま編集画面へ移動できるようにする。
+- 変更:
+  - `App.tsx`: トップページに「保存したプロジェクト(JSON)を読み込む」ボタン＋隠しfile inputを追加。
+    - 読み込み成功時は `deserializeProject` → `handleProjectLoad` を呼び、`AppStatus.EDITING` へ遷移。
+    - 失敗時は alert（プロジェクト読み込み失敗）。
+  - `utils/projectFileImport.js`: 読み込み前の簡易バリデーション（.json / application/json / 空ファイル）
+  - `tests/projectFileImport.test.js` 追加。
+- テスト:
+  - `npm test` OK
+  - `npm run test:coverage` OK（utils の line/branch/funcs 100%）
+- ビルド: `npm run build` OK
