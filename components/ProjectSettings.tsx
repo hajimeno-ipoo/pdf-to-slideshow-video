@@ -3,10 +3,12 @@ import React, { useRef, useState } from 'react';
 import { useEditor } from './slideEditor/SlideEditorContext';
 import BgmWaveformEditor from './BgmWaveformEditor';
 import { Resolution, OutputFormat, BackgroundFill, AspectRatio } from '../types';
+import { getVideoSaveFilePickerOptions, isFileSystemAccessSupported } from '../utils/fileSystemAccess';
 
 const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { 
       videoSettings, setVideoSettings,
+      outputFileHandle, outputFileFormat, setOutputFileHandle,
       bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
       globalAudioFile, setGlobalAudioFile, globalAudioVolume, setGlobalAudioVolume,
       duckingOptions, setDuckingOptions,
@@ -52,6 +54,25 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     if (bgImageInputRef.current) bgImageInputRef.current.value = '';
   };
 
+  const fileSystemAccessSupported = isFileSystemAccessSupported(
+    typeof window === 'undefined' ? null : (window as any)
+  );
+
+  const handleConfigureOutputFile = async () => {
+    if (!fileSystemAccessSupported) return;
+
+    try {
+      const handle = await (window as any).showSaveFilePicker(
+        getVideoSaveFilePickerOptions(videoSettings.format)
+      );
+      setOutputFileHandle(handle, videoSettings.format);
+    } catch (e: any) {
+      if (e?.name === 'AbortError') return;
+      console.error(e);
+      alert('保存先の設定に失敗しました。');
+    }
+  };
+
   const handleFitToAudio = () => {
     if (!bgmFile || slides.length === 0) return;
     const duration = bgmRange.end - bgmRange.start;
@@ -79,12 +100,12 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
               <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-2">動画出力</h4>
               
               <div className="grid grid-cols-2 gap-3">
-                 <div className="space-y-1">
-                   <label className="text-[12px] text-slate-300 uppercase">フォーマット</label>
-                   <select value={videoSettings.format} onChange={(e) => setVideoSettings({ format: e.target.value as OutputFormat })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
-                     <option value="mp4">MP4 (Video)</option><option value="gif">GIF (Anim)</option>
-                   </select>
-                 </div>
+	                 <div className="space-y-1">
+	                   <label className="text-[12px] text-slate-300 uppercase">フォーマット</label>
+	                   <select value={videoSettings.format} onChange={(e) => setVideoSettings({ format: e.target.value as OutputFormat })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
+	                     <option value="mp4">MP4 (動画)</option><option value="mov">MOV (動画)</option>
+	                   </select>
+	                 </div>
                  <div className="space-y-1">
                    <label className="text-[12px] text-slate-300 uppercase">アスペクト比</label>
                    <select value={videoSettings.aspectRatio} onChange={(e) => setVideoSettings({ aspectRatio: e.target.value as AspectRatio })} className="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500">
@@ -105,21 +126,61 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                  </div>
               </div>
 
-              {videoSettings.backgroundFill === 'custom_image' && (
-                <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-700 border-dashed flex items-center gap-2">
-                    <div className="text-sm text-slate-300 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "背景画像を選択..."}</div>
-                    <input type="file" accept="image/*" ref={bgImageInputRef} className="hidden" onChange={handleBgImageSelect} />
-                    {videoSettings.backgroundImageFile && (
-                        <button onClick={handleBgImageClear} className="px-3 py-1 text-[12px] text-red-400 hover:text-red-200 border border-red-500/50 rounded transition-colors whitespace-nowrap">削除</button>
-                    )}
-                    <button onClick={() => bgImageInputRef.current?.click()} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-sm text-white rounded transition-colors whitespace-nowrap">選択</button>
-                </div>
-              )}
+	              {videoSettings.backgroundFill === 'custom_image' && (
+	                <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-700 border-dashed flex items-center gap-2">
+	                    <div className="text-sm text-slate-300 truncate flex-1">{videoSettings.backgroundImageFile ? videoSettings.backgroundImageFile.name : "背景画像を選択..."}</div>
+	                    <input type="file" accept="image/*" ref={bgImageInputRef} className="hidden" onChange={handleBgImageSelect} />
+	                    {videoSettings.backgroundImageFile && (
+	                        <button onClick={handleBgImageClear} className="px-3 py-1 text-[12px] text-red-400 hover:text-red-200 border border-red-500/50 rounded transition-colors whitespace-nowrap">削除</button>
+	                    )}
+	                    <button onClick={() => bgImageInputRef.current?.click()} className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-sm text-white rounded transition-colors whitespace-nowrap">選択</button>
+	                </div>
+	              )}
 
-              <div className="space-y-3 pt-2">
-                 <div className="space-y-1">
-                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>スライド縮小</label><span>{videoSettings.slideScale}%</span></div>
-                    <input type="range" min="50" max="100" value={videoSettings.slideScale} onChange={(e) => setVideoSettings({ slideScale: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
+	              <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-700">
+	                  <div className="flex items-center justify-between gap-3">
+	                      <div className="flex flex-col min-w-0">
+	                          <span className="text-[12px] text-slate-300 uppercase">保存先</span>
+	                          <span className="text-[11px] text-slate-400 truncate">
+	                              {outputFileHandle ? outputFileHandle.name : '未設定'}
+	                          </span>
+	                      </div>
+	                  <button
+	                          onClick={handleConfigureOutputFile}
+	                          disabled={!fileSystemAccessSupported}
+	                          className={`px-3 py-2 text-xs rounded border transition-colors whitespace-nowrap ${
+	                              fileSystemAccessSupported
+	                                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/40'
+	                                  : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
+	                          }`}
+	                      >
+	                          保存先を設定
+	                      </button>
+	                  </div>
+
+	                  {!fileSystemAccessSupported && (
+	                      <div className="mt-2 text-[11px] text-yellow-400">
+	                          このブラウザではMP4/MOV書き出しが使えないよ。Chrome/Edgeで開いてね。
+	                      </div>
+	                  )}
+
+	                  {fileSystemAccessSupported && outputFileHandle && !outputFileFormat && (
+	                      <div className="mt-2 text-[11px] text-yellow-400">
+	                          保存先の情報が古いっぽいから、もう一回「保存先を設定」してね。
+	                      </div>
+	                  )}
+
+	                  {fileSystemAccessSupported && outputFileHandle && outputFileFormat && outputFileFormat !== videoSettings.format && (
+	                      <div className="mt-2 text-[11px] text-yellow-400">
+	                          今の保存先は{outputFileFormat.toUpperCase()}用だよ。{videoSettings.format.toUpperCase()}で書き出すなら設定しなおしてね。
+	                      </div>
+	                  )}
+	              </div>
+
+	              <div className="space-y-3 pt-2">
+	                 <div className="space-y-1">
+	                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>スライド縮小</label><span>{videoSettings.slideScale}%</span></div>
+	                    <input type="range" min="50" max="100" value={videoSettings.slideScale} onChange={(e) => setVideoSettings({ slideScale: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                  </div>
                  <div className="space-y-1">
                     <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>角丸半径</label><span>{videoSettings.slideBorderRadius}px</span></div>
@@ -133,8 +194,8 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
            </div>
 
            {/* Audio Settings */}
-           <div className={`space-y-3 pt-4 border-t border-slate-800 ${videoSettings.format === 'gif' ? 'opacity-50 grayscale pointer-events-none' : ''}`}>
-              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">BGM & オーディオ</h4>
+	           <div className="space-y-3 pt-4 border-t border-slate-800">
+	              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">BGM & オーディオ</h4>
               
               {/* BGM Section */}
               <div className="space-y-2">
@@ -170,14 +231,15 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                               <div className="absolute top-0.5 left-0.5 bg-slate-400 w-2.5 h-2.5 rounded-full transition-all peer-checked:translate-x-3.5 peer-checked:bg-yellow-400"></div>
                           </div>
                       </label>
-                      {duckingOptions.enabled && (
-                          <div className="flex items-center gap-2 mt-2">
-                              <span className="text-[10px] text-slate-400">下げる量</span>
-                              <input type="range" min="0.05" max="0.8" step="0.05" value={duckingOptions.duckingVolume} onChange={(e) => setDuckingOptions({...duckingOptions, duckingVolume: parseFloat(e.target.value)})} className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-yellow-500" />
-                          </div>
-                      )}
-                  </div>
-              )}
+	                      {duckingOptions.enabled && (
+	                          <div className="flex items-center gap-2 mt-2">
+	                              <span className="text-[10px] text-slate-400">下げる量</span>
+	                              <input type="range" min="0.05" max="0.8" step="0.05" value={duckingOptions.duckingVolume} onChange={(e) => setDuckingOptions({...duckingOptions, duckingVolume: parseFloat(e.target.value)})} className="flex-1 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-yellow-500" />
+	                              <span className="text-[10px] text-yellow-400 w-8 text-right">{Math.round(duckingOptions.duckingVolume * 100)}%</span>
+	                          </div>
+	                      )}
+	                  </div>
+	              )}
 
               {/* Global Audio */}
               <div className="space-y-2 pt-2 border-t border-slate-800/50">

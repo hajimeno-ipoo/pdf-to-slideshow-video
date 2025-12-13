@@ -172,17 +172,23 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                           <label className="text-xs text-slate-400 flex justify-between"><span>ぼかし</span><span>{selectedOverlay.shadowBlur || 0}px</span></label>
                           <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                          <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 flex justify-between"><span>X</span><span>{selectedOverlay.shadowOffsetX || 0}</span></label>
-                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetX || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetX: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
-                          </div>
-                          <div className="space-y-1">
-                              <label className="text-[10px] text-slate-400 flex justify-between"><span>Y</span><span>{selectedOverlay.shadowOffsetY || 0}</span></label>
-                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetY || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetY: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
-                          </div>
-                      </div>
-                  </div>
+	                      <div className="grid grid-cols-2 gap-2">
+	                          <div className="space-y-1">
+	                              <label className="text-xs text-slate-400 flex items-center justify-between">
+	                                  <span>X</span>
+	                                  <span className="text-sm text-slate-200 font-medium tabular-nums">{selectedOverlay.shadowOffsetX || 0}</span>
+	                              </label>
+	                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetX || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetX: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+	                          </div>
+	                          <div className="space-y-1">
+	                              <label className="text-xs text-slate-400 flex items-center justify-between">
+	                                  <span>Y</span>
+	                                  <span className="text-sm text-slate-200 font-medium tabular-nums">{selectedOverlay.shadowOffsetY || 0}</span>
+	                              </label>
+	                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetY || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetY: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+	                          </div>
+	                      </div>
+	                  </div>
                </div>
             </div>
          ) : (

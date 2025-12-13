@@ -1,7 +1,8 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectData, DuckingOptions } from '../types';
+import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectData, DuckingOptions, OutputFormat } from '../types';
 import { serializeProject, deserializeProject } from '../utils/fileUtils';
+import { isFileSystemAccessSupported } from '../utils/fileSystemAccess';
 import PreviewPlayer from './PreviewPlayer';
 import TimelineEditor from './TimelineEditor';
 import { EditorProvider, useEditor } from './slideEditor/SlideEditorContext';
@@ -20,7 +21,8 @@ const SlideEditorLayout: React.FC<{
     bgmVolume?: number,
     globalAudioFile?: File | null,
     globalAudioVolume?: number,
-    duckingOptions?: DuckingOptions
+    duckingOptions?: DuckingOptions,
+    outputFileHandle?: FileSystemFileHandle | null
   ) => void;
   onUsageUpdate?: (usage: TokenUsage) => void;
   onLoadProject?: (data: ProjectData) => void;
@@ -28,6 +30,7 @@ const SlideEditorLayout: React.FC<{
   const { 
       slides, updateSlides, undo, redo, canUndo, canRedo,
       videoSettings, 
+      outputFileHandle, outputFileFormat,
       bgmFile, bgmRange, bgmVolume, fadeOptions,
       globalAudioFile, globalAudioVolume,
       duckingOptions,
@@ -123,8 +126,37 @@ const SlideEditorLayout: React.FC<{
       } catch (e) { console.error("Import failed", e); alert("プロジェクトの読み込みに失敗しました。"); } finally { setIsImporting(false); if (projectInputRef.current) projectInputRef.current.value = ''; }
   };
 
+  const fileSystemAccessSupported = isFileSystemAccessSupported(
+      typeof window === 'undefined' ? null : (window as any)
+  );
+
   const handleStartClick = () => {
-    onStartConversion(bgmFile, fadeOptions, videoSettings, bgmFile ? bgmRange : undefined, bgmVolume, globalAudioFile, globalAudioVolume, duckingOptions);
+    if (!fileSystemAccessSupported) {
+      alert('このブラウザではMP4/MOV書き出しができないよ。Chrome/Edgeで開いてね。');
+      return;
+    }
+
+    if (!outputFileHandle) {
+      alert('先に「保存先を設定」してね。');
+      return;
+    }
+
+    if (!outputFileFormat || outputFileFormat !== videoSettings.format) {
+      alert('フォーマットに合わせて、もう一回「保存先を設定」してね。');
+      return;
+    }
+
+    onStartConversion(
+      bgmFile,
+      fadeOptions,
+      videoSettings,
+      bgmFile ? bgmRange : undefined,
+      bgmVolume,
+      globalAudioFile,
+      globalAudioVolume,
+      duckingOptions,
+      outputFileHandle
+    );
   };
 
   const handleToggleInspector = () => {
@@ -170,7 +202,18 @@ const SlideEditorLayout: React.FC<{
                     </div>
                     <div className="flex gap-2 items-center flex-shrink-0">
                         <button onClick={() => setIsPreviewOpen(true)} className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded shadow transition-colors whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" /></svg><span className="hidden sm:inline">全画面</span>プレビュー</button>
-                        <button onClick={handleStartClick} className="flex items-center gap-1.5 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded shadow transition-colors whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clipRule="evenodd" /></svg>書き出し</button>
+	                        <button
+	                            onClick={handleStartClick}
+	                            disabled={!fileSystemAccessSupported}
+	                            className={`flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded shadow transition-colors whitespace-nowrap ${
+	                                fileSystemAccessSupported
+	                                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+	                                    : 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+	                            }`}
+	                        >
+	                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clipRule="evenodd" /></svg>
+	                            書き出し
+	                        </button>
                         
                         <div className="w-px h-6 bg-slate-700 mx-2"></div>
                         
@@ -286,11 +329,14 @@ interface SlideEditorProps {
     bgmVolume?: number,
     globalAudioFile?: File | null,
     globalAudioVolume?: number,
-    duckingOptions?: DuckingOptions
+    duckingOptions?: DuckingOptions,
+    outputFileHandle?: FileSystemFileHandle | null
   ) => void;
   isProcessing: boolean;
   sourceFile: File | null;
   initialSettings?: VideoSettings;
+  initialOutputFileHandle?: FileSystemFileHandle | null;
+  initialOutputFileFormat?: OutputFormat | null;
   initialBgmFile?: File | null;
   initialFadeOptions?: FadeOptions;
   initialBgmTimeRange?: BgmTimeRange;
@@ -301,6 +347,7 @@ interface SlideEditorProps {
   onUsageUpdate?: (usage: TokenUsage) => void;
   onLoadProject?: (data: ProjectData) => void;
   onAutoSave?: (status: 'idle' | 'pending' | 'saving' | 'saved', time?: Date) => void;
+  onOutputFileTargetChange?: (handle: FileSystemFileHandle | null, format: OutputFormat | null) => void;
 }
 
 const SlideEditor: React.FC<SlideEditorProps> = (props) => {
@@ -309,6 +356,8 @@ const SlideEditor: React.FC<SlideEditorProps> = (props) => {
       slides={props.slides} 
       onUpdateSlides={props.onUpdateSlides} 
       initialSettings={props.initialSettings}
+      initialOutputFileHandle={props.initialOutputFileHandle}
+      initialOutputFileFormat={props.initialOutputFileFormat}
       initialBgmFile={props.initialBgmFile}
       initialFadeOptions={props.initialFadeOptions}
       initialBgmTimeRange={props.initialBgmTimeRange}
@@ -318,6 +367,7 @@ const SlideEditor: React.FC<SlideEditorProps> = (props) => {
       initialDuckingOptions={props.initialDuckingOptions}
       sourceFile={props.sourceFile}
       onAutoSave={props.onAutoSave}
+      onOutputFileTargetChange={props.onOutputFileTargetChange}
     >
       <SlideEditorLayout 
         onStartConversion={props.onStartConversion} 

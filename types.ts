@@ -63,7 +63,7 @@ export type TransitionType = 'none' | 'fade' | 'slide' | 'zoom' | 'wipe' | 'flip
 export type EffectType = 'none' | 'kenburns';
 export type AspectRatio = '16:9' | '4:3' | '1:1' | '9:16';
 export type Resolution = '1080p' | '720p';
-export type OutputFormat = 'mp4' | 'gif';
+export type OutputFormat = 'mp4' | 'mov';
 export type BackgroundFill = 'black' | 'white' | 'custom_image';
 
 export interface VideoSettings {
@@ -179,6 +179,8 @@ export interface ProjectData {
   slides: Slide[];
   sourceFile: File | null;
   videoSettings?: VideoSettings;
+  outputFileHandle?: FileSystemFileHandle | null;
+  outputFileFormat?: OutputFormat | null;
   bgmFile: File | null;
   bgmTimeRange?: BgmTimeRange;
   bgmVolume?: number;

@@ -68,11 +68,11 @@ export const SettingsPanel: React.FC = () => {
           <h4 className="text-sm font-semibold text-emerald-400 border-b border-slate-700/50 pb-2 mb-2">動画書き出し設定</h4>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
              <div className="space-y-1">
-               <label className="text-xs text-slate-400 block mb-1">フォーマット</label>
-               <select value={videoSettings.format} onChange={(e) => setVideoSettings({ format: e.target.value as OutputFormat })} className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none">
-                 <option value="mp4">MP4 (動画)</option><option value="gif">GIF (アニメーション)</option>
-               </select>
-             </div>
+	               <label className="text-xs text-slate-400 block mb-1">フォーマット</label>
+	               <select value={videoSettings.format} onChange={(e) => setVideoSettings({ format: e.target.value as OutputFormat })} className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none">
+	                 <option value="mp4">MP4 (動画)</option><option value="mov">MOV (動画)</option>
+	               </select>
+	             </div>
              <div className="space-y-1">
                <label className="text-xs text-slate-400 block mb-1">アスペクト比</label>
                <select value={videoSettings.aspectRatio} onChange={(e) => setVideoSettings({ aspectRatio: e.target.value as AspectRatio })} className="w-full bg-slate-800 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none">
@@ -110,11 +110,10 @@ export const SettingsPanel: React.FC = () => {
        </div>
 
        {/* BGM Settings */}
-       <div className={`bg-slate-900/30 p-4 rounded-xl border border-slate-700/50 space-y-3 ${videoSettings.format === 'gif' ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
-          <div className="flex justify-between items-center border-b border-slate-700/50 pb-2 mb-2">
-             <h4 className="text-sm font-semibold text-emerald-400">BGM設定</h4>
-             {videoSettings.format === 'gif' && <span className="text-[10px] text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded">GIF形式では音声は無効化されます</span>}
-          </div>
+	       <div className="bg-slate-900/30 p-4 rounded-xl border border-slate-700/50 space-y-3">
+	          <div className="flex justify-between items-center border-b border-slate-700/50 pb-2 mb-2">
+	             <h4 className="text-sm font-semibold text-emerald-400">BGM設定</h4>
+	          </div>
           <div className="flex flex-col gap-3">
               <input type="file" accept="audio/*" ref={bgmInputRef} onChange={handleBgmSelect} className="hidden" />
               {!bgmFile ? (
@@ -159,8 +158,8 @@ export const SettingsPanel: React.FC = () => {
        </div>
 
        {/* Global Narration Settings */}
-       <div className={`bg-slate-900/30 p-4 rounded-xl border border-slate-700/50 space-y-3 ${videoSettings.format === 'gif' ? 'opacity-50 pointer-events-none grayscale' : ''}`}>
-          <h4 className="text-sm font-semibold text-emerald-400 border-b border-slate-700/50 pb-2 mb-2">全体ナレーション設定</h4>
+	       <div className="bg-slate-900/30 p-4 rounded-xl border border-slate-700/50 space-y-3">
+	          <h4 className="text-sm font-semibold text-emerald-400 border-b border-slate-700/50 pb-2 mb-2">全体ナレーション設定</h4>
           <div className="flex flex-col gap-3">
               <input type="file" accept="audio/*" ref={globalAudioInputRef} onChange={handleGlobalAudioSelect} className="hidden" />
               {!globalAudioFile ? (

@@ -678,13 +678,13 @@ export const generateVideoFromSlides = async (
         };
     }));
 
-    // Prepare Audio Data (OfflineAudioContext)
-    let finalAudioBuffer: AudioBuffer | null = null;
-    if (videoSettings.format === 'mp4') {
-        const totalDuration = slides.reduce((acc, s) => acc + s.duration, 0);
-        // Minimum duration check for OfflineAudioContext (avoid 0 or negative)
-        const safeDuration = Math.max(0.1, totalDuration);
-        const offlineCtx = new OfflineAudioContext(2, Math.ceil(44100 * (safeDuration + 1)), 44100);
+	    // Prepare Audio Data (OfflineAudioContext)
+	    let finalAudioBuffer: AudioBuffer | null = null;
+	    if (videoSettings.format === 'mp4' || videoSettings.format === 'mov') {
+	        const totalDuration = slides.reduce((acc, s) => acc + s.duration, 0);
+	        // Minimum duration check for OfflineAudioContext (avoid 0 or negative)
+	        const safeDuration = Math.max(0.1, totalDuration);
+	        const offlineCtx = new OfflineAudioContext(2, Math.ceil(44100 * (safeDuration + 1)), 44100);
         
         // Ducking Gain is shared between BGM and narration scheduling
         let duckingGain: GainNode | null = null;
@@ -808,13 +808,14 @@ export const generateVideoFromSlides = async (
                     onProgress(current, total);
                 } else if (type === 'done') {
                     let url: string;
-                    if (savedToDisk && outputFileHandle && extension === 'mp4') {
-                        const file = await outputFileHandle.getFile();
-                        url = URL.createObjectURL(file);
-                    } else {
-                        const blob = new Blob([buffer], { type: extension === 'gif' ? 'image/gif' : 'video/mp4' });
-                        url = URL.createObjectURL(blob);
-                    }
+	                    if (savedToDisk && outputFileHandle && (extension === 'mp4' || extension === 'mov')) {
+	                        const file = await outputFileHandle.getFile();
+	                        url = URL.createObjectURL(file);
+	                    } else {
+	                        const mimeType = extension === 'mov' ? 'video/quicktime' : 'video/mp4';
+	                        const blob = new Blob([buffer], { type: mimeType });
+	                        url = URL.createObjectURL(blob);
+	                    }
                     worker.terminate();
                     URL.revokeObjectURL(workerUrl);
                     resolve({ url, extension });

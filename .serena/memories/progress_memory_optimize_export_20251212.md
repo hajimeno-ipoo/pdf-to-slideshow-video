@@ -26,3 +26,54 @@
 - `services/pdfVideoService.ts`: `worker.onmessage` を try/catch で包み、URL生成などで例外が出ても `reject` + cleanup されるように修正。
 - `services/videoWorkerScript.ts`: MP4のストリーミング保存で、失敗時に `output.cancel()` と `writable.abort()` を試みる finally を追加（中途半端ファイル/ロック残りを減らす）。
 - ビルド: `npm run build` 成功。
+
+## 2025-12-13
+- 出力形式: GIFを廃止して MP4/MOV に変更。
+- 編集画面（プロジェクト設定）に「保存先を設定」ボタンを追加。
+  - Secure Context + `showSaveFilePicker` がある環境のみ有効。
+  - Safari/Firefox 等は MP4/MOV 書き出しを無効化し、Chrome/Edge 推奨を表示。
+- 保存先は「最後に設定した1つだけ」を保持して使い回し。
+  - `FileSystemFileHandle` とフォーマットを状態として保持し、autosave（IndexedDB）にも保存。
+  - 再編集で編集画面に戻っても設定が残る。
+- 「書き出し」ボタンはダイアログ無しで設定済み保存先へディスク直書き。
+  - App側で書き込み権限をチェック（`requestPermission` 等）。
+- 完了画面:
+  - プレビューは書き出し後の動画（mp4/mov）。
+  - 「ダウンロード」ボタンは「サムネ画像を書き出す（PNG）」に変更。
+- worker:
+  - Mediabunny の `StreamTarget` + `Mp4OutputFormat/MovOutputFormat`（`fastStart:false`）で直書き。
+- テスト:
+  - `utils/fileSystemAccess.js` を `node --test --experimental-test-coverage` で 100% カバー。
+- ビルド: `npm run build` 成功。
+
+
+## 2025-12-13 追加（サムネ書き出し強化）
+- 書き出し完了画面の「サムネ画像を書き出す」から、小さい設定ダイアログを表示。
+  - 時間指定（○秒）: 指定時刻のフレームをPNGで1枚ダウンロード。
+  - 範囲指定（○秒〜○秒）: 範囲を等間隔で最大20枚にしてPNGを作り、ZIPでまとめてダウンロード（圧縮レベル0）。
+- ZIP生成は `fflate` をCDNから動的importして使用（依存追加なし）。
+- 追加ユーティリティ: `utils/thumbnailExport.js`（時間クランプ/ファイル名/20枚タイム生成）
+- 単体テスト: `tests/thumbnailExport.test.js` 追加、`npm run test:coverage` で `utils/thumbnailExport.js` を 100% カバー。
+- ビルド: `npm run build` 成功。
+
+
+## 2025-12-13 追加（サムネZIP tainted対策）
+- `canvas.toBlob()` が `SecurityError`（Tainted canvases）で落ちる環境があり、ZIP生成が止まる問題が出た。
+- 対策: 動画プレビューからのキャプチャが失敗したら、自動でスライドの `thumbnailUrl`（data URL）からファイル化して 1枚/ZIP を作るフォールバックを追加。
+  - フォールバック時は「動画のその瞬間のフレーム」ではなく「その時間に当たるスライドのサムネ」になる（でも確実に落とせる）。
+- 検証: `npm test` / `npm run test:coverage` / `npm run build` OK。
+
+
+## 2025-12-13 追加（サムネ画質の改善）
+- tainted回避フォールバックがプレビュー用 `thumbnailUrl`（低解像度）を使っていたため、落とした画像が荒く見える問題が出た。
+- 対策: tainted時は「スライド元（PDF/画像/無地）を出力サイズで再レンダ → PNG作成 → 1枚/ZIP」を行う。
+  - PDFは `scale <= 3.0`（動画生成と同等）でレンダして、動画と同じくらいの画質を狙う。
+  - 失敗したら最終フォールバックとして従来の `thumbnailUrl` を使う。
+- 検証: `npm test` / `npm run build` OK。
+
+
+## 2025-12-13 追加（シークタイムアウト対策）
+- サムネ作成で動画プレビューを `currentTime` シークすると、環境/長尺によって `seeked` が返らず「シークタイムアウト」が出ることがあった（1枚/ZIPどちらでも）。
+- 対策: tainted と同様に、シーク失敗（タイムアウト/失敗）もフォールバック対象にして、スライド元（PDF/画像/無地）を高画質レンダしてPNGを作る。
+- 追加: シーク先が `duration` ぴったりだと詰まりやすいので、`duration - 0.05s` までに丸める。
+- 検証: `npm test` / `npm run build` OK。

@@ -3,8 +3,7 @@
 // We do this to avoid complex build configuration for workers in this environment.
 
 export const VIDEO_WORKER_CODE = `
-import { Output, Mp4OutputFormat, StreamTarget, BufferTarget, CanvasSource, EncodedAudioPacketSource, EncodedPacket } from 'https://cdn.jsdelivr.net/npm/mediabunny@1.26.0/+esm';
-import { GIFEncoder, quantize, applyPalette } from 'https://cdn.jsdelivr.net/npm/gifenc@1.0.3/+esm';
+import { Output, Mp4OutputFormat, MovOutputFormat, StreamTarget, BufferTarget, CanvasSource, EncodedAudioPacketSource, EncodedPacket } from 'https://cdn.jsdelivr.net/npm/mediabunny@1.26.0/+esm';
 
 // --- Helper Functions ---
 
@@ -425,10 +424,10 @@ self.onmessage = async (e) => {
 
             // --- Encoding ---
             
-            const processFrames = async (writer, canvas, ctx, isGif = false) => {
-                let currentTime = 0;
-                let processedFrames = 0;
-                const fps = isGif ? 15 : 30;
+	            const processFrames = async (videoSource, canvas, ctx) => {
+	                let currentTime = 0;
+	                let processedFrames = 0;
+	                const fps = 30;
 
                 for (let i = 0; i < slides.length; i++) {
                     const slide = slides[i];
@@ -544,51 +543,37 @@ self.onmessage = async (e) => {
                             }
                         }
                         
-                        if (isGif) {
-                            const frameData = ctx.getImageData(0, 0, width, height).data;
-                            const palette = quantize(frameData, 256);
-                            const index = applyPalette(frameData, palette);
-                            writer.writeFrame(index, width, height, { palette, delay: 1000/fps });
-                        } else {
-                            await writer.add(currentTime, 1/fps);
-                        }
-                        
-                        currentTime += 1/fps;
+	                        await videoSource.add(currentTime, 1/fps);
+	                        
+	                        currentTime += 1/fps;
                         processedFrames++;
                         if (processedFrames % 15 === 0) self.postMessage({ type: 'progress', current: i+1, total: slides.length });
                     }
                 }
             };
 
-            if (videoSettings.format === 'gif') {
-                const canvas = new OffscreenCanvas(width, height);
-                const ctx = canvas.getContext('2d', { alpha: false });
-                const gif = GIFEncoder();
-                await processFrames(gif, canvas, ctx, true);
-                gif.finish();
-                const buffer = gif.bytes().buffer;
-                self.postMessage({ type: 'done', buffer, extension: 'gif' }, [buffer]);
-            } else {
-                const canvas = new OffscreenCanvas(width, height);
-                const ctx = canvas.getContext('2d', { alpha: false });
+	            {
+	                const canvas = new OffscreenCanvas(width, height);
+	                const ctx = canvas.getContext('2d', { alpha: false });
 
-                let writableStream = null;
-                let output = null;
-                let completed = false;
+	                let writableStream = null;
+	                let output = null;
+	                let completed = false;
 
-                try {
-                    let target;
-                    if (outputFileHandle) {
-                        writableStream = await outputFileHandle.createWritable();
-                        target = new StreamTarget(writableStream, { chunked: true });
-                    } else {
-                        target = new BufferTarget();
-                    }
+	                try {
+	                    let target;
+	                    if (outputFileHandle) {
+	                        writableStream = await outputFileHandle.createWritable();
+	                        target = new StreamTarget(writableStream, { chunked: true });
+	                    } else {
+	                        target = new BufferTarget();
+	                    }
 
-                    output = new Output({
-                        format: new Mp4OutputFormat({ fastStart: false }),
-                        target
-                    });
+	                    const extension = videoSettings.format === 'mov' ? 'mov' : 'mp4';
+	                    output = new Output({
+	                        format: extension === 'mov' ? new MovOutputFormat({ fastStart: false }) : new Mp4OutputFormat({ fastStart: false }),
+	                        target
+	                    });
 
                     const videoSource = new CanvasSource(canvas, {
                         codec: 'avc',
@@ -648,24 +633,24 @@ self.onmessage = async (e) => {
                         audioEncoder.close();
                     }
 
-                    await processFrames(videoSource, canvas, ctx, false);
-                    
-                    await output.finalize();
-                    completed = true;
+	                    await processFrames(videoSource, canvas, ctx);
+	                    
+	                    await output.finalize();
+	                    completed = true;
 
-                    if (outputFileHandle) {
-                        self.postMessage({ type: 'done', extension: 'mp4', savedToDisk: true });
-                    } else {
-                        const buffer = target.buffer;
-                        self.postMessage({ type: 'done', buffer, extension: 'mp4' }, [buffer]);
-                    }
-                } finally {
-                    if (!completed) {
-                        try { await output?.cancel?.(); } catch (_) {}
-                        try { await writableStream?.abort?.(); } catch (_) {}
-                    }
-                }
-            }
+	                    if (outputFileHandle) {
+	                        self.postMessage({ type: 'done', extension, savedToDisk: true });
+	                    } else {
+	                        const buffer = target.buffer;
+	                        self.postMessage({ type: 'done', buffer, extension }, [buffer]);
+	                    }
+	                } finally {
+	                    if (!completed) {
+	                        try { await output?.cancel?.(); } catch (_) {}
+	                        try { await writableStream?.abort?.(); } catch (_) {}
+	                    }
+	                }
+	            }
         } catch (e) {
             console.error(e);
             self.postMessage({ type: 'error', message: e?.message || String(e) });

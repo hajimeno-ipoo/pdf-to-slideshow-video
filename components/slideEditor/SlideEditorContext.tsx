@@ -35,7 +35,11 @@ interface EditorContextType {
   setDuckingOptions: (options: DuckingOptions) => void;
   
   sourceFile: File | null;
-  
+
+  outputFileHandle: FileSystemFileHandle | null;
+  outputFileFormat: OutputFormat | null;
+  setOutputFileHandle: (handle: FileSystemFileHandle | null, format: OutputFormat | null) => void;
+
   saveProjectState: () => Promise<void>;
 }
 
@@ -46,6 +50,8 @@ interface EditorProviderProps {
   slides: Slide[];
   onUpdateSlides: (slides: Slide[]) => void;
   initialSettings?: VideoSettings;
+  initialOutputFileHandle?: FileSystemFileHandle | null;
+  initialOutputFileFormat?: OutputFormat | null;
   initialBgmFile?: File | null;
   initialFadeOptions?: FadeOptions;
   initialBgmTimeRange?: BgmTimeRange;
@@ -55,10 +61,11 @@ interface EditorProviderProps {
   initialDuckingOptions?: DuckingOptions;
   sourceFile: File | null;
   onAutoSave?: (status: 'idle' | 'pending' | 'saving' | 'saved', time?: Date) => void;
+  onOutputFileTargetChange?: (handle: FileSystemFileHandle | null, format: OutputFormat | null) => void;
 }
 
 export const EditorProvider: React.FC<EditorProviderProps> = ({ 
-  children, slides, onUpdateSlides, initialSettings, initialBgmFile, initialFadeOptions, initialBgmTimeRange, initialBgmVolume, initialGlobalAudioFile, initialGlobalAudioVolume, initialDuckingOptions, sourceFile, onAutoSave
+  children, slides, onUpdateSlides, initialSettings, initialOutputFileHandle, initialOutputFileFormat, initialBgmFile, initialFadeOptions, initialBgmTimeRange, initialBgmVolume, initialGlobalAudioFile, initialGlobalAudioVolume, initialDuckingOptions, sourceFile, onAutoSave, onOutputFileTargetChange
 }) => {
   // --- History State ---
   const [history, setHistory] = useState<Slide[][]>([]);
@@ -77,6 +84,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
   const [slideBorderRadius, setSlideBorderRadius] = useState<number>(initialSettings?.slideBorderRadius || 12);
   const [transitionDuration, setTransitionDuration] = useState<number>(initialSettings?.transitionDuration || 1.0);
 
+  // --- Output Target State ---
+  const [outputFileHandle, setOutputFileHandleState] = useState<FileSystemFileHandle | null>(initialOutputFileHandle || null);
+  const [outputFileFormat, setOutputFileFormat] = useState<OutputFormat | null>(initialOutputFileFormat || null);
+
   // Sync with initialSettings on load
   useEffect(() => {
      if (initialSettings) {
@@ -90,6 +101,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
          setTransitionDuration(initialSettings.transitionDuration);
      }
   }, [initialSettings]);
+
+  // Sync output file target on load
+  useEffect(() => {
+      if (initialOutputFileHandle !== undefined) setOutputFileHandleState(initialOutputFileHandle);
+      if (initialOutputFileFormat !== undefined) setOutputFileFormat(initialOutputFileFormat);
+  }, [initialOutputFileHandle, initialOutputFileFormat]);
 
   // --- Audio State ---
   const [bgmFile, setBgmFile] = useState<File | null>(initialBgmFile || null);
@@ -159,6 +176,12 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       if (settings.transitionDuration !== undefined) setTransitionDuration(settings.transitionDuration);
   };
 
+  const setOutputFileHandle = (handle: FileSystemFileHandle | null, format: OutputFormat | null) => {
+      setOutputFileHandleState(handle);
+      setOutputFileFormat(format);
+      onOutputFileTargetChange?.(handle, format);
+  };
+
   // --- Auto Save Logic ---
   const saveProjectState = useCallback(async () => {
       const currentSettings: VideoSettings = {
@@ -169,6 +192,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
           slides,
           sourceFile,
           videoSettings: currentSettings,
+          outputFileHandle,
+          outputFileFormat,
           bgmFile,
           bgmTimeRange: bgmRange,
           bgmVolume,
@@ -180,7 +205,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       };
 
       await saveProject(projectData);
-  }, [slides, aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration, bgmFile, bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, sourceFile]);
+  }, [slides, aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration, bgmFile, bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, sourceFile, outputFileHandle, outputFileFormat]);
 
   useEffect(() => {
       if (!onAutoSave || slides.length === 0) return;
@@ -222,6 +247,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       duckingOptions, setDuckingOptions,
       
       sourceFile,
+      outputFileHandle,
+      outputFileFormat,
+      setOutputFileHandle,
       saveProjectState
   };
 
