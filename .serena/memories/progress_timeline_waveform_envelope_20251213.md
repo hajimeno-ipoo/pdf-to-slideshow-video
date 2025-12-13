@@ -1,0 +1,12 @@
+## 2025-12-13
+- 目的: 長尺タイムラインで波形が細くて見にくい問題を、B案（包み線）で改善。
+- 変更: 波形を「ピーク1本の棒」ではなく、各描画点ごとに **min〜max（包み線）** を縦に描く方式に変更。
+  - ズームアウトでも存在感が出て、音編集ソフトっぽい見え方になる。
+- 実装:
+  - `components/TimelineEditor.tsx`: `drawWaveform` のループ内で、サンプル窓の min/max を計算して縦線（fillRect）描画に変更。
+  - `utils/waveformEnvelope.js`: `computeWaveformEnvelopeRect(min,max,amp,volume,{boost,minBarHeight})` を追加（表示用のy/height計算）。
+  - `tests/waveformEnvelope.test.js` 追加。
+- テスト:
+  - `npm test` OK
+  - `npm run test:coverage` OK（utilsの line/branch/funcs 100%）
+  - `npm run build` OK

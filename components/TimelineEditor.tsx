@@ -8,6 +8,7 @@ import {
   getVideoDimensions 
 } from '../services/pdfVideoService';
 import { getCanvasRenderWidthCss } from '../utils/canvasSizing';
+import { computeWaveformEnvelopeRect } from '../utils/waveformEnvelope';
 
 interface TimelineEditorProps {
   slides: Slide[];
@@ -112,8 +113,9 @@ const drawWaveform = (
           sampleIdx = Math.floor(time * sampleRate);
       }
 
-      // Calculate Peak in this pixel's time window
-      let maxVal = 0;
+      // Calculate Envelope (min..max) in this pixel's time window
+      let minVal = Number.POSITIVE_INFINITY;
+      let maxVal = Number.NEGATIVE_INFINITY;
       // We look ahead `step` samples, but skip by `stride`
       const endSearch = sampleIdx + step;
       const limit = data.length;
@@ -123,16 +125,18 @@ const drawWaveform = (
           const safeI = shouldLoop ? i % limit : i;
           if (safeI >= limit) break; 
           
-          const val = Math.abs(data[safeI]);
+          const val = data[safeI];
+          if (val < minVal) minVal = val;
           if (val > maxVal) maxVal = val;
       }
 
-      if (maxVal > 0) {
-          // Draw symmetric bar
-          const barHeight = Math.max(1, maxVal * amp * 1.8 * volume);
-          const y = amp - (barHeight / 2);
-          ctx.fillRect(x, y, 1, barHeight);
-      }
+      if (minVal === Number.POSITIVE_INFINITY || maxVal === Number.NEGATIVE_INFINITY) continue;
+      const rect = computeWaveformEnvelopeRect(minVal, maxVal, amp, volume, {
+          boost: 1.8,
+          minBarHeightPx: 1
+      });
+      if (!rect) continue;
+      ctx.fillRect(x, rect.y, 1, rect.height);
   }
   
   ctx.restore();
