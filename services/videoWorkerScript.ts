@@ -3,7 +3,7 @@
 // We do this to avoid complex build configuration for workers in this environment.
 
 export const VIDEO_WORKER_CODE = `
-import { Muxer, ArrayBufferTarget } from 'https://cdn.jsdelivr.net/npm/mp4-muxer@5.1.0/build/mp4-muxer.mjs';
+import { Output, Mp4OutputFormat, StreamTarget, BufferTarget, CanvasSource, EncodedAudioPacketSource, EncodedPacket } from 'https://cdn.jsdelivr.net/npm/mediabunny@1.26.0/+esm';
 import { GIFEncoder, quantize, applyPalette } from 'https://cdn.jsdelivr.net/npm/gifenc@1.0.3/+esm';
 
 // --- Helper Functions ---
@@ -381,7 +381,7 @@ self.onmessage = async (e) => {
 
     if (type === 'init') {
         try {
-            const { slides, videoSettings, bgmTimeRange, bgmVolume, globalAudioVolume, fadeOptions, duckingOptions, audioChannels, bgImageBuffer, bgMimeType } = payload;
+            const { slides, videoSettings, bgmTimeRange, bgmVolume, globalAudioVolume, fadeOptions, duckingOptions, audioChannels, bgImageBuffer, bgMimeType, outputFileHandle } = payload;
             const { width, height } = getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution);
             
             // 1. Prepare Slide Assets
@@ -425,9 +425,7 @@ self.onmessage = async (e) => {
 
             // --- Encoding ---
             
-            const processFrames = async (encoder, isGif = false) => {
-                const canvas = new OffscreenCanvas(width, height);
-                const ctx = canvas.getContext('2d', { alpha: false });
+            const processFrames = async (writer, canvas, ctx, isGif = false) => {
                 let currentTime = 0;
                 let processedFrames = 0;
                 const fps = isGif ? 15 : 30;
@@ -550,11 +548,9 @@ self.onmessage = async (e) => {
                             const frameData = ctx.getImageData(0, 0, width, height).data;
                             const palette = quantize(frameData, 256);
                             const index = applyPalette(frameData, palette);
-                            encoder.writeFrame(index, width, height, { palette, delay: 1000/fps });
+                            writer.writeFrame(index, width, height, { palette, delay: 1000/fps });
                         } else {
-                            const frame = new VideoFrame(canvas, { timestamp: Math.round(currentTime * 1_000_000), duration: Math.round(1_000_000 / fps) });
-                            encoder.encode(frame);
-                            frame.close();
+                            await writer.add(currentTime, 1/fps);
                         }
                         
                         currentTime += 1/fps;
@@ -565,56 +561,114 @@ self.onmessage = async (e) => {
             };
 
             if (videoSettings.format === 'gif') {
+                const canvas = new OffscreenCanvas(width, height);
+                const ctx = canvas.getContext('2d', { alpha: false });
                 const gif = GIFEncoder();
-                await processFrames(gif, true);
+                await processFrames(gif, canvas, ctx, true);
                 gif.finish();
                 const buffer = gif.bytes().buffer;
                 self.postMessage({ type: 'done', buffer, extension: 'gif' }, [buffer]);
             } else {
-                const muxer = new Muxer({
-                    target: new ArrayBufferTarget(),
-                    video: { codec: 'avc', width, height },
-                    audio: { codec: 'aac', sampleRate: 44100, numberOfChannels: 2 },
-                    fastStart: 'in-memory'
-                });
-                
-                const videoEncoder = new VideoEncoder({
-                    output: (chunk, meta) => muxer.addVideoChunk(chunk, meta),
-                    error: (e) => console.error("Worker Video Enc Error", e)
-                });
-                videoEncoder.configure({ codec: 'avc1.4d002a', width, height, bitrate: 4_000_000, framerate: 30 });
+                const canvas = new OffscreenCanvas(width, height);
+                const ctx = canvas.getContext('2d', { alpha: false });
 
-                const audioEncoder = new AudioEncoder({
-                    output: (chunk, meta) => muxer.addAudioChunk(chunk, meta),
-                    error: (e) => console.error("Worker Audio Enc Error", e)
-                });
-                audioEncoder.configure({ codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000 });
+                let writableStream = null;
+                let output = null;
+                let completed = false;
 
-                if (audioChannels) {
-                    const [audioDataL, audioDataR] = audioChannels;
-                    const lenSamples = audioDataL.length;
-                    const chunkSize = 4096;
-                    for (let i = 0; i < lenSamples; i += chunkSize) {
-                        const end = Math.min(i + chunkSize, lenSamples);
-                        const len = end - i;
-                        const data = new Float32Array(len * 2);
-                        for (let j = 0; j < len; j++) { data[j*2] = audioDataL[i+j]; data[j*2+1] = audioDataR[i+j]; }
-                        const frame = new AudioData({ format: 'f32', sampleRate: 44100, numberOfFrames: len, numberOfChannels: 2, timestamp: Math.round((i / 44100) * 1_000_000), data });
-                        audioEncoder.encode(frame); frame.close();
+                try {
+                    let target;
+                    if (outputFileHandle) {
+                        writableStream = await outputFileHandle.createWritable();
+                        target = new StreamTarget(writableStream, { chunked: true });
+                    } else {
+                        target = new BufferTarget();
+                    }
+
+                    output = new Output({
+                        format: new Mp4OutputFormat({ fastStart: false }),
+                        target
+                    });
+
+                    const videoSource = new CanvasSource(canvas, {
+                        codec: 'avc',
+                        bitrate: 4_000_000,
+                        frameRate: 30
+                    });
+
+                    output.addVideoTrack(videoSource, { frameRate: 30 });
+
+                    let audioSource = null;
+                    let audioAddChain = Promise.resolve();
+                    let audioHasDecoderConfig = false;
+
+                    if (audioChannels) {
+                        audioSource = new EncodedAudioPacketSource('aac');
+                        output.addAudioTrack(audioSource);
+                    }
+
+                    await output.start();
+
+                    if (audioChannels && audioSource) {
+                        const audioEncoder = new AudioEncoder({
+                            output: (chunk, meta) => {
+                                const packet = EncodedPacket.fromEncodedChunk(chunk);
+                                const decoderConfig = meta?.decoderConfig || {
+                                    codec: 'mp4a.40.2',
+                                    numberOfChannels: 2,
+                                    sampleRate: 44100,
+                                    description: meta?.decoderConfig?.description
+                                };
+
+                                if (!audioHasDecoderConfig) {
+                                    audioHasDecoderConfig = true;
+                                    audioAddChain = audioAddChain.then(() => audioSource.add(packet, { decoderConfig }));
+                                } else {
+                                    audioAddChain = audioAddChain.then(() => audioSource.add(packet));
+                                }
+                            },
+                            error: (e) => console.error("Worker Audio Enc Error", e)
+                        });
+                        audioEncoder.configure({ codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000 });
+
+                        const [audioDataL, audioDataR] = audioChannels;
+                        const lenSamples = audioDataL.length;
+                        const chunkSize = 4096;
+                        for (let i = 0; i < lenSamples; i += chunkSize) {
+                            const end = Math.min(i + chunkSize, lenSamples);
+                            const len = end - i;
+                            const data = new Float32Array(len * 2);
+                            for (let j = 0; j < len; j++) { data[j*2] = audioDataL[i+j]; data[j*2+1] = audioDataR[i+j]; }
+                            const frame = new AudioData({ format: 'f32', sampleRate: 44100, numberOfFrames: len, numberOfChannels: 2, timestamp: Math.round((i / 44100) * 1_000_000), data });
+                            audioEncoder.encode(frame); frame.close();
+                        }
+
+                        await audioEncoder.flush();
+                        await audioAddChain;
+                        audioEncoder.close();
+                    }
+
+                    await processFrames(videoSource, canvas, ctx, false);
+                    
+                    await output.finalize();
+                    completed = true;
+
+                    if (outputFileHandle) {
+                        self.postMessage({ type: 'done', extension: 'mp4', savedToDisk: true });
+                    } else {
+                        const buffer = target.buffer;
+                        self.postMessage({ type: 'done', buffer, extension: 'mp4' }, [buffer]);
+                    }
+                } finally {
+                    if (!completed) {
+                        try { await output?.cancel?.(); } catch (_) {}
+                        try { await writableStream?.abort?.(); } catch (_) {}
                     }
                 }
-
-                await processFrames(videoEncoder, false);
-                
-                await videoEncoder.flush();
-                await audioEncoder.flush();
-                muxer.finalize();
-                const buffer = muxer.target.buffer;
-                self.postMessage({ type: 'done', buffer, extension: 'mp4' }, [buffer]);
             }
         } catch (e) {
             console.error(e);
-            self.postMessage({ type: 'error', message: e.message });
+            self.postMessage({ type: 'error', message: e?.message || String(e) });
         }
     }
 };

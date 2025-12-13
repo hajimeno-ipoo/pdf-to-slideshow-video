@@ -312,6 +312,28 @@ const App: React.FC = () => {
     }
 
     try {
+      let outputFileHandle: FileSystemFileHandle | null = null;
+      if (
+        videoSettings.format === 'mp4' &&
+        window.isSecureContext &&
+        typeof (window as any).showSaveFilePicker === 'function'
+      ) {
+        try {
+          outputFileHandle = await (window as any).showSaveFilePicker({
+            suggestedName: 'slideshow.mp4',
+            types: [
+              {
+                description: 'MP4 Video',
+                accept: { 'video/mp4': ['.mp4'] }
+              }
+            ]
+          });
+        } catch (e: any) {
+          if (e?.name === 'AbortError') return;
+          throw e;
+        }
+      }
+
       setState({ 
         status: AppStatus.CONVERTING, 
         message: '動画を作成中...',
@@ -334,7 +356,8 @@ const App: React.FC = () => {
             progress: { current, total }
           }));
         },
-        duckingOptions
+        duckingOptions,
+        outputFileHandle
       );
 
       setState({ 
