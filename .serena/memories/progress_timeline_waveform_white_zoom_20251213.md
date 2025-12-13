@@ -1,0 +1,15 @@
+## 2025-12-13
+- 目的: 長尺プロジェクトでタイムラインをズームすると、BGM/GlobalAudio の波形部分が真っ白になる問題を修正。
+- 原因: `components/TimelineEditor.tsx` の `drawWaveform` が `canvas.width = totalDuration * scale * dpr` をそのまま設定しており、長尺×高ズームで Canvas の最大サイズを超えて描画が破綻しやすかった。
+- 対応:
+  - Canvasの内部解像度（`canvas.width`）は上限を設けて固定（device pixel最大16384）
+  - 表示上の幅（`canvas.style.width`）は今まで通り `totalDuration * scale` にして、CSSで伸ばす
+  - 波形/グリッド/ダッキング線は「内部幅(renderWidth)」基準で描き、時間→X の変換を比率で合わせる
+- 変更ファイル:
+  - `components/TimelineEditor.tsx`
+  - `utils/canvasSizing.js`（内部幅の計算）
+  - `tests/canvasSizing.test.js`
+- テスト:
+  - `npm test` OK
+  - `npm run test:coverage` OK（utilsの line/branch/funcs 100%）
+  - `npm run build` OK

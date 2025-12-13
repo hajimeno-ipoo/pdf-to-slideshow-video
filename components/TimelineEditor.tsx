@@ -7,6 +7,7 @@ import {
   renderBackground, 
   getVideoDimensions 
 } from '../services/pdfVideoService';
+import { getCanvasRenderWidthCss } from '../utils/canvasSizing';
 
 interface TimelineEditorProps {
   slides: Slide[];
@@ -39,31 +40,32 @@ const drawWaveform = (
 
   const dpr = window.devicePixelRatio || 1;
   // Ensure width is at least 1px so canvas doesn't throw errors, even if totalDuration is 0
-  const width = Math.max(1, totalDuration * scale);
+  const desiredWidth = Math.max(1, totalDuration * scale);
+  const renderWidth = getCanvasRenderWidthCss(desiredWidth, dpr);
   const height = WAVEFORM_HEIGHT;
 
   // Resize canvas if needed
-  if (canvas.width !== width * dpr || canvas.height !== height * dpr) {
-      canvas.width = width * dpr;
+  if (canvas.width !== renderWidth * dpr || canvas.height !== height * dpr) {
+      canvas.width = renderWidth * dpr;
       canvas.height = height * dpr;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
   }
+  canvas.style.width = `${desiredWidth}px`;
+  canvas.style.height = `${height}px`;
   
   ctx.save();
   ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, width, height);
+  ctx.clearRect(0, 0, renderWidth, height);
 
   // Background
   ctx.fillStyle = '#0f172a';
-  ctx.fillRect(0, 0, width, height);
+  ctx.fillRect(0, 0, renderWidth, height);
 
   // Grid
   ctx.strokeStyle = '#334155';
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let t = 0; t <= totalDuration; t += 1) {
-      const x = t * scale;
+      const x = totalDuration > 0 ? (t / totalDuration) * renderWidth : 0;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
   }
@@ -77,7 +79,7 @@ const drawWaveform = (
   const data = buffer.getChannelData(0);
   const sampleRate = buffer.sampleRate;
   const amp = height / 2;
-  const step = Math.ceil(sampleRate / scale); // Samples per pixel (approx)
+  const step = Math.max(1, Math.ceil((sampleRate * totalDuration) / renderWidth)); // Samples per pixel (approx)
   
   // Optimization: Don't check every sample if zoomed out extremely far.
   const samplesToCheck = 50; 
@@ -95,8 +97,8 @@ const drawWaveform = (
   // Note: BGM defaults to {start:0, end:0} which results in loopDuration = buffer.duration.
   const shouldLoop = !!bgmRange && loopDuration > 0;
 
-  for (let x = 0; x < width; x++) {
-      let time = x / scale;
+  for (let x = 0; x < renderWidth; x++) {
+      let time = totalDuration > 0 ? (x / renderWidth) * totalDuration : 0;
       
       // Determine sample index
       let sampleIdx = 0;
@@ -343,7 +345,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
         ctx.save();
         ctx.scale(dpr, dpr);
 
-        const width = totalDuration * scale;
+        const width = canvas.width / dpr;
         const height = WAVEFORM_HEIGHT; 
         const amp = height / 2;
 
@@ -370,7 +372,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
         const pointsToDraw = Math.ceil(width / 2);
         for (let i = 0; i <= pointsToDraw; i++) {
             const x = i * 2;
-            const t = x / scale;
+            const t = totalDuration > 0 ? (x / width) * totalDuration : 0;
             let minVol = 1.0;
             let isInside = false;
             let distToStart = 9999;
