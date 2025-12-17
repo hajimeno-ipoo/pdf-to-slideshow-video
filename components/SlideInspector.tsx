@@ -58,7 +58,6 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   const [activeTab, setActiveTab] = useState<'crop' | 'overlay' | 'image' | 'color' | 'audio'>('crop');
   const [overviewImage, setOverviewImage] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isCanvasMode, setIsCanvasMode] = useState(false);
 
   // Local state for editing
   const [crop, setCrop] = useState(slide.crop);
@@ -96,7 +95,14 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   // Placement Mode State
   const [pendingAddType, setPendingAddType] = useState<OverlayType | null>(null);
 
+  const isCanvasMode = activeTab !== 'crop';
   const isSolidSlide = !!slide.backgroundColor;
+  const hasCanvasLayout =
+      !!slideLayout ||
+      !!slide.layout ||
+      !!slide.layerOrder ||
+      overlays.some(o => (o.space || 'slide') === 'canvas');
+  const showCanvasStage = activeTab !== 'crop' && (isCanvasMode || hasCanvasLayout);
 
   // プレビュー縮尺に応じて角丸をスケールする
   const getScaledRadiusPx = () => {
@@ -122,8 +128,6 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       setSelectedLayerId(null);
       setPendingAddType(null);
       setImageSize({ width: 0, height: 0 });
-      setStageSize({ width: 0, height: 0 });
-      setIsCanvasMode(!!slide.layout || !!slide.layerOrder);
       setIsDraggingSlide(false);
       setSlideDragMode(null);
 
@@ -140,6 +144,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   // Stage size tracking (canvas mode)
   useEffect(() => {
       if (!stageRef.current) return;
+      if (!showCanvasStage) return;
       const el = stageRef.current;
       const update = () => {
           const rect = el.getBoundingClientRect();
@@ -153,7 +158,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           observer.disconnect();
           window.removeEventListener('resize', update);
       };
-  }, [isCanvasMode]);
+  }, [showCanvasStage]);
 
   // Keep layerOrder in sync with overlays
   useEffect(() => {
@@ -166,11 +171,6 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           return next;
       });
   }, [overlays]);
-
-  // Disable canvas mode while cropping
-  useEffect(() => {
-      if (activeTab === 'crop' && isCanvasMode) setIsCanvasMode(false);
-  }, [activeTab, isCanvasMode]);
 
   // Audio Preview & Duration Sync Logic
   useEffect(() => {
@@ -373,45 +373,35 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       
       if (!pendingAddType) return;
 
-      if (isCanvasMode) {
-          if (!stageRef.current) return;
-          if (stageSize.width === 0 || stageSize.height === 0) return;
+	      if (isCanvasMode) {
+	          if (!stageRef.current) return;
+	          if (stageSize.width === 0 || stageSize.height === 0) return;
 
-          const stageRectDom = stageRef.current.getBoundingClientRect();
-          const mouseX = e.clientX - stageRectDom.left;
-          const mouseY = e.clientY - stageRectDom.top;
+	          const stageRectDom = stageRef.current.getBoundingClientRect();
+	          const mouseX = e.clientX - stageRectDom.left;
+	          const mouseY = e.clientY - stageRectDom.top;
 
-          const slideRect = getSlideRectPx();
-          const isInsideSlide =
-              mouseX >= slideRect.x &&
-              mouseX <= slideRect.x + slideRect.w &&
-              mouseY >= slideRect.y &&
-              mouseY <= slideRect.y + slideRect.h;
+	          const relativeX = mouseX / stageSize.width;
+	          const relativeY = mouseY / stageSize.height;
+	          if (!Number.isFinite(relativeX) || !Number.isFinite(relativeY)) return;
 
-          const base = isInsideSlide ? slideRect : { x: 0, y: 0, w: stageSize.width, h: stageSize.height };
-          if (base.w === 0 || base.h === 0) return;
-
-          const relativeX = (mouseX - base.x) / base.w;
-          const relativeY = (mouseY - base.y) / base.h;
-          if (!Number.isFinite(relativeX) || !Number.isFinite(relativeY)) return;
-
-          const type = pendingAddType;
-          const newOverlay: Overlay = {
-              id: safeRandomUUID(),
+	          const type = pendingAddType;
+	          const newOverlay: Overlay = {
+	              id: safeRandomUUID(),
               type,
               x: relativeX,
               y: relativeY,
               rotation: 0,
               opacity: 1,
-              startTime: 0,
-              duration: localDuration,
-              animationOut: 'fade',
-              space: isInsideSlide ? undefined : 'canvas',
-              text: type === 'text' ? 'テキスト' : undefined,
-              fontSize: type === 'text' ? 8 : undefined,
-              color: type === 'text' ? '#ffffff' : (type === 'arrow' || type === 'rect' || type === 'circle' || type === 'line' ? '#ef4444' : undefined),
-              width: type === 'text' ? undefined : 0.2,
-              height: type === 'rect' || type === 'circle' ? 0.2 : (type === 'arrow' || type === 'line' ? 0.05 : undefined),
+	              startTime: 0,
+	              duration: localDuration,
+	              animationOut: 'fade',
+	              space: 'canvas',
+	              text: type === 'text' ? 'テキスト' : undefined,
+	              fontSize: type === 'text' ? 8 : undefined,
+	              color: type === 'text' ? '#ffffff' : (type === 'arrow' || type === 'rect' || type === 'circle' || type === 'line' ? '#ef4444' : undefined),
+	              width: type === 'text' ? undefined : 0.2,
+	              height: type === 'rect' || type === 'circle' ? 0.2 : (type === 'arrow' || type === 'line' ? 0.05 : undefined),
               strokeWidth: type === 'text' ? 0 : 5,
               backgroundColor: type === 'text' ? undefined : (type === 'rect' || type === 'circle' ? 'transparent' : undefined),
               borderStyle: type === 'line' ? 'solid' : undefined,
@@ -562,11 +552,11 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           const dxRaw = mouseX - startPos.x;
           const dyRaw = mouseY - startPos.y;
           const dx = dxRaw / currentScale;
-          const dy = dyRaw / currentScale;
+	          const dy = dyRaw / currentScale;
 
-          if (activeOverlayTool === 'move') {
-              updateSelectedOverlay({ x: startOverlayState.x + (dx / screenRect.width), y: startOverlayState.y + (dy / screenRect.height) });
-          } else if (activeOverlayTool === 'rotate') {
+	          if (activeOverlayTool === 'move') {
+	              updateSelectedOverlay({ x: startOverlayState.x + (dx / screenRect.width), y: startOverlayState.y + (dy / screenRect.height) });
+	          } else if (activeOverlayTool === 'rotate') {
               // Rotation logic
               const cx = screenRect.x + (target.x * screenRect.width);
               const cy = screenRect.y + (target.y * screenRect.height);
@@ -629,6 +619,45 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   const handleMouseUp = () => {
       setIsDraggingCrop(false); setDragModeCrop(null);
+      // Drop: if a slide-space overlay is released outside the slide in canvas mode, promote it to canvas-space.
+      if (activeTab !== 'crop' && isCanvasMode && isDraggingOverlay && selectedOverlayId && stageSize.width > 0 && stageSize.height > 0) {
+          const target = overlays.find(t => t.id === selectedOverlayId);
+          if (target && (target.space || 'slide') !== 'canvas') {
+              const margin = 0.02;
+              const isOutside = (target.x < -margin || target.x > 1 + margin || target.y < -margin || target.y > 1 + margin);
+              if (isOutside) {
+                  const slideRect = getSlideRectPx();
+                  if (slideRect.w > 0 && slideRect.h > 0) {
+                      const absX = slideRect.x + (target.x * slideRect.w);
+                      const absY = slideRect.y + (target.y * slideRect.h);
+                      const xCanvas = Math.min(1, Math.max(0, absX / stageSize.width));
+                      const yCanvas = Math.min(1, Math.max(0, absY / stageSize.height));
+                      const wCanvas = target.width !== undefined ? (target.width * slideRect.w) / stageSize.width : target.width;
+                      const hCanvas = target.height !== undefined ? (target.height * slideRect.h) / stageSize.height : target.height;
+                      const scaleY = slideRect.h / stageSize.height;
+
+                      setOverlays(prev => prev.map(o => {
+                          if (o.id !== selectedOverlayId) return o;
+                          return {
+                              ...o,
+                              space: 'canvas',
+                              x: xCanvas,
+                              y: yCanvas,
+                              width: wCanvas,
+                              height: hCanvas,
+                              fontSize: o.fontSize !== undefined ? o.fontSize * scaleY : o.fontSize,
+                              strokeWidth: o.strokeWidth !== undefined ? o.strokeWidth * scaleY : o.strokeWidth,
+                              shadowBlur: o.shadowBlur !== undefined ? o.shadowBlur * scaleY : o.shadowBlur,
+                              shadowOffsetX: o.shadowOffsetX !== undefined ? o.shadowOffsetX * scaleY : o.shadowOffsetX,
+                              shadowOffsetY: o.shadowOffsetY !== undefined ? o.shadowOffsetY * scaleY : o.shadowOffsetY,
+                              borderRadius: o.borderRadius !== undefined ? o.borderRadius * scaleY : o.borderRadius,
+                          };
+                      }));
+                  }
+              }
+          }
+      }
+
       setIsDraggingOverlay(false); setActiveOverlayTool(null);
       setIsDraggingSlide(false); setSlideDragMode(null);
   };
@@ -648,7 +677,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
             imageData: imageData,
             width: 0.3,
             height: 0.3,
-            space: isCanvasMode && selectedLayerId !== SLIDE_TOKEN ? 'canvas' : undefined
+            space: isCanvasMode ? 'canvas' : undefined
         };
 
         const img = new Image(); 
@@ -716,13 +745,13 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       });
   };
 
-  const handleMouseDownOverlay = (e: React.MouseEvent, id: string, tool: ToolType) => { 
-    e.stopPropagation(); 
-    e.preventDefault(); 
-    setSelectedOverlayId(id); 
-    setSelectedLayerId(id);
-    const locked = overlays.find(t => t.id === id)?.locked;
-    if (locked) return;
+	  const handleMouseDownOverlay = (e: React.MouseEvent, id: string, tool: ToolType) => { 
+	    e.stopPropagation(); 
+	    e.preventDefault(); 
+	    setSelectedOverlayId(id); 
+	    setSelectedLayerId(id);
+	    const locked = overlays.find(t => t.id === id)?.locked;
+	    if (locked) return;
     setActiveOverlayTool(tool); 
     setIsDraggingOverlay(true); 
     setStartPos({ x: e.clientX, y: e.clientY }); 
@@ -799,21 +828,27 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   const renderOverlayForCanvas = (ov: Overlay, baseW: number, baseH: number) => {
       const isSelected = ov.id === selectedOverlayId;
+      const interactive = isCanvasMode && activeTab !== 'crop';
       const baseStyle: React.CSSProperties = {
           position: 'absolute',
           left: `${ov.x * 100}%`,
           top: `${ov.y * 100}%`,
           transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`,
-          cursor: 'move',
+          cursor: interactive ? 'move' : 'default',
           opacity: ov.opacity ?? 1,
           userSelect: 'none',
-          pointerEvents: 'auto'
+          pointerEvents: interactive ? 'auto' : 'none'
       };
       const strokeWidthPx = (ov.strokeWidth || 0) * (baseH / 500);
       const shadowScale = baseH / 500;
 
       return (
-          <div key={ov.id} id={`overlay-${ov.id}`} style={baseStyle} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'move')}>
+          <div
+              key={ov.id}
+              id={`overlay-${ov.id}`}
+              style={baseStyle}
+              onMouseDown={interactive ? ((e) => handleMouseDownOverlay(e, ov.id, 'move')) : undefined}
+          >
               {ov.type === 'text' && (
                   <div style={{
                       position: 'relative',
@@ -864,7 +899,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                   })()
               )}
 
-              {isSelected && (
+              {isSelected && interactive && !ov.locked && (
                   <div className="absolute inset-0 border border-emerald-400 pointer-events-none" style={{ margin: '-4px' }}>
                       <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow border border-slate-400 flex items-center justify-center cursor-grab pointer-events-auto hover:bg-emerald-50" onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'rotate')}>↻</div>
                       {ov.type !== 'line' && (
@@ -920,24 +955,8 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
               <button onClick={() => setActiveTab('image')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'image' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>画像</button>
               <button onClick={() => setActiveTab('audio')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'audio' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>音声</button>
           </div>
-          <div className="flex justify-end">
-              <button
-                  type="button"
-                  onClick={() => setIsCanvasMode(v => !v)}
-                  disabled={activeTab === 'crop'}
-                  className={`px-3 py-1.5 rounded text-[10px] font-bold border transition-colors ${
-                      activeTab === 'crop'
-                          ? 'bg-slate-800 border-slate-700 text-slate-600 cursor-not-allowed'
-                          : isCanvasMode
-                              ? 'bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-500'
-                              : 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
-                  }`}
-                  title="キャンバス全体（黒背景含む）を編集"
-              >
-                  {isCanvasMode ? 'キャンバス編集ON' : 'キャンバス編集'}
-              </button>
-          </div>
-      </div>
+	          <div className="flex justify-end" />
+	      </div>
 
       <div className="flex-1 flex flex-col landscape:flex-row lg:!flex-col overflow-hidden">
           
@@ -953,17 +972,17 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                           "
                style={{ backgroundColor: getBackgroundColor() }}
           >
-              {pendingAddType && (
+              {pendingAddType && isCanvasMode && (
                   <div className="absolute top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[11px] px-2.5 py-1 rounded-full shadow-lg z-50 pointer-events-none animate-bounce">
                       ダブルクリックして配置
                   </div>
               )}
-              {isCanvasMode && (
+              {showCanvasStage && (
                   <div
                       ref={stageRef}
                       className="relative w-full max-w-full border border-slate-800 rounded-lg overflow-hidden"
                       style={{ aspectRatio: videoSettings.aspectRatio.replace(':', '/'), backgroundColor: getBackgroundColor() }}
-                      onDoubleClick={handleDoubleClick}
+                      onDoubleClick={isCanvasMode ? handleDoubleClick : undefined}
                       onMouseDown={(e) => {
                           if (e.target === e.currentTarget) {
                               setSelectedOverlayId(null);
@@ -971,14 +990,49 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                           }
                       }}
                   >
-                      {(() => {
-                          const slideRect = getSlideRectPx();
-                          const overlayById = new Map(overlays.map(o => [o.id, o]));
-                          const slideOverlayIds = layerOrder.filter(id => id !== SLIDE_TOKEN && overlayById.get(id) && ((overlayById.get(id)!.space || 'slide') !== 'canvas') && !overlayById.get(id)!.hidden);
-                          return layerOrder.map(id => {
-	                              if (id === SLIDE_TOKEN) {
-	                                  const cropW = crop?.width || slide.crop?.width || slide.width || 1;
-	                                  const cropH = crop?.height || slide.crop?.height || slide.height || 1;
+	                      {(() => {
+	                          const slideRect = getSlideRectPx();
+	                          const overlayById = new Map(overlays.map(o => [o.id, o]));
+	                          const draggingOverlay = (isCanvasMode && isDraggingOverlay && selectedOverlayId) ? overlayById.get(selectedOverlayId) : null;
+	                          const draggingIsSlideSpace = !!draggingOverlay && ((draggingOverlay.space || 'slide') !== 'canvas');
+	                          const slideOverlayIds = layerOrder
+	                              .filter(id => id !== SLIDE_TOKEN && overlayById.get(id) && ((overlayById.get(id)!.space || 'slide') !== 'canvas') && !overlayById.get(id)!.hidden)
+	                              .filter(id => !(draggingIsSlideSpace && id === selectedOverlayId));
+
+	                          const toCanvasPreview = (ov: Overlay) => {
+	                              if (stageSize.width <= 0 || stageSize.height <= 0) return null;
+	                              if (slideRect.w <= 0 || slideRect.h <= 0) return null;
+	                              const absX = slideRect.x + (ov.x * slideRect.w);
+	                              const absY = slideRect.y + (ov.y * slideRect.h);
+	                              const xCanvas = absX / stageSize.width;
+	                              const yCanvas = absY / stageSize.height;
+	                              const wCanvas = ov.width !== undefined ? (ov.width * slideRect.w) / stageSize.width : ov.width;
+	                              const hCanvas = ov.height !== undefined ? (ov.height * slideRect.h) / stageSize.height : ov.height;
+	                              const scaleY = slideRect.h / stageSize.height;
+	                              return {
+	                                  ...ov,
+	                                  space: 'canvas' as const,
+	                                  x: xCanvas,
+	                                  y: yCanvas,
+	                                  width: wCanvas,
+	                                  height: hCanvas,
+	                                  fontSize: ov.fontSize !== undefined ? ov.fontSize * scaleY : ov.fontSize,
+	                                  strokeWidth: ov.strokeWidth !== undefined ? ov.strokeWidth * scaleY : ov.strokeWidth,
+	                                  shadowBlur: ov.shadowBlur !== undefined ? ov.shadowBlur * scaleY : ov.shadowBlur,
+	                                  shadowOffsetX: ov.shadowOffsetX !== undefined ? ov.shadowOffsetX * scaleY : ov.shadowOffsetX,
+	                                  shadowOffsetY: ov.shadowOffsetY !== undefined ? ov.shadowOffsetY * scaleY : ov.shadowOffsetY,
+	                                  borderRadius: ov.borderRadius !== undefined ? ov.borderRadius * scaleY : ov.borderRadius,
+	                              };
+	                          };
+
+	                          const dragPreviewOverlay = (draggingIsSlideSpace && draggingOverlay && !draggingOverlay.hidden)
+	                              ? toCanvasPreview(draggingOverlay)
+	                              : null;
+
+	                          const elements = layerOrder.map(id => {
+		                              if (id === SLIDE_TOKEN) {
+		                                  const cropW = crop?.width || slide.crop?.width || slide.width || 1;
+		                                  const cropH = crop?.height || slide.crop?.height || slide.height || 1;
 	                                  const cropX = crop?.x || slide.crop?.x || 0;
 	                                  const cropY = crop?.y || slide.crop?.y || 0;
 	                                  const originalW = slide.originalWidth || slide.width || cropW;
@@ -1003,9 +1057,12 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                                               overflow: 'hidden',
                                               boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
                                               border: selectedLayerId === SLIDE_TOKEN ? '2px solid rgba(16,185,129,0.8)' : '1px solid rgba(255,255,255,0.15)',
-                                              cursor: 'move',
+	                                              cursor: isCanvasMode ? 'move' : 'default',
 	                                          }}
-	                                          onMouseDown={(e) => handleMouseDownSlide(e, 'move')}
+	                                          onMouseDown={(e) => {
+	                                              if (!isCanvasMode) return;
+	                                              handleMouseDownSlide(e, 'move');
+	                                          }}
 	                                      >
 	                                          {overviewImage ? (
 	                                              <img
@@ -1037,26 +1094,39 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                                                   return renderOverlayForCanvas(ov, slideRect.w, slideRect.h);
                                               })}
                                           </div>
-                                          {selectedLayerId === SLIDE_TOKEN && (
-                                              <div
-                                                  className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-emerald-500 cursor-se-resize"
-                                                  onMouseDown={(e) => handleMouseDownSlide(e, 'se')}
-                                              />
-                                          )}
-                                      </div>
-                                  );
-                              }
+	                                          {selectedLayerId === SLIDE_TOKEN && isCanvasMode && (
+	                                              <div
+	                                                  className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-emerald-500 cursor-se-resize"
+	                                                  onMouseDown={(e) => {
+	                                                      if (!isCanvasMode) return;
+	                                                      handleMouseDownSlide(e, 'se');
+	                                                  }}
+	                                              />
+	                                          )}
+	                                      </div>
+	                                  );
+	                              }
 
-                              const ov = overlayById.get(id);
-                              if (!ov || ov.hidden) return null;
-                              if ((ov.space || 'slide') !== 'canvas') return null;
-                              return renderOverlayForCanvas(ov, stageSize.width, stageSize.height);
-                          });
-                      })()}
-                  </div>
-              )}
+		                              const ov = overlayById.get(id);
+		                              if (!ov || ov.hidden) return null;
+		                              if ((ov.space || 'slide') !== 'canvas') return null;
+		                              return renderOverlayForCanvas(ov, stageSize.width, stageSize.height);
+	                          });
 
-              {!isCanvasMode && (
+	                          if (dragPreviewOverlay) {
+	                              elements.push(
+	                                  <div key="__DRAG_PREVIEW__" style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
+	                                      {renderOverlayForCanvas(dragPreviewOverlay, stageSize.width, stageSize.height)}
+	                                  </div>
+	                              );
+	                          }
+
+	                          return elements;
+	                      })()}
+	                  </div>
+	              )}
+
+              {!showCanvasStage && (
               <div className="relative inline-block shadow-2xl" ref={containerRef}
                    onDoubleClick={handleDoubleClick}
                    style={{ 
@@ -1188,14 +1258,18 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
           {/* 3. Property Editor (Scrollable) */}
           <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-900 landscape:w-1/2 lg:!w-full">
-              {activeTab !== 'crop' && (isCanvasMode ? layerOrder.length > 0 : overlays.length > 0) && (
+              {activeTab !== 'crop' && (showCanvasStage ? layerOrder.length > 0 : overlays.length > 0) && (
                   <div className="p-4 pb-3 border-b border-slate-800">
                       <div className="flex items-center justify-between">
                           <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">要素一覧</div>
-                          <div className="text-[10px] text-slate-500">ドラッグで並び替え（上ほど手前）</div>
+                          {isCanvasMode ? (
+                              <div className="text-[10px] text-slate-500">ドラッグで並び替え（上ほど手前）</div>
+                          ) : (
+                              <div className="text-[10px] text-slate-500">表示は反映済み（編集OFF）</div>
+                          )}
                       </div>
                       <div className="mt-2 space-y-1">
-                          {isCanvasMode ? (
+                          {showCanvasStage ? (
                               [...layerOrder].reverse().map(id => {
                                   const isSlide = id === SLIDE_TOKEN;
                                   const ov = isSlide ? null : overlays.find(o => o.id === id);
@@ -1209,14 +1283,16 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                                           key={id}
                                           role="button"
                                           tabIndex={0}
-                                          draggable
+                                          draggable={isCanvasMode}
                                           onDragStart={(e) => {
+                                              if (!isCanvasMode) return;
                                               setDraggingLayerOverlayId(id);
                                               setDragOverLayerOverlayId(id);
                                               try { e.dataTransfer.setData('text/plain', id); } catch (_) {}
                                               e.dataTransfer.effectAllowed = 'move';
                                           }}
                                           onDragOver={(e) => {
+                                              if (!isCanvasMode) return;
                                               if (!draggingLayerOverlayId) return;
                                               e.preventDefault();
                                               if (dragOverLayerOverlayId !== id) setDragOverLayerOverlayId(id);
@@ -1226,6 +1302,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                                               if (dragOverLayerOverlayId === id) setDragOverLayerOverlayId(null);
                                           }}
                                           onDrop={(e) => {
+                                              if (!isCanvasMode) return;
                                               e.preventDefault();
                                               const fromId = draggingLayerOverlayId || (() => { try { return e.dataTransfer.getData('text/plain'); } catch (_) { return ''; } })();
                                               const toId = id;
