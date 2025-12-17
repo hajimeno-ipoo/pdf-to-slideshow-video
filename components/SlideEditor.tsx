@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectData, DuckingOptions, OutputFormat } from '../types';
 import { serializeProject, deserializeProject } from '../utils/fileUtils';
 import { isFileSystemAccessSupported } from '../utils/fileSystemAccess';
+import { saveNamedProject } from '../services/projectStorage';
 import PreviewPlayer from './PreviewPlayer';
 import TimelineEditor from './TimelineEditor';
 import { EditorProvider, useEditor } from './slideEditor/SlideEditorContext';
@@ -26,7 +27,8 @@ const SlideEditorLayout: React.FC<{
   ) => void;
   onUsageUpdate?: (usage: TokenUsage) => void;
   onLoadProject?: (data: ProjectData) => void;
-}> = ({ onStartConversion, onUsageUpdate, onLoadProject }) => {
+  onOpenProjectManager?: () => void;
+}> = ({ onStartConversion, onUsageUpdate, onLoadProject, onOpenProjectManager }) => {
   const { 
       slides, updateSlides, undo, redo, canUndo, canRedo,
       videoSettings, 
@@ -41,6 +43,7 @@ const SlideEditorLayout: React.FC<{
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isSavingNamed, setIsSavingNamed] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
   const projectInputRef = useRef<HTMLInputElement>(null);
 
@@ -113,6 +116,47 @@ const SlideEditorLayout: React.FC<{
           a.href = url; a.download = `project_${new Date().toISOString().slice(0,10)}.json`;
           document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       } catch (e) { console.error("Export failed", e); alert("プロジェクトの保存に失敗しました。"); } finally { setIsExporting(false); }
+  };
+
+  const handleSaveNamedProject = async () => {
+      if (!slides || slides.length === 0) {
+          alert('スライドが無いと保存できないよ。');
+          return;
+      }
+
+      const defaultName = `project_${new Date().toISOString().slice(0, 19).replace('T', '_')}`;
+      const name = window.prompt('プロジェクト名を入れてね！', defaultName);
+      if (!name || !name.trim()) return;
+
+      setIsSavingNamed(true);
+      try {
+          const projectData: ProjectData = {
+              slides,
+              sourceFile,
+              videoSettings,
+              outputFileHandle,
+              outputFileFormat,
+              bgmFile,
+              bgmTimeRange: bgmRange,
+              bgmVolume,
+              globalAudioFile,
+              globalAudioVolume,
+              fadeOptions,
+              duckingOptions,
+              updatedAt: Date.now()
+          };
+          const savedId = await saveNamedProject(name.trim(), projectData);
+          if (!savedId) {
+              alert('保存に失敗しちゃった…');
+              return;
+          }
+          alert('保存できたよ〜！');
+      } catch (e) {
+          console.error('Named save failed', e);
+          alert('保存に失敗しちゃった…');
+      } finally {
+          setIsSavingNamed(false);
+      }
   };
 
   const handleImportProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,6 +233,13 @@ const SlideEditorLayout: React.FC<{
                         </button>
                         <button onClick={handleExportProject} disabled={isExporting} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap">
                             {isExporting ? <span className="animate-spin">↻</span> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" /><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" /></svg>} 保存
+                        </button>
+                        <button onClick={handleSaveNamedProject} disabled={isSavingNamed} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap">
+                            {isSavingNamed ? <span className="animate-spin">↻</span> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M4.75 3A1.75 1.75 0 003 4.75v10.5A1.75 1.75 0 004.75 17h10.5A1.75 1.75 0 0017 15.25V7.621a1.75 1.75 0 00-.513-1.237l-2.871-2.871A1.75 1.75 0 0012.379 3H4.75zM6.5 4.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 4a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75zm0 4a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75z" clipRule="evenodd" /></svg>} 名前をつけて保存
+                        </button>
+                        <button onClick={onOpenProjectManager} disabled={!onOpenProjectManager} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M2 4.75A2.75 2.75 0 014.75 2h7.69a2.75 2.75 0 011.944.806l2.81 2.81A2.75 2.75 0 0118 7.56v7.69A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25V4.75zm2.75-1.25c-.69 0-1.25.56-1.25 1.25v10.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25V7.56c0-.332-.132-.65-.366-.884l-2.81-2.81A1.25 1.25 0 0011.19 3.5H4.75z" clipRule="evenodd" /></svg>
+                            プロジェクト管理
                         </button>
 
                         <div className="w-px h-5 bg-slate-700 mx-1"></div>
@@ -348,6 +399,7 @@ interface SlideEditorProps {
   onLoadProject?: (data: ProjectData) => void;
   onAutoSave?: (status: 'idle' | 'pending' | 'saving' | 'saved', time?: Date) => void;
   onOutputFileTargetChange?: (handle: FileSystemFileHandle | null, format: OutputFormat | null) => void;
+  onOpenProjectManager?: () => void;
 }
 
 const SlideEditor: React.FC<SlideEditorProps> = (props) => {
@@ -373,6 +425,7 @@ const SlideEditor: React.FC<SlideEditorProps> = (props) => {
         onStartConversion={props.onStartConversion} 
         onUsageUpdate={props.onUsageUpdate}
         onLoadProject={props.onLoadProject}
+        onOpenProjectManager={props.onOpenProjectManager}
       />
     </EditorProvider>
   );

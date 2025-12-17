@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import FileUpload from './components/FileUpload';
+import ProjectManagerModal from './components/ProjectManagerModal';
 import ProcessingStep from './components/ProcessingStep';
 import SlideEditor from './components/SlideEditor';
 import RestoreModal from './components/RestoreModal';
@@ -14,8 +15,6 @@ import { loadProject, saveProject, clearProject } from './services/projectStorag
 import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey, hasEncryptedStored, PersistMode } from './utils/apiKeyStore';
 import { ensureWritePermission, isFileSystemAccessSupported } from './utils/fileSystemAccess';
 import { buildThumbnailCaptureTimes, clampSeconds, formatSecondsForFilename } from './utils/thumbnailExport';
-import { deserializeProject } from './utils/fileUtils';
-import { getProjectImportError } from './utils/projectFileImport';
 
 declare const pdfjsLib: any;
 
@@ -54,8 +53,8 @@ const App: React.FC = () => {
   const [apiKeyEncrypted, setApiKeyEncrypted] = useState<boolean>(hasEncryptedStored());
   const [apiKeyValue, setApiKeyValue] = useState<string>('');
   const [apiKeyMode, setApiKeyMode] = useState<PersistMode>('session');
-  const projectImportInputRef = useRef<HTMLInputElement | null>(null);
-  const [projectImporting, setProjectImporting] = useState(false);
+  const [projectManagerOpen, setProjectManagerOpen] = useState(true);
+  const prevStatusRef = useRef<AppStatus | null>(null);
 
   // Cooldown State
   const [cooldown, setCooldown] = useState({ isActive: false, remainingMs: 0, reason: '' });
@@ -95,6 +94,14 @@ const App: React.FC = () => {
       }
       setReqStats(prev => ({ ...prev, rpd: initialRpd }));
   }, []);
+
+  // 起動時/IDLEに戻ったときに、プロジェクト管理モーダルを開く
+  useEffect(() => {
+      if (state.status === AppStatus.IDLE && prevStatusRef.current !== AppStatus.IDLE) {
+          setProjectManagerOpen(true);
+      }
+      prevStatusRef.current = state.status;
+  }, [state.status]);
 
   // Request Tracking Logic & Cooldown Listener
   useEffect(() => {
@@ -269,28 +276,6 @@ const App: React.FC = () => {
       });
       setSaveStatus('saved');
       setLastSavedTime(new Date(data.updatedAt));
-  };
-
-  const handleImportProjectFromTop = async (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (!e.target.files || e.target.files.length === 0) return;
-      const file = e.target.files[0];
-      setProjectImporting(true);
-      try {
-          const err = getProjectImportError(file);
-          if (err) {
-              alert(err);
-              return;
-          }
-          const text = await file.text();
-          const data = await deserializeProject(text);
-          handleProjectLoad(data);
-      } catch (e) {
-          console.error("Project import failed", e);
-          alert("プロジェクトの読み込みに失敗しました。");
-      } finally {
-          setProjectImporting(false);
-          if (projectImportInputRef.current) projectImportInputRef.current.value = '';
-      }
   };
 
   const handleDiscard = async () => {
@@ -939,6 +924,15 @@ const App: React.FC = () => {
 	        }}
 	      />
 
+        <ProjectManagerModal
+          isOpen={projectManagerOpen}
+          onClose={() => setProjectManagerOpen(false)}
+          onLoadProject={(data) => {
+            setProjectManagerOpen(false);
+            handleProjectLoad(data);
+          }}
+        />
+
 	      {thumbnailDialogOpen && (
 	        <div className="fixed inset-0 z-[9998] bg-black/60 flex items-center justify-center p-4">
 	          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl">
@@ -1076,7 +1070,7 @@ const App: React.FC = () => {
         {/* Editor View */}
         {state.status === AppStatus.EDITING ? (
             <div className="flex-1 w-full h-full p-3 sm:p-4 lg:p-6 overflow-hidden flex flex-col">
-	                <SlideEditor 
+	                    <SlideEditor
 	                    slides={slides} 
 	                    onUpdateSlides={setSlides} 
 	                    onStartConversion={handleStartConversion}
@@ -1098,6 +1092,7 @@ const App: React.FC = () => {
 	                    }}
 	                    onUsageUpdate={handleUsageUpdate}
 	                    onLoadProject={handleProjectLoad}
+                      onOpenProjectManager={() => setProjectManagerOpen(true)}
 	                    onAutoSave={handleAutoSaveStatus}
 	                />
             </div>
@@ -1123,30 +1118,21 @@ const App: React.FC = () => {
 
                 {/* Upload Area */}
                 {state.status === AppStatus.IDLE && (
+                  <div className="w-full max-w-2xl mx-auto mb-4 flex flex-col items-center gap-2 px-2 sm:px-0">
+                    <button
+                      onClick={() => setProjectManagerOpen(true)}
+                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors"
+                    >
+                      プロジェクト管理を開く
+                    </button>
+                    <div className="text-xs text-slate-500 text-center">
+                      保存済みのプロジェクトを開いたり、JSONから読み込めるよ。
+                    </div>
+                  </div>
+                )}
+                {state.status === AppStatus.IDLE && (
                 <FileUpload onFileSelect={handleFileSelect} status={state.status} />
                 )}
-
-	                {state.status === AppStatus.IDLE && (
-	                  <div className="w-full max-w-2xl mx-auto mt-4 flex flex-col items-center gap-2 px-2 sm:px-0">
-	                    <input
-	                      type="file"
-	                      accept=".json,application/json"
-	                      ref={projectImportInputRef}
-	                      className="hidden"
-	                      onChange={handleImportProjectFromTop}
-	                    />
-	                    <button
-	                      onClick={() => projectImportInputRef.current?.click()}
-	                      disabled={projectImporting}
-	                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-	                    >
-	                      保存したプロジェクト(JSON)を読み込む
-	                    </button>
-	                    <div className="text-xs text-slate-500 text-center">
-	                      以前エクスポートした <span className="text-slate-300 font-medium">.json</span> から続き編集できるよ。
-	                    </div>
-	                  </div>
-	                )}
 
                 {/* Processing Status (Analysis or Conversion) */}
                 {(state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING) && (
