@@ -69,10 +69,9 @@ const analyzePageContent = async (page: PDFPageProxy, pageIndex: number): Promis
   return { x: minX / scale, y: minY / scale, width: (maxX - minX) / scale, height: (maxY - minY) / scale, originalWidth: fullWidth, originalHeight: fullHeight, pageIndex };
 };
 
-const generateThumbnail = async (pdf: PDFDocumentProxy, bound: PageBound): Promise<string> => {
+const generateThumbnail = async (page: PDFPageProxy, bound: PageBound): Promise<string> => {
   const targetThumbWidth = 300;
   const scale = targetThumbWidth / bound.width;
-  const page = await pdf.getPage(bound.pageIndex);
   const viewport = page.getViewport({ scale });
   const canvas = document.createElement('canvas');
   canvas.width = bound.width * scale; canvas.height = bound.height * scale;
@@ -414,27 +413,55 @@ export const analyzePdf = async (
   const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
   const numPages = pdf.numPages;
   const slides: Slide[] = [];
-  
-  let previousContext = "";
+  const baseTotalUnits = numPages;
+  const totalUnits = baseTotalUnits + (autoGenerateScript ? numPages : 0);
+  let doneUnits = 0;
 
-  for (let i = 1; i <= numPages; i++) {
-    if (onProgress) {
-        onProgress(i, numPages);
+  const report = () => {
+    if (!onProgress) return;
+    const current = totalUnits > 0 ? (doneUnits / totalUnits) * numPages : 0;
+    onProgress(current, numPages);
+  };
+
+  const pageResults: Array<{ bound: PageBound; thumbnailUrl: string } | null> = new Array(numPages).fill(null);
+  const concurrency = 2;
+  let nextIndex = 1;
+
+  const worker = async () => {
+    while (true) {
+      const i = nextIndex;
+      nextIndex += 1;
+      if (i > numPages) return;
+      const page = await pdf.getPage(i);
+      const bound = await analyzePageContent(page, i);
+      const thumbnailUrl = await generateThumbnail(page, bound);
+      pageResults[i - 1] = { bound, thumbnailUrl };
+      doneUnits += 1;
+      report();
     }
-    const page = await pdf.getPage(i);
-    const bound = await analyzePageContent(page, i);
-    const thumbnailUrl = await generateThumbnail(pdf, bound);
-    
+  };
+
+  await Promise.all(Array.from({ length: Math.min(concurrency, numPages) }, () => worker()));
+
+  let previousContext = "";
+  for (let i = 1; i <= numPages; i++) {
+    const result = pageResults[i - 1];
+    if (!result) continue;
+    const { bound, thumbnailUrl } = result;
+
     let narrationScript = "";
     if (autoGenerateScript) {
-        try {
-            const result = await generateSlideScript(thumbnailUrl, previousContext, customScriptPrompt);
-            narrationScript = result.text;
-            previousContext = result.text;
-            if (onUsageUpdate) onUsageUpdate(result.usage);
-        } catch (e) {
-            console.error(`Script generation failed for page ${i}`, e);
-        }
+      try {
+        const gen = await generateSlideScript(thumbnailUrl, previousContext, customScriptPrompt);
+        narrationScript = gen.text;
+        previousContext = gen.text;
+        if (onUsageUpdate) onUsageUpdate(gen.usage);
+      } catch (e) {
+        console.error(`Script generation failed for page ${i}`, e);
+      } finally {
+        doneUnits += 1;
+        report();
+      }
     }
 
     slides.push({
@@ -458,7 +485,7 @@ export const analyzePdf = async (
       overlays: []
     });
   }
-  
+
   return slides;
 };
 
