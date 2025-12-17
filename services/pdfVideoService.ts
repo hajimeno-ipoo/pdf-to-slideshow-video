@@ -346,38 +346,85 @@ export const renderSlideToImage = async (pdfDoc: PDFDocumentProxy | null, slide:
 };
 
 export const drawSlideFrame = async (ctx: CanvasRenderingContext2D, slideImage: ImageBitmap, width: number, height: number, effectType: EffectType, kenBurns: any, progress: number, slide: Slide, settings: VideoSettings, currentTime: number, imageCache?: Map<string, HTMLImageElement>, skipOverlays: boolean = false) => {
+    const SLIDE_TOKEN = '__SLIDE__';
     const slideScale = settings.slideScale / 100; const radius = settings.slideBorderRadius;
     let kbScale = 1.0; let kbX = 0; let kbY = 0;
     if (effectType === 'kenburns' && kenBurns) {
         const p = progress;
         const { direction, startScale, endScale, panX, panY } = kenBurns;
         kbScale = startScale + (endScale - startScale) * p;
-        if (direction.includes('pan')) { kbX = panX * width * p; kbY = panY * height * p; }
+        if (direction.includes('pan')) { kbX = panX * p; kbY = panY * p; }
         if (direction === 'zoom-out') { kbScale = endScale + (startScale - endScale) * p; }
     }
     const availableW = width * slideScale; const availableH = height * slideScale;
     const imgRatio = slideImage.width / slideImage.height;
-    let finalW = availableW; let finalH = availableW / imgRatio;
-    if (finalH > availableH) { finalH = availableH; finalW = availableH * imgRatio; }
-    const centerX = width / 2; const centerY = height / 2;
-    const drawW = finalW * kbScale; const drawH = finalH * kbScale;
-    const drawX = centerX - (drawW / 2) + kbX; const drawY = centerY - (drawH / 2) + kbY;
-    ctx.save();
-    if (radius > 0) {
-        const clipX = centerX - finalW/2; const clipY = centerY - finalH/2;
-        ctx.beginPath();
-        if (typeof ctx.roundRect === 'function') { ctx.roundRect(clipX, clipY, finalW, finalH, radius); } else { ctx.rect(clipX, clipY, finalW, finalH); }
-        ctx.clip();
+    let rectW = availableW; let rectH = availableW / imgRatio;
+    if (rectH > availableH) { rectH = availableH; rectW = availableH * imgRatio; }
+    let rectX = (width / 2) - (rectW / 2);
+    let rectY = (height / 2) - (rectH / 2);
+    if (slide.layout && Number.isFinite(slide.layout.w) && Number.isFinite(slide.layout.x) && Number.isFinite(slide.layout.y)) {
+        rectW = slide.layout.w * width;
+        rectH = rectW / imgRatio;
+        if (rectH > height) { rectH = height; rectW = rectH * imgRatio; }
+        rectX = slide.layout.x * width;
+        rectY = slide.layout.y * height;
     }
-    ctx.drawImage(slideImage, drawX, drawY, drawW, drawH);
-    ctx.restore();
-    if (slide.overlays && !skipOverlays) {
-        const slideRectX = centerX - finalW/2; const slideRectY = centerY - finalH/2;
-        const transDuration = slide.transitionType === 'none' ? 0 : (slide.transitionDuration !== undefined ? slide.transitionDuration : settings.transitionDuration);
+
+    const drawSlide = () => {
+        const centerX = rectX + rectW / 2;
+        const centerY = rectY + rectH / 2;
+        const drawW = rectW * kbScale;
+        const drawH = rectH * kbScale;
+        const drawX = centerX - (drawW / 2) + (kbX * rectW);
+        const drawY = centerY - (drawH / 2) + (kbY * rectH);
+
         ctx.save();
-        ctx.translate(slideRectX, slideRectY);
-        await drawOverlays(ctx, slide.overlays, finalW, finalH, currentTime, slide.duration, imageCache, transDuration);
+        if (radius > 0) {
+            ctx.beginPath();
+            if (typeof ctx.roundRect === 'function') ctx.roundRect(rectX, rectY, rectW, rectH, radius);
+            else ctx.rect(rectX, rectY, rectW, rectH);
+            ctx.clip();
+        }
+        ctx.drawImage(slideImage, drawX, drawY, drawW, drawH);
         ctx.restore();
+    };
+
+    if (!slide.overlays || skipOverlays) {
+        drawSlide();
+        return;
+    }
+
+    const overlays = slide.overlays || [];
+    const overlayIds = overlays.map(o => o.id);
+    let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
+    if (!layerOrder.includes(SLIDE_TOKEN)) layerOrder.unshift(SLIDE_TOKEN);
+    for (const id of overlayIds) if (!layerOrder.includes(id)) layerOrder.push(id);
+    layerOrder = layerOrder.filter(id => id === SLIDE_TOKEN || overlayIds.includes(id));
+
+    const transDuration = slide.transitionType === 'none' ? 0 : (slide.transitionDuration !== undefined ? slide.transitionDuration : settings.transitionDuration);
+
+    for (const id of layerOrder) {
+        if (id === SLIDE_TOKEN) {
+            drawSlide();
+            continue;
+        }
+        const ov = overlays.find(o => o.id === id);
+        if (!ov) continue;
+        const space = ov.space || 'slide';
+        if (space === 'canvas') {
+            await drawOverlays(ctx, [ov], width, height, currentTime, slide.duration, imageCache, transDuration);
+        } else {
+            ctx.save();
+            ctx.translate(rectX, rectY);
+            if (radius > 0) {
+                ctx.beginPath();
+                if (typeof ctx.roundRect === 'function') ctx.roundRect(0, 0, rectW, rectH, radius);
+                else ctx.rect(0, 0, rectW, rectH);
+                ctx.clip();
+            }
+            await drawOverlays(ctx, [ov], rectW, rectH, currentTime, slide.duration, imageCache, transDuration);
+            ctx.restore();
+        }
     }
 };
 

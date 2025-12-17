@@ -59,6 +59,28 @@ const easeInBack = (x: number): number => {
   return c3 * x * x * x - c1 * x * x;
 };
 
+const getSlideRect = (slide: Slide, videoSettings: VideoSettings, videoW: number, videoH: number) => {
+    const slideScale = videoSettings.slideScale / 100;
+    const imgRatio = (slide.crop && slide.crop.width && slide.crop.height) ? (slide.crop.width / slide.crop.height) : (slide.width / slide.height);
+
+    let rectW = videoW * slideScale;
+    let rectH = rectW / imgRatio;
+    const availableH = videoH * slideScale;
+    if (rectH > availableH) { rectH = availableH; rectW = availableH * imgRatio; }
+    let rectX = (videoW / 2) - (rectW / 2);
+    let rectY = (videoH / 2) - (rectH / 2);
+
+    if (slide.layout && Number.isFinite(slide.layout.w) && Number.isFinite(slide.layout.x) && Number.isFinite(slide.layout.y)) {
+        rectW = slide.layout.w * videoW;
+        rectH = rectW / imgRatio;
+        if (rectH > videoH) { rectH = videoH; rectW = rectH * imgRatio; }
+        rectX = slide.layout.x * videoW;
+        rectY = slide.layout.y * videoH;
+    }
+
+    return { x: rectX, y: rectY, w: rectW, h: rectH, imgRatio };
+};
+
 // Helper component for slide background when using custom image (GIF/APNG support)
 const SlideBackgroundLayer = React.memo(({ slide, kenBurns, progress, width: videoW, height: videoH, videoSettings }: { slide: Slide, kenBurns: any, progress: number, width: number, height: number, videoSettings: VideoSettings }) => {
     const isAnim = isAnimSlide(slide);
@@ -80,7 +102,6 @@ const SlideBackgroundLayer = React.memo(({ slide, kenBurns, progress, width: vid
         };
     }, [slide.customImageFile, slide.thumbnailUrl]);
 
-    const slideScale = videoSettings.slideScale / 100;
     const radius = videoSettings.slideBorderRadius;
 
     let kbScale = 1.0;
@@ -99,24 +120,13 @@ const SlideBackgroundLayer = React.memo(({ slide, kenBurns, progress, width: vid
         }
     }
 
-    const availableW = videoW * slideScale;
-    const availableH = videoH * slideScale;
-    const imgRatio = slide.crop.width / slide.crop.height;
-    
-    let finalW = availableW;
-    let finalH = availableW / imgRatio;
-    
-    if (finalH > availableH) {
-        finalH = availableH;
-        finalW = availableH * imgRatio;
-    }
-    
-    const centerX = videoW / 2;
-    const centerY = videoH / 2;
-    const drawW = finalW * kbScale;
-    const drawH = finalH * kbScale;
-    const drawX = centerX - (drawW / 2) + kbX;
-    const drawY = centerY - (drawH / 2) + kbY;
+    const rect = getSlideRect(slide, videoSettings, videoW, videoH);
+    const centerX = rect.x + rect.w / 2;
+    const centerY = rect.y + rect.h / 2;
+    const drawW = rect.w * kbScale;
+    const drawH = rect.h * kbScale;
+    const drawX = centerX - (drawW / 2) + (kbX * rect.w);
+    const drawY = centerY - (drawH / 2) + (kbY * rect.h);
 
     return (
         <div 
@@ -166,215 +176,213 @@ const OverlayLayer = React.memo(({
     if (!slide.overlays) return null;
     if (videoW === 0) return null;
 
-    const slideScale = videoSettings.slideScale / 100;
-    const availableW = videoW * slideScale;
-    const availableH = videoH * slideScale;
-    
-    const imgRatio = slide.width / slide.height;
-    
-    let finalW = availableW;
-    let finalH = availableW / imgRatio;
-    
-    if (finalH > availableH) {
-        finalH = availableH;
-        finalW = availableH * imgRatio;
-    }
-    
-    let kbScale = 1.0;
-    let kbX = 0;
-    let kbY = 0;
-    
-    if (slide.effectType === 'kenburns' && kenBurns) {
-        const { direction, startScale, endScale, panX, panY } = kenBurns;
-        kbScale = startScale + (endScale - startScale) * progress;
-        if (direction.includes('pan')) {
-           kbX = panX * videoW * progress;
-           kbY = panY * videoH * progress;
+    const SLIDE_TOKEN = '__SLIDE__';
+    const overlays = slide.overlays.filter(ov => !ov.hidden);
+    const overlayIds = overlays.map(o => o.id);
+    const overlayById = new Map(overlays.map(o => [o.id, o]));
+
+    let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
+    if (!layerOrder.includes(SLIDE_TOKEN)) layerOrder.unshift(SLIDE_TOKEN);
+    for (const id of overlayIds) if (!layerOrder.includes(id)) layerOrder.push(id);
+    layerOrder = layerOrder.filter(id => id === SLIDE_TOKEN || overlayIds.includes(id));
+
+    const rect = getSlideRect(slide, videoSettings, videoW, videoH);
+    const radius = videoSettings.slideBorderRadius;
+
+    const slideOverlayIdsInOrder = layerOrder.filter(id => {
+        if (id === SLIDE_TOKEN) return false;
+        const ov = overlayById.get(id);
+        if (!ov) return false;
+        return (ov.space || 'slide') !== 'canvas';
+    });
+
+    const renderOverlay = (ov: Overlay, baseW: number, baseH: number) => {
+        const startTime = ov.startTime || 0;
+        const duration = ov.duration || (slide.duration - startTime);
+        const endTime = startTime + duration;
+        if (currentTime < startTime || currentTime > endTime) return null;
+
+        const strokeWidthPx = Math.max(1, (ov.strokeWidth || 0) * (baseH / 500));
+        const baseDuration = 1.0;
+        const animDuration = (duration < 2.0) ? Math.min(baseDuration, duration / 2) : baseDuration;
+        const timeInOverlay = currentTime - startTime;
+
+        let alpha = ov.opacity ?? 1;
+        let offsetX = 0;
+        let offsetY = 0;
+        let scale = 1;
+        let rotation = ov.rotation || 0;
+        let clipPath: string | undefined = undefined;
+        let displayText = ov.text;
+
+        if (ov.animationIn && ov.animationIn !== 'none') {
+            const p = Math.min(1, Math.max(0, timeInOverlay / animDuration));
+            const easeOut = 1 - Math.pow(1 - p, 3);
+            switch (ov.animationIn) {
+                case 'fade': alpha *= easeOut; break;
+                case 'pop': scale = easeOutBack(p); alpha *= Math.min(1, p * 2); break;
+                case 'slide-up': offsetY += (1 - easeOut) * (baseH * 0.2); alpha *= easeOut; break;
+                case 'slide-down': offsetY -= (1 - easeOut) * (baseH * 0.2); alpha *= easeOut; break;
+                case 'slide-left': offsetX -= (1 - easeOut) * (baseW * 0.2); alpha *= easeOut; break;
+                case 'slide-right': offsetX += (1 - easeOut) * (baseW * 0.2); alpha *= easeOut; break;
+                case 'zoom': scale = easeOut; alpha *= easeOut; break;
+                case 'rotate-cw': rotation += (1 - easeOut) * -180; alpha *= easeOut; break;
+                case 'rotate-ccw': rotation += (1 - easeOut) * 180; alpha *= easeOut; break;
+                case 'wipe-right': clipPath = `inset(0 ${100 - (easeOut * 100)}% 0 0)`; break;
+                case 'wipe-down': clipPath = `inset(0 0 ${100 - (easeOut * 100)}% 0)`; break;
+                case 'typewriter':
+                    if (ov.type === 'text' && ov.text) {
+                        const len = Math.floor(ov.text.length * p);
+                        displayText = ov.text.substring(0, len);
+                    }
+                    break;
+            }
         }
-        if (direction === 'zoom-out') {
-             kbScale = endScale + (startScale - endScale) * progress;
+
+        if (ov.animationOut && ov.animationOut !== 'none') {
+            const outStartTime = duration - animDuration;
+            if (timeInOverlay > outStartTime) {
+                const p = Math.min(1, Math.max(0, (timeInOverlay - outStartTime) / animDuration));
+                const easeIn = Math.pow(p, 3);
+                switch (ov.animationOut) {
+                    case 'fade': alpha *= (1 - easeIn); break;
+                    case 'pop': scale = easeInBack(1 - p); alpha *= (1 - p); break;
+                    case 'slide-up': offsetY -= easeIn * (baseH * 0.2); alpha *= (1 - easeIn); break;
+                    case 'slide-down': offsetY += easeIn * (baseH * 0.2); alpha *= (1 - easeIn); break;
+                    case 'slide-left': offsetX -= easeIn * (baseW * 0.2); alpha *= (1 - easeIn); break;
+                    case 'slide-right': offsetX += easeIn * (baseW * 0.2); alpha *= (1 - easeIn); break;
+                    case 'zoom': scale = 1 + easeIn * 0.5; alpha *= (1 - easeIn); break;
+                    case 'rotate-cw': rotation += easeIn * 180; alpha *= (1 - easeIn); break;
+                    case 'rotate-ccw': rotation += easeIn * -180; alpha *= (1 - easeIn); break;
+                    case 'wipe-right': clipPath = `inset(0 0 0 ${easeIn * 100}%)`; break;
+                    case 'wipe-down': clipPath = `inset(${easeIn * 100}% 0 0 0)`; break;
+                }
+            }
         }
-    }
-    
-    const centerX = videoW / 2;
-    const centerY = videoH / 2;
-    const drawW = finalW * kbScale;
-    const drawH = finalH * kbScale;
-    const drawX = centerX - (drawW / 2) + kbX;
-    const drawY = centerY - (drawH / 2) + kbY;
-    const shadowScale = drawH / 500;
+
+        const baseStyle: React.CSSProperties = {
+            position: 'absolute',
+            left: `${ov.x * 100}%`,
+            top: `${ov.y * 100}%`,
+            transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scale})`,
+            opacity: alpha,
+            clipPath,
+            pointerEvents: 'none',
+        };
+
+        const shadowScale = baseH / 500;
+
+        const textStrokeStyle: React.CSSProperties =
+            strokeWidthPx > 0
+                ? {
+                      WebkitTextStrokeWidth: `${strokeWidthPx}px`,
+                      WebkitTextStrokeColor: ov.strokeColor || '#000',
+                      WebkitTextStroke: `${strokeWidthPx}px ${ov.strokeColor || '#000'}`,
+                      paintOrder: 'stroke fill',
+                  }
+                : {};
+
+        return (
+            <div key={ov.id} style={baseStyle}>
+                {ov.type === 'text' && (
+                    <div style={{
+                        fontSize: `${(ov.fontSize || 5) / 100 * baseH}px`,
+                        fontFamily: `"${ov.fontFamily}", sans-serif`,
+                        fontWeight: ov.isBold ? 'bold' : 'normal',
+                        fontStyle: ov.isItalic ? 'italic' : 'normal',
+                        textAlign: ov.textAlign || 'center',
+                        whiteSpace: ov.width ? 'normal' : 'pre',
+                        width: ov.width ? `${ov.width * baseW}px` : 'auto',
+                        minWidth: ov.width ? `${ov.width * baseW}px` : 'auto',
+                        color: ov.color,
+                        backgroundColor: ov.backgroundColor,
+                        padding: ov.backgroundColor ? `${(ov.backgroundPadding||0) * ((ov.fontSize||5)/500 * baseH)}px` : undefined,
+                        borderRadius: `${(ov.borderRadius||0)}px`,
+                        filter: ov.shadowColor ? `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor})` : undefined,
+                        ...textStrokeStyle,
+                    }}>
+                        {displayText}
+                    </div>
+                )}
+                {ov.type === 'image' && ov.imageData && (
+                    <img
+                      src={ov.imageData}
+                      alt="overlay"
+                      style={{
+                          width: `${(ov.width||0.2) * baseW}px`,
+                          height: `${(ov.height||0.2) * baseH}px`,
+                          objectFit: 'contain',
+                          filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`
+                      }}
+                    />
+                )}
+                {(ov.type === 'rect' || ov.type === 'circle') && (
+                    <div style={{
+                        width: `${(ov.width||0.2) * baseW}px`,
+                        height: `${(ov.height||0.2) * baseH}px`,
+                        border: `${strokeWidthPx}px solid ${ov.color}`,
+                        backgroundColor: ov.backgroundColor || 'transparent',
+                        borderRadius: ov.type === 'circle' ? '50%' : `${(ov.borderRadius||0)}px`,
+                        boxShadow: `${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'}`
+                    }} />
+                )}
+                {ov.type === 'line' && (
+                    <svg width={`${(ov.width||0.2) * baseW}`} height={`${Math.max(20, strokeWidthPx * 2)}`} style={{ overflow: 'visible', filter: ov.shadowColor ? `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor})` : undefined }}>
+                        <line x1="0" y1="50%" x2="100%" y2="50%" stroke={ov.color} strokeWidth={strokeWidthPx} strokeLinecap={ov.strokeLineCap || 'butt'} strokeDasharray={ ov.borderStyle === 'dashed' ? `${strokeWidthPx * 3},${strokeWidthPx * 2}` : ov.borderStyle === 'dotted' ? (ov.strokeLineCap === 'round' ? `0,${strokeWidthPx * 2}` : `${strokeWidthPx},${strokeWidthPx}`) : undefined } />
+                    </svg>
+                )}
+                {ov.type === 'arrow' && (
+                    (() => {
+                        const w = (ov.width || 0.2) * baseW;
+                        const h = (ov.height || 0.05) * baseH;
+                        const headHeight = h;
+                        const headLength = Math.min(w, headHeight);
+                        const shaftHeight = (ov.strokeWidth || 5) * (baseH / 500);
+                        const shaftY = (h - shaftHeight) / 2;
+                        return (
+                            <svg width={w} height={h} style={{ filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`, overflow: 'visible' }}>
+                                <rect x="0" y={shaftY} width={Math.max(0, w - headLength)} height={shaftHeight} fill={ov.color} />
+                                <polygon points={`${w},${h/2} ${w-headLength},0 ${w-headLength},${h}`} fill={ov.color} />
+                            </svg>
+                        );
+                    })()
+                )}
+            </div>
+        );
+    };
 
     return (
-        <div 
-          style={{ 
-              position: 'absolute', 
-              left: drawX, top: drawY, 
-              width: drawW, height: drawH, 
-              pointerEvents: 'none',
-              overflow: 'hidden',
-              zIndex: 10
-          }}
-        >
-            {slide.overlays.filter(ov => !ov.hidden).map(ov => {
-                // Timing Check
-                const startTime = ov.startTime || 0;
-                const duration = ov.duration || (slide.duration - startTime);
-                const endTime = startTime + duration;
-
-                if (currentTime < startTime || currentTime > endTime) {
-                    return null;
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 10 }}>
+            {layerOrder.map(id => {
+                if (id === SLIDE_TOKEN) {
+                    return (
+                        <div
+                            key={id}
+                            style={{
+                                position: 'absolute',
+                                left: rect.x,
+                                top: rect.y,
+                                width: rect.w,
+                                height: rect.h,
+                                overflow: 'hidden',
+                                borderRadius: `${radius}px`,
+                                pointerEvents: 'none',
+                            }}
+                        >
+                            {slideOverlayIdsInOrder.map(oid => {
+                                const ov = overlayById.get(oid);
+                                if (!ov) return null;
+                                return renderOverlay(ov, rect.w, rect.h);
+                            })}
+                        </div>
+                    );
                 }
 
-                const strokeWidthPx = Math.max(1, (ov.strokeWidth || 0) * (drawH / 500));
-                const baseDuration = 1.0;
-                const animDuration = (duration < 2.0) ? Math.min(baseDuration, duration / 2) : baseDuration;
-                
-                // Calculate local time for this overlay
-                const timeInOverlay = currentTime - startTime;
-
-                let alpha = ov.opacity ?? 1;
-                let offsetX = 0;
-                let offsetY = 0;
-                let scale = 1;
-                let rotation = ov.rotation || 0;
-                let clipPath: string | undefined = undefined;
-                let displayText = ov.text;
-
-                // Animation IN
-                if (ov.animationIn && ov.animationIn !== 'none') {
-                    const p = Math.min(1, Math.max(0, timeInOverlay / animDuration));
-                    const easeOut = 1 - Math.pow(1 - p, 3);
-
-                    switch (ov.animationIn) {
-                        case 'fade': alpha *= easeOut; break;
-                        case 'pop': scale = easeOutBack(p); alpha *= Math.min(1, p * 2); break;
-                        case 'slide-up': offsetY += (1 - easeOut) * (drawH * 0.2); alpha *= easeOut; break;
-                        case 'slide-down': offsetY -= (1 - easeOut) * (drawH * 0.2); alpha *= easeOut; break;
-                        case 'slide-left': offsetX -= (1 - easeOut) * (drawW * 0.2); alpha *= easeOut; break;
-                        case 'slide-right': offsetX += (1 - easeOut) * (drawW * 0.2); alpha *= easeOut; break;
-                        case 'zoom': scale = easeOut; alpha *= easeOut; break;
-                        case 'rotate-cw': rotation += (1 - easeOut) * -180; alpha *= easeOut; break;
-                        case 'rotate-ccw': rotation += (1 - easeOut) * 180; alpha *= easeOut; break;
-                        case 'wipe-right': clipPath = `inset(0 ${100 - (easeOut * 100)}% 0 0)`; break;
-                        case 'wipe-down': clipPath = `inset(0 0 ${100 - (easeOut * 100)}% 0)`; break;
-                        case 'typewriter': 
-                            if (ov.type === 'text' && ov.text) {
-                                const len = Math.floor(ov.text.length * p);
-                                displayText = ov.text.substring(0, len);
-                            }
-                            break;
-                    }
-                }
-
-                // Animation OUT
-                if (ov.animationOut && ov.animationOut !== 'none') {
-                    const outStartTime = duration - animDuration;
-                    if (timeInOverlay > outStartTime) {
-                        const p = Math.min(1, Math.max(0, (timeInOverlay - outStartTime) / animDuration));
-                        const easeIn = Math.pow(p, 3);
-                        switch (ov.animationOut) {
-                            case 'fade': alpha *= (1 - easeIn); break;
-                            case 'pop': scale = easeInBack(1 - p); alpha *= (1 - p); break;
-                            case 'slide-up': offsetY -= easeIn * (drawH * 0.2); alpha *= (1 - easeIn); break;
-                            case 'slide-down': offsetY += easeIn * (drawH * 0.2); alpha *= (1 - easeIn); break;
-                            case 'slide-left': offsetX -= easeIn * (drawW * 0.2); alpha *= (1 - easeIn); break;
-                            case 'slide-right': offsetX += easeIn * (drawW * 0.2); alpha *= (1 - easeIn); break;
-                            case 'zoom': scale = 1 + easeIn * 0.5; alpha *= (1 - easeIn); break;
-                            case 'rotate-cw': rotation += easeIn * 180; alpha *= (1 - easeIn); break;
-                            case 'rotate-ccw': rotation += easeIn * -180; alpha *= (1 - easeIn); break;
-                            case 'wipe-right': clipPath = `inset(0 0 0 ${easeIn * 100}%)`; break;
-                            case 'wipe-down': clipPath = `inset(${easeIn * 100}% 0 0 0)`; break;
-                        }
-                    }
-                }
-
-                const baseStyle: React.CSSProperties = {
-                    position: 'absolute',
-                    left: `${ov.x * 100}%`,
-                    top: `${ov.y * 100}%`,
-                    transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scale})`,
-                    opacity: alpha, // Local opacity only
-                    clipPath: clipPath,
-                };
-
-                // テキスト枠線をプレビューでも出すためのスタイル
-                const textStrokeStyle: React.CSSProperties =
-                    strokeWidthPx > 0
-                        ? {
-                              WebkitTextStrokeWidth: `${strokeWidthPx}px`,
-                              WebkitTextStrokeColor: ov.strokeColor || '#000',
-                              WebkitTextStroke: `${strokeWidthPx}px ${ov.strokeColor || '#000'}`,
-                              paintOrder: 'stroke fill',
-                          }
-                        : {};
-
-                return (
-                    <div key={ov.id} style={baseStyle}>
-                        {ov.type === 'text' && (
-                            <div style={{
-                                fontSize: `${(ov.fontSize || 5) / 100 * drawH}px`,
-                                fontFamily: `"${ov.fontFamily}", sans-serif`,
-                                fontWeight: ov.isBold ? 'bold' : 'normal',
-                                fontStyle: ov.isItalic ? 'italic' : 'normal',
-                                textAlign: ov.textAlign || 'center',
-                                whiteSpace: ov.width ? 'normal' : 'pre',
-                                width: ov.width ? `${ov.width * 100 * (drawW/drawH/ov.width*0.2)}vw` : 'auto', 
-                                minWidth: ov.width ? `${ov.width * drawW}px` : 'auto',
-                                color: ov.color,
-                                backgroundColor: ov.backgroundColor,
-                                padding: ov.backgroundColor ? `${(ov.backgroundPadding||0) * ((ov.fontSize||5)/500 * drawH)}px` : undefined,
-                                borderRadius: `${(ov.borderRadius||0)}px`,
-                                filter: ov.shadowColor ? `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor})` : undefined,
-                                ...textStrokeStyle,
-                            }}>
-                                {displayText}
-                            </div>
-                        )}
-                        {ov.type === 'image' && ov.imageData && (
-                            <img 
-                              src={ov.imageData} 
-                              alt="overlay" 
-                              style={{ 
-                                  width: `${(ov.width||0.2) * drawW}px`, 
-                                  height: `${(ov.height||0.2) * drawH}px`, 
-                                  objectFit: 'contain',
-                                  filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})` 
-                              }} 
-                            />
-                        )}
-                        {(ov.type === 'rect' || ov.type === 'circle') && (
-                            <div style={{ 
-                                width: `${(ov.width||0.2) * drawW}px`, 
-                                height: `${(ov.height||0.2) * drawH}px`, 
-                                border: `${strokeWidthPx}px solid ${ov.color}`, 
-                                backgroundColor: ov.backgroundColor || 'transparent', 
-                                borderRadius: ov.type === 'circle' ? '50%' : `${(ov.borderRadius||0)}px`,
-                                boxShadow: `${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'}`
-                            }} />
-                        )}
-                        {ov.type === 'line' && (
-                              <svg width={`${(ov.width||0.2) * drawW}`} height={`${Math.max(20, strokeWidthPx * 2)}`} style={{ overflow: 'visible', filter: ov.shadowColor ? `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor})` : undefined }}>
-                                  <line x1="0" y1="50%" x2="100%" y2="50%" stroke={ov.color} strokeWidth={strokeWidthPx} strokeLinecap={ov.strokeLineCap || 'butt'} strokeDasharray={ ov.borderStyle === 'dashed' ? `${strokeWidthPx * 3},${strokeWidthPx * 2}` : ov.borderStyle === 'dotted' ? (ov.strokeLineCap === 'round' ? `0,${strokeWidthPx * 2}` : `${strokeWidthPx},${strokeWidthPx}`) : undefined } />
-                              </svg>
-                        )}
-                        {ov.type === 'arrow' && (
-                              (() => { 
-                                  const w = (ov.width || 0.2) * drawW; 
-                                  const h = (ov.height || 0.05) * drawH; 
-                                  const headHeight = h; 
-                                  const headLength = Math.min(w, headHeight); 
-                                  const shaftHeight = (ov.strokeWidth || 5) * (drawH / 500); 
-                                  const shaftY = (h - shaftHeight) / 2; 
-                                  return ( 
-                                      <svg width={w} height={h} style={{ filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`, overflow: 'visible' }}> 
-                                          <rect x="0" y={shaftY} width={Math.max(0, w - headLength)} height={shaftHeight} fill={ov.color} /> 
-                                          <polygon points={`${w},${h/2} ${w-headLength},0 ${w-headLength},${h}`} fill={ov.color} /> 
-                                      </svg> 
-                                  ); 
-                              })()
-                        )}
-                    </div>
-                );
+                const ov = overlayById.get(id);
+                if (!ov) return null;
+                const space = ov.space || 'slide';
+                if (space !== 'canvas') return null;
+                return renderOverlay(ov, videoW, videoH);
             })}
         </div>
     );

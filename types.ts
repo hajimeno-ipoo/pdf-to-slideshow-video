@@ -79,6 +79,7 @@ export interface VideoSettings {
 }
 
 export type OverlayType = 'text' | 'arrow' | 'rect' | 'circle' | 'image' | 'line';
+export type OverlaySpace = 'slide' | 'canvas';
 export type AnimationType = 
   | 'none' 
   | 'fade' 
@@ -98,6 +99,7 @@ export interface Overlay {
   height?: number;
   rotation: number;
   opacity?: number;
+  space?: OverlaySpace;
   hidden?: boolean;
   locked?: boolean;
   
@@ -172,6 +174,10 @@ export interface Slide {
   audioOffset?: number; // Start offset for audio relative to slide start
   
   overlays?: Overlay[];
+  // Slide placement on the video canvas (normalized 0..1, fixed aspect ratio)
+  layout?: { x: number; y: number; w: number };
+  // Layer order (bottom -> top). Use '__SLIDE__' to represent the slide layer.
+  layerOrder?: string[];
   
   // Transient property used in worker
   bitmap?: ImageBitmap;

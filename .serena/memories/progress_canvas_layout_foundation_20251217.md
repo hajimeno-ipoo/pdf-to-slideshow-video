@@ -1,0 +1,11 @@
+## 2025-12-17
+- 要望「スライドを中央固定じゃなく移動/拡大縮小」「オブジェクトをキャンバス(黒背景)側にも置く」「スライド下にも置く」「回転なし/縦横比固定」を前提に、まず土台側を着手。
+- 型追加（後方互換）:
+  - `Overlay.space?: 'slide' | 'canvas'`
+  - `Slide.layout?: { x; y; w }`（キャンバス基準0..1、縦横比はスライド比固定の想定）
+  - `Slide.layerOrder?: string[]`（bottom->top、'__SLIDE__' をスライドとして扱う）
+- 書き出し/サムネ/worker 側:
+  - `services/pdfVideoService.ts` の `drawSlideFrame` を拡張し、`layout` と `layerOrder` に従ってスライドとオーバーレイを描画。
+  - `services/videoWorkerScript.ts` の `drawSlideFrame` も同様に対応。
+- 現状: エディタ( SlideInspector )のUI/操作と、PreviewPlayer の見え方はまだ未対応（次フェーズ）。
+- `npm test` は通過。
