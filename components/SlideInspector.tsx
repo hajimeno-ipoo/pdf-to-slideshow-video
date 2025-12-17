@@ -436,6 +436,24 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   
   const updateSelectedOverlay = (updates: Partial<Overlay>) => { if (!selectedOverlayId) return; setOverlays(prev => prev.map(t => t.id === selectedOverlayId ? { ...t, ...updates } : t)); };
   const handleDeleteOverlay = () => { if (!selectedOverlayId) return; setOverlays(prev => prev.filter(t => t.id !== selectedOverlayId)); setSelectedOverlayId(null); };
+  type OverlayReorderAction = 'front' | 'back' | 'forward' | 'backward';
+  const reorderSelectedOverlay = (action: OverlayReorderAction) => {
+      if (!selectedOverlayId) return;
+      setOverlays(prev => {
+          const index = prev.findIndex(t => t.id === selectedOverlayId);
+          if (index < 0) return prev;
+
+          const next = [...prev];
+          const [item] = next.splice(index, 1);
+
+          if (action === 'front') next.push(item);
+          else if (action === 'back') next.unshift(item);
+          else if (action === 'forward') next.splice(Math.min(next.length, index + 1), 0, item);
+          else next.splice(Math.max(0, index - 1), 0, item);
+
+          return next;
+      });
+  };
 
   const handleMouseDownOverlay = (e: React.MouseEvent, id: string, tool: ToolType) => { 
     e.stopPropagation(); 
@@ -485,6 +503,9 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   const screenRect = getScreenRect();
   const selectedOverlay = overlays.find(t => t.id === selectedOverlayId);
+  const selectedOverlayIndex = selectedOverlayId ? overlays.findIndex(t => t.id === selectedOverlayId) : -1;
+  const canMoveOverlayForward = selectedOverlayIndex >= 0 && selectedOverlayIndex < overlays.length - 1;
+  const canMoveOverlayBackward = selectedOverlayIndex > 0;
 
   // インスペクタの周囲背景は常に動画設定の塗りに従う（黒基調）
   const getBackgroundColor = () => {
@@ -699,6 +720,9 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                     onUpdateOverlay={updateSelectedOverlay}
                     onDeleteOverlay={handleDeleteOverlay}
                     onUsageUpdate={onUsageUpdate}
+                    onReorderOverlay={reorderSelectedOverlay}
+                    canMoveForward={canMoveOverlayForward}
+                    canMoveBackward={canMoveOverlayBackward}
                     slideDuration={localDuration}
                  />
               )}
@@ -709,6 +733,9 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                     onUpdateOverlay={updateSelectedOverlay}
                     onDeleteOverlay={handleDeleteOverlay}
                     pendingAddType={pendingAddType}
+                    onReorderOverlay={reorderSelectedOverlay}
+                    canMoveForward={canMoveOverlayForward}
+                    canMoveBackward={canMoveOverlayBackward}
                     slideDuration={localDuration}
                 />
               )}

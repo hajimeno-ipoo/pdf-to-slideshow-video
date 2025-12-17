@@ -10,6 +10,9 @@ interface OverlaySettingsPanelProps {
   onDeleteOverlay: () => void;
   onAddOverlay: (type: OverlayType) => void;
   pendingAddType?: OverlayType | null;
+  onReorderOverlay?: (action: 'front' | 'back' | 'forward' | 'backward') => void;
+  canMoveForward?: boolean;
+  canMoveBackward?: boolean;
   slideDuration: number;
 }
 
@@ -19,6 +22,9 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
   onDeleteOverlay,
   onAddOverlay,
   pendingAddType,
+  onReorderOverlay,
+  canMoveForward,
+  canMoveBackward,
   slideDuration
 }) => {
   const [activePropertyTab, setActivePropertyTab] = useState<'style' | 'outline' | 'shadow' | 'anim'>('style');
@@ -111,6 +117,17 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">選択中の装飾設定</h4>
                <button onClick={onDeleteOverlay} className="px-3 py-1 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded text-xs transition-colors">削除</button>
           </div>
+          {onReorderOverlay && (
+              <div className="flex items-center justify-between gap-2 bg-slate-800/40 border border-slate-700/50 rounded-lg p-2">
+                  <span className="text-[10px] text-slate-400 font-bold tracking-wider">重なり順</span>
+                  <div className="flex items-center gap-1">
+                      <button onClick={() => onReorderOverlay('back')} disabled={!canMoveBackward} className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-40">最背面</button>
+                      <button onClick={() => onReorderOverlay('backward')} disabled={!canMoveBackward} className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-40">後ろへ</button>
+                      <button onClick={() => onReorderOverlay('forward')} disabled={!canMoveForward} className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-40">前へ</button>
+                      <button onClick={() => onReorderOverlay('front')} disabled={!canMoveForward} className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-40">最前面</button>
+                  </div>
+              </div>
+          )}
 
           {selectedOverlay.type === 'text' && (
               <div className="space-y-1"><label className="text-xs text-slate-400">テキスト内容</label><textarea value={selectedOverlay.text || ''} onChange={(e) => onUpdateOverlay({ text: e.target.value })} className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm h-16 focus:ring-1 focus:ring-emerald-500 outline-none" /></div>
