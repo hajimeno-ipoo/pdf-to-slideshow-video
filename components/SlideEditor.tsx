@@ -4,6 +4,7 @@ import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectDat
 import { serializeProject, deserializeProject } from '../utils/fileUtils';
 import { isFileSystemAccessSupported } from '../utils/fileSystemAccess';
 import { saveNamedProject } from '../services/projectStorage';
+import { getProjectImportError, getProjectJsonTextError } from '../utils/projectFileImport';
 import PreviewPlayer from './PreviewPlayer';
 import TimelineEditor from './TimelineEditor';
 import { EditorProvider, useEditor } from './slideEditor/SlideEditorContext';
@@ -164,7 +165,17 @@ const SlideEditorLayout: React.FC<{
       const file = e.target.files[0];
       setIsImporting(true);
       try {
+          const err = getProjectImportError(file);
+          if (err) {
+              alert(err);
+              return;
+          }
           const text = await file.text();
+          const textErr = getProjectJsonTextError(text);
+          if (textErr) {
+              alert(textErr);
+              return;
+          }
           const data = await deserializeProject(text);
           if (onLoadProject) onLoadProject(data);
       } catch (e) { console.error("Import failed", e); alert("プロジェクトの読み込みに失敗しました。"); } finally { setIsImporting(false); if (projectInputRef.current) projectInputRef.current.value = ''; }

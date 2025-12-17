@@ -1,5 +1,6 @@
 import { ProjectData } from '../types';
 import { safeRandomUUID } from '../utils/uuid';
+import { estimateProjectBytes } from '../utils/projectMetaUtils';
 
 const DB_NAME = 'PDFVideoCreatorDB';
 const DB_VERSION = 2;
@@ -14,6 +15,7 @@ export interface ProjectMeta {
   updatedAt: number;
   slideCount: number;
   thumbnailUrl: string;
+  approxBytes: number;
 }
 
 /**
@@ -45,6 +47,7 @@ const buildProjectMeta = (id: string, name: string, data: ProjectData, createdAt
     updatedAt: data.updatedAt || Date.now(),
     slideCount: data.slides?.length || 0,
     thumbnailUrl,
+    approxBytes: estimateProjectBytes(data),
   };
 };
 

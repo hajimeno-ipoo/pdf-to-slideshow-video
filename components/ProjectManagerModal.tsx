@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ProjectData } from '../types';
 import { deleteProjectById, listProjectMetas, loadProjectById, ProjectMeta } from '../services/projectStorage';
 import { deserializeProject } from '../utils/fileUtils';
-import { getProjectImportError } from '../utils/projectFileImport';
+import { getProjectImportError, getProjectJsonTextError } from '../utils/projectFileImport';
+import { formatBytes } from '../utils/projectMetaUtils';
 
 interface ProjectManagerModalProps {
   isOpen: boolean;
@@ -98,6 +99,11 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
         return;
       }
       const text = await file.text();
+      const textErr = getProjectJsonTextError(text);
+      if (textErr) {
+        alert(textErr);
+        return;
+      }
       const data = await deserializeProject(text);
       onLoadProject(data);
       onClose();
@@ -173,7 +179,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
                       selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-800'
                     }`}
                   >
-                    <div className="relative w-full aspect-video bg-slate-950">
+                  <div className="relative w-full aspect-video bg-slate-950">
                       {p.thumbnailUrl ? (
                         <img src={p.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />
                       ) : (
@@ -189,6 +195,9 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
                       <div className="text-sm text-white font-bold truncate">{p.name || '（無名）'}</div>
                       <div className="text-[11px] text-slate-500 mt-1">
                         更新: {formatDateTime(p.updatedAt)}
+                      </div>
+                      <div className="text-[11px] text-slate-600 mt-1">
+                        容量: {formatBytes(p.approxBytes || 0)}
                       </div>
                       <div className="text-[10px] text-slate-600 mt-2">
                         ダブルクリックで開くよ

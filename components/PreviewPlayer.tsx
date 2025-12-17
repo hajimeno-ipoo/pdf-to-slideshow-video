@@ -427,6 +427,10 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const previewRenderBufferRef = useRef<AudioBuffer | null>(null);
   const previewRenderSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const previewPlayTokenRef = useRef<number>(0);
+  const previewCacheKeyRef = useRef<string>('');
+  const seekDebounceTimerRef = useRef<number | null>(null);
+  const seekDebounceTokenRef = useRef<number>(0);
+  const pendingSeekRef = useRef<number | null>(null);
   
   const pdfDocRef = useRef<any>(null);
   
@@ -606,11 +610,18 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
 
   const cleanup = () => {
       stopAudio();
+      if (seekDebounceTimerRef.current) {
+          window.clearTimeout(seekDebounceTimerRef.current);
+          seekDebounceTimerRef.current = null;
+      }
+      pendingSeekRef.current = null;
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
       if (currentSlideImageRef.current) currentSlideImageRef.current.close();
       if (nextSlideImageRef.current) nextSlideImageRef.current.close();
       if (bgImageRef.current) bgImageRef.current.close();
       overlayImageCache.current.clear();
+      previewRenderBufferRef.current = null;
+      previewCacheKeyRef.current = '';
   };
 
   // Render full audio offline for preview, then play buffered result
@@ -755,8 +766,33 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       const ctx = audioCtxRef.current;
       if (ctx.state === 'suspended') await ctx.resume();
 
-      // Render preview audio offline each time to guarantee fresh mix
-      previewRenderBufferRef.current = await renderPreviewAudio();
+      const fileKey = (f: File | null | undefined) => {
+          if (!f) return '';
+          return `${f.name}|${f.type}|${f.size}|${f.lastModified}`;
+      };
+
+      const cacheKey = JSON.stringify({
+          slides: slides.map(s => ({
+              id: s.id,
+              duration: s.duration,
+              audioOffset: s.audioOffset || 0,
+              audioVolume: s.audioVolume ?? 1.0,
+              audioFile: fileKey(s.audioFile),
+          })),
+          bgmFile: fileKey(bgmFile),
+          bgmTimeRange: bgmTimeRange ? { start: bgmTimeRange.start, end: bgmTimeRange.end } : null,
+          bgmVolume,
+          globalAudioFile: fileKey(globalAudioFile),
+          globalAudioVolume,
+          fadeOptions: fadeOptions || null,
+          duckingOptions: duckingOptions || null,
+      });
+
+      // Render preview audio offline only when mix inputs changed
+      if (!previewRenderBufferRef.current || previewCacheKeyRef.current !== cacheKey) {
+          previewCacheKeyRef.current = cacheKey;
+          previewRenderBufferRef.current = await renderPreviewAudio();
+      }
       if (playToken !== previewPlayTokenRef.current) return;
       if (!previewRenderBufferRef.current) return;
 
@@ -785,7 +821,6 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           narrationSourcesRef.current.forEach(src => { try { src.stop(); src.disconnect(); } catch(e){} });
           narrationSourcesRef.current = [];
           if (previewRenderSourceRef.current) { previewRenderSourceRef.current.stop(); previewRenderSourceRef.current.disconnect(); previewRenderSourceRef.current = null; }
-          previewRenderBufferRef.current = null;
           lastDuckEndRef.current = 0;
           if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
               audioCtxRef.current.suspend().catch(() => {});
@@ -1077,8 +1112,16 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       setCurrentTime(t);
       if (isPlayingState) {
           stopAudio();
-          startTimeRef.current = performance.now() - (t * 1000);
-          await playAudio(t);
+          pendingSeekRef.current = t;
+          const token = ++seekDebounceTokenRef.current;
+          if (seekDebounceTimerRef.current) window.clearTimeout(seekDebounceTimerRef.current);
+          seekDebounceTimerRef.current = window.setTimeout(async () => {
+              if (!isPlayingRef.current) return;
+              if (token !== seekDebounceTokenRef.current) return;
+              const latest = pendingSeekRef.current ?? t;
+              startTimeRef.current = performance.now() - (latest * 1000);
+              await playAudio(latest);
+          }, 120);
       } else {
           await drawFrame(t);
       }
