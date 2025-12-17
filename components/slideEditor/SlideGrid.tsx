@@ -145,7 +145,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
                 {/* We render image overlays as separate DOM elements so GIFs animate */}
                 {slide.overlays && slide.overlays.length > 0 && (
                     <div className="absolute inset-0 pointer-events-none">
-                        {slide.overlays.filter(o => o.type === 'image' && o.imageData).map(ov => (
+                        {slide.overlays.filter(o => !o.hidden && o.type === 'image' && o.imageData).map(ov => (
                             <img 
                                 key={ov.id}
                                 src={ov.imageData} 

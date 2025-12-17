@@ -98,6 +98,8 @@ export interface Overlay {
   height?: number;
   rotation: number;
   opacity?: number;
+  hidden?: boolean;
+  locked?: boolean;
   
   // Timing
   startTime?: number; // seconds from slide start

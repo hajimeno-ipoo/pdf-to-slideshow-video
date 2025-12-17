@@ -1,0 +1,15 @@
+## 2025-12-17
+- 右パネル要素一覧（選択/表示/ロック）追加の流れで、Overlay に `hidden?: boolean` と `locked?: boolean` を導入。
+- スライド編集（SlideInspector/CropModal）での挙動:
+  - 選択中の矢印キー移動（Shiftで大きく）、Delete/Backspace削除（lockedなら移動/削除しない）。
+  - locked のときはドラッグ開始もしない（選択だけ可）。
+  - hidden のときは編集キャンバス描画から除外。
+- プレビュー/一覧表示:
+  - `PreviewPlayer` と `SlideGrid` でも hidden を反映。
+- 書き出し/ワーカー:
+  - `services/pdfVideoService.ts` と `services/videoWorkerScript.ts` の drawOverlays で hidden を continue。
+  - worker 側の overlayAssets 準備ループも hidden をスキップ。
+- テスト:
+  - `utils/overlayUtils.js`（toggle/delete/nudge）に node:test を追加。
+  - hidden 反映はファイル内容チェックの最小テストを追加。
+  - `npm test` pass。

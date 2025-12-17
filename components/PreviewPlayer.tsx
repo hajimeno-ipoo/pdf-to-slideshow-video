@@ -215,7 +215,7 @@ const OverlayLayer = React.memo(({
               zIndex: 10
           }}
         >
-            {slide.overlays.map(ov => {
+            {slide.overlays.filter(ov => !ov.hidden).map(ov => {
                 // Timing Check
                 const startTime = ov.startTime || 0;
                 const duration = ov.duration || (slide.duration - startTime);

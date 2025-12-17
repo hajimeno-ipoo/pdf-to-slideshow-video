@@ -8,6 +8,7 @@ import AudioSettingsPanel from './cropModal/AudioSettingsPanel';
 import ImageSettingsPanel from './cropModal/ImageSettingsPanel';
 import OverlaySettingsPanel from './cropModal/OverlaySettingsPanel';
 import { safeRandomUUID } from '../utils/uuid';
+import { deleteOverlayById, nudgeOverlayById, reorderOverlaysById, toggleOverlayHidden, toggleOverlayLocked } from '../utils/overlayUtils';
 
 interface SlideInspectorProps {
   slide: Slide;
@@ -67,6 +68,8 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   // Selection state
   const [selectedOverlayId, setSelectedOverlayId] = useState<string | null>(null);
+  const [draggingLayerOverlayId, setDraggingLayerOverlayId] = useState<string | null>(null);
+  const [dragOverLayerOverlayId, setDragOverLayerOverlayId] = useState<string | null>(null);
   const [isDraggingCrop, setIsDraggingCrop] = useState(false);
   const [dragModeCrop, setDragModeCrop] = useState<'move' | 'nw' | 'ne' | 'sw' | 'se' | null>(null);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
@@ -165,6 +168,43 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
   }, [pendingAddType]);
+
+  // Key controls for overlays (delete / arrow nudge)
+  useEffect(() => {
+      if (!selectedOverlayId) return;
+      if (activeTab === 'crop') return;
+      const handleKeyDown = (e: KeyboardEvent) => {
+          const target = e.target as HTMLElement;
+          if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || (target as any).isContentEditable)) return;
+          const selected = overlays.find(o => o.id === selectedOverlayId);
+          if (!selected) return;
+
+          if (e.key === 'Delete' || e.key === 'Backspace') {
+              e.preventDefault();
+              if (selected.locked) return;
+              setOverlays(prev => deleteOverlayById(prev, selectedOverlayId));
+              setSelectedOverlayId(null);
+              return;
+          }
+
+          if (e.key.startsWith('Arrow')) {
+              e.preventDefault();
+              if (selected.locked) return;
+              const step = e.shiftKey ? 0.05 : 0.002;
+              let dx = 0;
+              let dy = 0;
+              switch (e.key) {
+                  case 'ArrowUp': dy = -step; break;
+                  case 'ArrowDown': dy = step; break;
+                  case 'ArrowLeft': dx = -step; break;
+                  case 'ArrowRight': dx = step; break;
+              }
+              setOverlays(prev => nudgeOverlayById(prev, selectedOverlayId, dx, dy));
+          }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeTab, overlays, selectedOverlayId]);
 
   // Apply Changes Logic
   const handleApplyChanges = async () => {
@@ -435,7 +475,13 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   };
   
   const updateSelectedOverlay = (updates: Partial<Overlay>) => { if (!selectedOverlayId) return; setOverlays(prev => prev.map(t => t.id === selectedOverlayId ? { ...t, ...updates } : t)); };
-  const handleDeleteOverlay = () => { if (!selectedOverlayId) return; setOverlays(prev => prev.filter(t => t.id !== selectedOverlayId)); setSelectedOverlayId(null); };
+  const handleDeleteOverlay = () => {
+      if (!selectedOverlayId) return;
+      const target = overlays.find(t => t.id === selectedOverlayId);
+      if (target?.locked) return;
+      setOverlays(prev => deleteOverlayById(prev, selectedOverlayId));
+      setSelectedOverlayId(null);
+  };
   type OverlayReorderAction = 'front' | 'back' | 'forward' | 'backward';
   const reorderSelectedOverlay = (action: OverlayReorderAction) => {
       if (!selectedOverlayId) return;
@@ -459,6 +505,8 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
     e.stopPropagation(); 
     e.preventDefault(); 
     setSelectedOverlayId(id); 
+    const locked = overlays.find(t => t.id === id)?.locked;
+    if (locked) return;
     setActiveOverlayTool(tool); 
     setIsDraggingOverlay(true); 
     setStartPos({ x: e.clientX, y: e.clientY }); 
@@ -506,6 +554,17 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   const selectedOverlayIndex = selectedOverlayId ? overlays.findIndex(t => t.id === selectedOverlayId) : -1;
   const canMoveOverlayForward = selectedOverlayIndex >= 0 && selectedOverlayIndex < overlays.length - 1;
   const canMoveOverlayBackward = selectedOverlayIndex > 0;
+  const visibleOverlays = overlays.filter(o => !o.hidden);
+
+  const getOverlayLabel = (ov: Overlay) => {
+      if (ov.type === 'image') return '画像';
+      if (ov.type === 'text') return ov.text ? `テキスト: ${ov.text}` : 'テキスト';
+      if (ov.type === 'line') return '線';
+      if (ov.type === 'arrow') return '矢印';
+      if (ov.type === 'rect') return '四角';
+      if (ov.type === 'circle') return '丸';
+      return ov.type;
+  };
 
   // インスペクタの周囲背景は常に動画設定の塗りに従う（黒基調）
   const getBackgroundColor = () => {
@@ -619,7 +678,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                         style={{ left: screenRect.x, top: screenRect.y, width: screenRect.width, height: screenRect.height, border: '1px dashed rgba(255,255,255,0.2)' }} 
                         onMouseDown={handleContainerMouseDown}
                       >
-                        {overlays.map(ov => {
+                        {visibleOverlays.map(ov => {
                           const isSelected = ov.id === selectedOverlayId;
                           const baseStyle: React.CSSProperties = { position: 'absolute', left: `${ov.x * 100}%`, top: `${ov.y * 100}%`, transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`, cursor: 'move', opacity: ov.opacity ?? 1, userSelect: 'none', pointerEvents: 'auto' };
                           const strokeWidthPx = (ov.strokeWidth || 0) * (screenRect.height / 500);
@@ -694,6 +753,98 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
           {/* 3. Property Editor (Scrollable) */}
           <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-900 landscape:w-1/2 lg:!w-full">
+              {activeTab !== 'crop' && overlays.length > 0 && (
+                  <div className="p-4 pb-3 border-b border-slate-800">
+                      <div className="flex items-center justify-between">
+                          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">要素一覧</div>
+                          <div className="text-[10px] text-slate-500">ドラッグで並び替え（上ほど手前）</div>
+                      </div>
+                      <div className="mt-2 space-y-1">
+                          {[...overlays].reverse().map(ov => {
+                              const isSelected = ov.id === selectedOverlayId;
+                              const label = getOverlayLabel(ov);
+                              const icon = ov.type === 'text' ? 'T' : ov.type === 'image' ? 'IMG' : ov.type === 'line' ? '—' : ov.type === 'arrow' ? '→' : ov.type === 'rect' ? '▭' : ov.type === 'circle' ? '○' : '●';
+                              return (
+                                  <div
+                                      key={ov.id}
+                                      role="button"
+                                      tabIndex={0}
+                                      draggable
+                                      onDragStart={(e) => {
+                                          setDraggingLayerOverlayId(ov.id);
+                                          setDragOverLayerOverlayId(ov.id);
+                                          try { e.dataTransfer.setData('text/plain', ov.id); } catch (_) {}
+                                          e.dataTransfer.effectAllowed = 'move';
+                                      }}
+                                      onDragOver={(e) => {
+                                          if (!draggingLayerOverlayId) return;
+                                          e.preventDefault();
+                                          if (dragOverLayerOverlayId !== ov.id) setDragOverLayerOverlayId(ov.id);
+                                          try { e.dataTransfer.dropEffect = 'move'; } catch (_) {}
+                                      }}
+                                      onDragLeave={() => {
+                                          if (dragOverLayerOverlayId === ov.id) setDragOverLayerOverlayId(null);
+                                      }}
+                                      onDrop={(e) => {
+                                          e.preventDefault();
+                                          const fromId = draggingLayerOverlayId || (() => { try { return e.dataTransfer.getData('text/plain'); } catch (_) { return ''; } })();
+                                          const toId = ov.id;
+                                          if (!fromId || fromId === toId) {
+                                              setDraggingLayerOverlayId(null);
+                                              setDragOverLayerOverlayId(null);
+                                              return;
+                                          }
+                                          setOverlays(prev => reorderOverlaysById([...prev].reverse(), fromId, toId).reverse());
+                                          setDraggingLayerOverlayId(null);
+                                          setDragOverLayerOverlayId(null);
+                                      }}
+                                      onDragEnd={() => {
+                                          setDraggingLayerOverlayId(null);
+                                          setDragOverLayerOverlayId(null);
+                                      }}
+                                      onClick={() => {
+                                          setSelectedOverlayId(ov.id);
+                                          if (ov.type === 'image') setActiveTab('image');
+                                          else setActiveTab('overlay');
+                                          setPendingAddType(null);
+                                      }}
+                                      className={`w-full flex items-center justify-between gap-2 px-2 py-1.5 rounded border text-left transition-colors ${
+                                          isSelected ? 'bg-slate-800 border-emerald-500/60' : 'bg-slate-900/30 border-slate-800 hover:bg-slate-800/60'
+                                      } ${
+                                          dragOverLayerOverlayId === ov.id && draggingLayerOverlayId && draggingLayerOverlayId !== ov.id ? 'ring-1 ring-emerald-500/60' : ''
+                                      }`}
+                                  >
+                                      <div className={`flex items-center gap-2 min-w-0 ${ov.hidden ? 'opacity-50' : ''}`}>
+                                          <span className="w-9 h-6 flex items-center justify-center text-[10px] font-bold bg-slate-800 border border-slate-700 rounded text-slate-200 flex-shrink-0">{icon}</span>
+                                          <span className="text-xs text-slate-200 truncate">{label}</span>
+                                          {ov.locked && <span className="text-[10px] text-slate-500 flex-shrink-0">🔒</span>}
+                                      </div>
+                                      <div className="flex items-center gap-1 flex-shrink-0">
+                                          <button
+                                              type="button"
+                                              onClick={(e) => { e.stopPropagation(); setOverlays(prev => toggleOverlayHidden(prev, ov.id)); }}
+                                              draggable={false}
+                                              className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700"
+                                              title={ov.hidden ? '表示する' : '非表示にする'}
+                                          >
+                                              {ov.hidden ? '表示' : '非表示'}
+                                          </button>
+                                          <button
+                                              type="button"
+                                              onClick={(e) => { e.stopPropagation(); setOverlays(prev => toggleOverlayLocked(prev, ov.id)); }}
+                                              draggable={false}
+                                              className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700"
+                                              title={ov.locked ? 'ロック解除' : 'ロック'}
+                                          >
+                                              {ov.locked ? '解除' : 'ロック'}
+                                          </button>
+                                      </div>
+                                  </div>
+                              );
+                          })}
+                      </div>
+                  </div>
+              )}
               {activeTab === 'crop' && (
                  <div className="p-4 space-y-4">
                     <div className="text-xs text-slate-400">プレビューの枠をドラッグして、表示範囲を指定してください。</div>

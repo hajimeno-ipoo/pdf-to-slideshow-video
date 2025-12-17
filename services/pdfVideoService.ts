@@ -123,6 +123,7 @@ export const drawOverlays = async (ctx: CanvasRenderingContext2D, overlays: Over
   const shadowScale = canvasHeight / 500;
 
   for (const overlay of overlays) {
+    if (overlay.hidden) continue;
     ctx.save();
     let alpha = overlay.opacity !== undefined ? overlay.opacity : 1.0;
     let offsetX = 0; let offsetY = 0; let scale = 1; let rotation = overlay.rotation || 0; let typewriterProgress = 1.0;

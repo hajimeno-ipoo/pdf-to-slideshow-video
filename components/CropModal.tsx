@@ -153,6 +153,8 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
           if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
           if (e.key === 'Delete' || e.key === 'Backspace') {
               e.preventDefault();
+              const selected = overlays.find(o => o.id === selectedOverlayId);
+              if (selected?.locked) return;
               handleDeleteOverlay();
           } else if (e.key.startsWith('Arrow')) {
               e.preventDefault();
@@ -160,6 +162,7 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
               setOverlays(prev => {
                   const target = prev.find(o => o.id === selectedOverlayId);
                   if (!target) return prev;
+                  if (target.locked) return prev;
                   let newX = target.x;
                   let newY = target.y;
                   switch(e.key) {
@@ -174,7 +177,7 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, selectedOverlayId]);
+  }, [isOpen, overlays, selectedOverlayId]);
 
   if (!isOpen || !slide) return null;
 
@@ -281,12 +284,20 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
   };
   
   const updateSelectedOverlay = (updates: Partial<Overlay>) => { if (!selectedOverlayId) return; setOverlays(prev => prev.map(t => t.id === selectedOverlayId ? { ...t, ...updates } : t)); };
-  const handleDeleteOverlay = () => { if (!selectedOverlayId) return; setOverlays(prev => prev.filter(t => t.id !== selectedOverlayId)); setSelectedOverlayId(null); };
+  const handleDeleteOverlay = () => {
+    if (!selectedOverlayId) return;
+    const target = overlays.find(t => t.id === selectedOverlayId);
+    if (target?.locked) return;
+    setOverlays(prev => prev.filter(t => t.id !== selectedOverlayId));
+    setSelectedOverlayId(null);
+  };
 
   const handleMouseDownOverlay = (e: React.MouseEvent, id: string, tool: ToolType) => { 
     e.stopPropagation(); 
     e.preventDefault(); 
     setSelectedOverlayId(id); 
+    const locked = overlays.find(t => t.id === id)?.locked;
+    if (locked) return;
     setActiveOverlayTool(tool); 
     setIsDraggingOverlay(true); 
     setStartPos({ x: e.clientX, y: e.clientY }); 
@@ -463,7 +474,7 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
               {(activeTab === 'overlay' || activeTab === 'image' || activeTab === 'audio') && (
                 <>
                   <div className="absolute overflow-hidden" style={{ left: screenRect.x, top: screenRect.y, width: screenRect.width, height: screenRect.height, border: '1px dashed rgba(255,255,255,0.3)' }} onMouseDown={() => setSelectedOverlayId(null)}>
-                    {overlays.map(ov => {
+                    {overlays.filter(ov => !ov.hidden).map(ov => {
                       const isSelected = ov.id === selectedOverlayId;
                       // Styles
                       const baseStyle: React.CSSProperties = {

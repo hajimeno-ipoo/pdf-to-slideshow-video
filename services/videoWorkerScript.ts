@@ -136,6 +136,7 @@ const drawOverlays = async (ctx, overlays, canvasWidth, canvasHeight, currentTim
   const shadowScale = canvasHeight / 500;
 
   for (const overlay of overlays) {
+    if (overlay.hidden) continue;
     const startTime = overlay.startTime || 0;
     const duration = overlay.duration || (slideDuration - startTime);
     const endTime = startTime + duration;
@@ -405,6 +406,7 @@ self.onmessage = async (e) => {
             for (const slide of slides) {
                 if (slide.overlays) {
                     for (const ov of slide.overlays) {
+                        if (ov.hidden) continue;
                         if (ov.type === 'image' && ov.imageData) {
                             try {
                                 const base64 = ov.imageData.split(',')[1];
