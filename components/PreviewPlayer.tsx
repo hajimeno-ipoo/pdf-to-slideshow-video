@@ -426,6 +426,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const lastDuckEndRef = useRef<number>(0);
   const previewRenderBufferRef = useRef<AudioBuffer | null>(null);
   const previewRenderSourceRef = useRef<AudioBufferSourceNode | null>(null);
+  const previewPlayTokenRef = useRef<number>(0);
   
   const pdfDocRef = useRef<any>(null);
   
@@ -749,12 +750,14 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const playAudio = async (startOffset: number) => {
       // Ensure no previous sources are playing
       stopAudio();
+      const playToken = previewPlayTokenRef.current;
       if (!audioCtxRef.current) return;
       const ctx = audioCtxRef.current;
       if (ctx.state === 'suspended') await ctx.resume();
 
       // Render preview audio offline each time to guarantee fresh mix
       previewRenderBufferRef.current = await renderPreviewAudio();
+      if (playToken !== previewPlayTokenRef.current) return;
       if (!previewRenderBufferRef.current) return;
 
       const src = ctx.createBufferSource();
@@ -764,12 +767,18 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       // 先頭から再生し、UIの時間表示は startTimeRef で合わせる
       const clampedOffset = Math.min(startOffset, src.buffer.duration);
       startTimeRef.current = performance.now() - clampedOffset * 1000;
+      if (playToken !== previewPlayTokenRef.current) {
+          try { src.disconnect(); } catch (e) {}
+          return;
+      }
       src.start(0, clampedOffset);
       previewRenderSourceRef.current = src;
   };
 
   const stopAudio = () => {
       try {
+          // Cancel any in-flight async playAudio() so it won't start later
+          previewPlayTokenRef.current += 1;
           if (bgmSourceRef.current) { bgmSourceRef.current.stop(); bgmSourceRef.current.disconnect(); }
           if (globalAudioSourceRef.current) { globalAudioSourceRef.current.stop(); globalAudioSourceRef.current.disconnect(); }
           if (duckingGainRef.current) { duckingGainRef.current.gain.cancelScheduledValues(0); duckingGainRef.current.gain.setValueAtTime(1.0, 0); duckingGainRef.current.disconnect(); duckingGainRef.current = null; }
@@ -1069,7 +1078,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       if (isPlayingState) {
           stopAudio();
           startTimeRef.current = performance.now() - (t * 1000);
-          playAudio(t);
+          await playAudio(t);
       } else {
           await drawFrame(t);
       }
