@@ -862,7 +862,8 @@ const App: React.FC = () => {
     }
   };
 
-  const isEditing = state.status === AppStatus.EDITING;
+	  const isEditing = state.status === AppStatus.EDITING;
+	  const aiEnabled = apiStatus === 'connected';
 
   return (
     <div className="h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30 flex flex-col overflow-hidden">
@@ -1070,12 +1071,13 @@ const App: React.FC = () => {
         {/* Editor View */}
         {state.status === AppStatus.EDITING ? (
             <div className="flex-1 w-full h-full p-3 sm:p-4 lg:p-6 overflow-hidden flex flex-col">
-	                    <SlideEditor
-	                    slides={slides} 
-	                    onUpdateSlides={setSlides} 
-	                    onStartConversion={handleStartConversion}
-	                    isProcessing={false}
-	                    sourceFile={sourceFile}
+		                    <SlideEditor
+		                    aiEnabled={aiEnabled}
+		                    slides={slides} 
+		                    onUpdateSlides={setSlides} 
+		                    onStartConversion={handleStartConversion}
+		                    isProcessing={false}
+		                    sourceFile={sourceFile}
 	                    initialSettings={state.settings}
 	                    initialOutputFileHandle={outputFileHandle}
 	                    initialOutputFileFormat={outputFileFormat}
@@ -1131,8 +1133,8 @@ const App: React.FC = () => {
                   </div>
                 )}
                 {state.status === AppStatus.IDLE && (
-                <FileUpload onFileSelect={handleFileSelect} status={state.status} />
-                )}
+	                <FileUpload onFileSelect={handleFileSelect} status={state.status} aiEnabled={aiEnabled} />
+	                )}
 
                 {/* Processing Status (Analysis or Conversion) */}
                 {(state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING) && (

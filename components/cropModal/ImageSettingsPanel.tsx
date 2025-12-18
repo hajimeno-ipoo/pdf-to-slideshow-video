@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Overlay, TokenUsage, AnimationType } from '../../types';
 import { generateImage } from '../../services/geminiService';
 import { ANIMATION_VALUES, getAnimationLabel } from './constants';
@@ -15,6 +15,7 @@ interface ImageSettingsPanelProps {
   canMoveForward?: boolean;
   canMoveBackward?: boolean;
   slideDuration: number;
+  aiEnabled: boolean;
 }
 
 const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
@@ -26,12 +27,18 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   onReorderOverlay,
   canMoveForward,
   canMoveBackward,
-  slideDuration
+  slideDuration,
+  aiEnabled
 }) => {
   const [imageMode, setImageMode] = useState<'upload' | 'gen'>('upload');
   const [imgGenPrompt, setImgGenPrompt] = useState('');
   const [isGeneratingImg, setIsGeneratingImg] = useState(false);
   const imageUploadRef = useRef<HTMLInputElement>(null);
+  const isAiLocked = !aiEnabled;
+
+  useEffect(() => {
+    if (isAiLocked) setImageMode('upload');
+  }, [isAiLocked]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { 
       if (e.target.files && e.target.files.length > 0) { 
@@ -59,12 +66,18 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   return (
     <div className="w-full p-4 flex flex-col gap-6">
          {/* 追加エリア (常時表示) */}
-         <div className="flex flex-col gap-2">
-             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">画像の追加</h4>
-             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
-                  <button onClick={() => setImageMode('upload')} className={`flex-1 py-1.5 text-xs rounded-md ${imageMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
-                  <button onClick={() => setImageMode('gen')} className={`flex-1 py-1.5 text-xs rounded-md ${imageMode === 'gen' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>AIで生成</button>
-             </div>
+	         <div className="flex flex-col gap-2">
+	             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">画像の追加</h4>
+	             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
+	                  <button onClick={() => setImageMode('upload')} className={`flex-1 py-1.5 text-xs rounded-md ${imageMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
+	                  <button
+	                      onClick={() => setImageMode('gen')}
+	                      disabled={isAiLocked}
+	                      className={`flex-1 py-1.5 text-xs rounded-md disabled:opacity-40 disabled:cursor-not-allowed ${imageMode === 'gen' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white disabled:hover:text-slate-400'}`}
+	                  >
+	                      AIで生成
+	                  </button>
+	             </div>
              
              {imageMode === 'upload' ? (
                  <>
@@ -79,30 +92,32 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
              ) : (
                  <div className="space-y-3 bg-slate-800/50 p-3 rounded-lg border border-slate-700">
                     <div className="space-y-1">
-                        <textarea 
-                            value={imgGenPrompt}
-                            onChange={(e) => setImgGenPrompt(e.target.value)}
-                            placeholder="例: 会議室で握手をするビジネスマンのイラスト"
-                            className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-xs h-20 focus:ring-1 focus:ring-emerald-500 outline-none resize-none"
-                        />
-                    </div>
-                    <button 
-                        onClick={handleGenerateImage} 
-                        disabled={isGeneratingImg || !imgGenPrompt.trim()}
-                        className={`w-full py-1.5 rounded font-medium text-xs transition-all flex items-center justify-center gap-2 ${isGeneratingImg || !imgGenPrompt.trim() ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg'}`}
-                    >
-                        {isGeneratingImg ? (
-                            <>
-                                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                生成中...
-                            </>
-                        ) : (
-                            '画像を生成 (無料)'
-                        )}
-                    </button>
-                 </div>
-             )}
-         </div>
+	                        <textarea 
+	                            value={imgGenPrompt}
+	                            onChange={(e) => setImgGenPrompt(e.target.value)}
+	                            disabled={isAiLocked}
+	                            placeholder="例: 会議室で握手をするビジネスマンのイラスト"
+	                            className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-xs h-20 focus:ring-1 focus:ring-emerald-500 outline-none resize-none disabled:opacity-60 disabled:cursor-not-allowed"
+	                        />
+	                    </div>
+	                    <button 
+	                        onClick={handleGenerateImage} 
+	                        disabled={isAiLocked || isGeneratingImg || !imgGenPrompt.trim()}
+	                        className={`w-full py-1.5 rounded font-medium text-xs transition-all flex items-center justify-center gap-2 ${isAiLocked || isGeneratingImg || !imgGenPrompt.trim() ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg'}`}
+	                    >
+	                        {isGeneratingImg ? (
+	                            <>
+	                                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+	                                生成中...
+	                            </>
+	                        ) : (
+	                            '画像を生成 (無料)'
+	                        )}
+	                    </button>
+	                    {isAiLocked && <div className="text-[11px] text-slate-500">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</div>}
+	                 </div>
+	             )}
+	         </div>
 
          {/* 編集エリア (選択時のみ表示) */}
          {selectedOverlay && selectedOverlay.type === 'image' ? (

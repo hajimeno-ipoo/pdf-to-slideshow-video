@@ -15,6 +15,7 @@ interface SlideInspectorProps {
   slide: Slide;
   onUpdate: (updatedSlide: Slide) => void;
   onUsageUpdate?: (usage: TokenUsage) => void;
+  aiEnabled: boolean;
   sourceFile: File | null;
   onClose?: () => void; // Added for mobile
 }
@@ -46,7 +47,7 @@ const getCursorStyle = (handle: ResizeHandleType, rotation: number = 0): string 
 
 const SOLID_PREVIEW_WIDTH = 400; // 無地スライド用のデフォルト描画幅
 
-const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsageUpdate, sourceFile, onClose }) => {
+const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsageUpdate, aiEnabled, sourceFile, onClose }) => {
   const { videoSettings } = useEditor(); // Get global settings
   const SLIDE_TOKEN = '__SLIDE__';
   const containerRef = useRef<HTMLDivElement>(null);
@@ -1501,32 +1502,34 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                     <button onClick={handleResetCrop} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs">範囲リセット</button>
                  </div>
               )}
-              {activeTab === 'audio' && (
-                  <AudioSettingsPanel 
-                      audioFile={audioFile}
-                      audioVolume={audioVolume}
-                      audioDuration={audioDuration}
-                      audioPreviewUrl={audioPreviewUrl}
-                      onAudioFileChange={setAudioFile}
-                      onVolumeChange={setAudioVolume}
-                      imageUrl={overviewImage || slide.thumbnailUrl}
-                      initialScript={slide.narrationScript}
-                      onUsageUpdate={onUsageUpdate}
-                  />
-              )}
-              {activeTab === 'image' && (
-                 <ImageSettingsPanel 
-                    onAddImage={(img) => handleAddOverlay('image', img)}
-                    selectedOverlay={selectedOverlay}
-                    onUpdateOverlay={updateSelectedOverlay}
-                    onDeleteOverlay={handleDeleteOverlay}
-                    onUsageUpdate={onUsageUpdate}
-                    onReorderOverlay={reorderSelectedOverlay}
-                    canMoveForward={canMoveOverlayForward}
-                    canMoveBackward={canMoveOverlayBackward}
-                    slideDuration={localDuration}
-                 />
-              )}
+	              {activeTab === 'audio' && (
+	                  <AudioSettingsPanel 
+	                      audioFile={audioFile}
+	                      audioVolume={audioVolume}
+	                      audioDuration={audioDuration}
+	                      audioPreviewUrl={audioPreviewUrl}
+	                      onAudioFileChange={setAudioFile}
+	                      onVolumeChange={setAudioVolume}
+	                      imageUrl={overviewImage || slide.thumbnailUrl}
+	                      initialScript={slide.narrationScript}
+	                      onUsageUpdate={onUsageUpdate}
+	                      aiEnabled={aiEnabled}
+	                  />
+	              )}
+	              {activeTab === 'image' && (
+	                 <ImageSettingsPanel 
+	                    onAddImage={(img) => handleAddOverlay('image', img)}
+	                    selectedOverlay={selectedOverlay}
+	                    onUpdateOverlay={updateSelectedOverlay}
+	                    onDeleteOverlay={handleDeleteOverlay}
+	                    onUsageUpdate={onUsageUpdate}
+	                    onReorderOverlay={reorderSelectedOverlay}
+	                    canMoveForward={canMoveOverlayForward}
+	                    canMoveBackward={canMoveOverlayBackward}
+	                    slideDuration={localDuration}
+	                    aiEnabled={aiEnabled}
+	                 />
+	              )}
               {activeTab === 'overlay' && (
                 <OverlaySettingsPanel 
                     selectedOverlay={selectedOverlay}

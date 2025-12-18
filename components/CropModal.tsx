@@ -16,6 +16,7 @@ interface SlideEditModalProps {
   imageUrl: string;
   slide: Slide;
   onUsageUpdate?: (usage: TokenUsage) => void;
+  aiEnabled: boolean;
 }
 
 type ResizeHandleType = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
@@ -43,7 +44,7 @@ const getCursorStyle = (handle: ResizeHandleType, rotation: number = 0): string 
     return 'nwse-resize';
 };
 
-const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave, imageUrl, slide, onUsageUpdate }) => {
+const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave, imageUrl, slide, onUsageUpdate, aiEnabled }) => {
   const { videoSettings } = useEditor();
   const containerRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -551,30 +552,32 @@ const SlideEditModal: React.FC<SlideEditModalProps> = ({ isOpen, onClose, onSave
              <ColorSettingsPanel color={solidColor} onChange={setSolidColor} />
           )}
           
-          {activeTab === 'audio' && (
-              <AudioSettingsPanel 
-                  audioFile={audioFile}
-                  audioVolume={audioVolume}
-                  audioDuration={audioDuration}
-                  audioPreviewUrl={audioPreviewUrl}
-                  onAudioFileChange={setAudioFile}
-                  onVolumeChange={setAudioVolume}
-                  imageUrl={imageUrl}
-                  initialScript={slide.narrationScript}
-                  onUsageUpdate={onUsageUpdate}
-              />
-          )}
+	          {activeTab === 'audio' && (
+	              <AudioSettingsPanel 
+	                  audioFile={audioFile}
+	                  audioVolume={audioVolume}
+	                  audioDuration={audioDuration}
+	                  audioPreviewUrl={audioPreviewUrl}
+	                  onAudioFileChange={setAudioFile}
+	                  onVolumeChange={setAudioVolume}
+	                  imageUrl={imageUrl}
+	                  initialScript={slide.narrationScript}
+	                  onUsageUpdate={onUsageUpdate}
+	                  aiEnabled={aiEnabled}
+	              />
+	          )}
 
-          {activeTab === 'image' && (
-             <ImageSettingsPanel 
-                onAddImage={(img) => handleAddOverlay('image', img)}
-                selectedOverlay={selectedOverlay}
-                onUpdateOverlay={updateSelectedOverlay}
-                onDeleteOverlay={handleDeleteOverlay}
-                onUsageUpdate={onUsageUpdate}
-                slideDuration={currentDuration}
-             />
-          )}
+	          {activeTab === 'image' && (
+	             <ImageSettingsPanel 
+	                onAddImage={(img) => handleAddOverlay('image', img)}
+	                selectedOverlay={selectedOverlay}
+	                onUpdateOverlay={updateSelectedOverlay}
+	                onDeleteOverlay={handleDeleteOverlay}
+	                onUsageUpdate={onUsageUpdate}
+	                slideDuration={currentDuration}
+	                aiEnabled={aiEnabled}
+	             />
+	          )}
 
           {activeTab === 'overlay' && (
             <OverlaySettingsPanel 

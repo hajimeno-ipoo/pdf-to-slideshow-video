@@ -16,6 +16,7 @@ interface AudioSettingsPanelProps {
   imageUrl: string; 
   initialScript?: string;
   onUsageUpdate?: (usage: TokenUsage) => void;
+  aiEnabled: boolean;
 }
 
 const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
@@ -27,7 +28,8 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
   onVolumeChange,
   imageUrl,
   initialScript,
-  onUsageUpdate
+  onUsageUpdate,
+  aiEnabled
 }) => {
   const [audioMode, setAudioMode] = useState<'upload' | 'record' | 'tts'>('upload');
   const [isRecording, setIsRecording] = useState(false);
@@ -43,15 +45,22 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
   const [ttsVoice, setTtsVoice] = useState('Kore');
   const [isGeneratingTts, setIsGeneratingTts] = useState(false);
   const [isAnalyzingSlide, setIsAnalyzingSlide] = useState(false);
+  const isAiLocked = !aiEnabled;
 
   useEffect(() => {
       if (initialScript && !ttsText) {
           setTtsText(initialScript);
       }
-      if (initialScript && !audioFile) {
+      if (initialScript && !audioFile && !isAiLocked) {
           setAudioMode('tts');
       }
   }, [initialScript]);
+
+  useEffect(() => {
+      if (isAiLocked) {
+          setAudioMode((prev) => (prev === 'tts' ? 'upload' : prev));
+      }
+  }, [isAiLocked]);
 
   // Auto-fill prompt for Zundamon style
   useEffect(() => {
@@ -123,11 +132,12 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
       stopRecordingCleanup();
   };
 
-  const handleGenerateTts = async () => {
-      if (!ttsText) return;
-      setIsGeneratingTts(true);
-      try {
-          const { file, usage } = await generateSpeech(ttsText, ttsVoice, ttsStylePrompt);
+	  const handleGenerateTts = async () => { 
+	      if (isAiLocked) return;
+	      if (!ttsText) return;
+	      setIsGeneratingTts(true);
+	      try {
+	          const { file, usage } = await generateSpeech(ttsText, ttsVoice, ttsStylePrompt);
           onAudioFileChange(file);
           if (onUsageUpdate) onUsageUpdate(usage);
       } catch (e: any) {
@@ -137,10 +147,11 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
       }
   };
 
-  const handleAnalyzeSlide = async () => {
-      setIsAnalyzingSlide(true);
-      try {
-          const result = await generateSlideScript(imageUrl, undefined, scriptPrompt);
+	  const handleAnalyzeSlide = async () => {
+	      if (isAiLocked) return;
+	      setIsAnalyzingSlide(true);
+	      try {
+	          const result = await generateSlideScript(imageUrl, undefined, scriptPrompt);
           setTtsText(result.text);
           if (onUsageUpdate) onUsageUpdate(result.usage);
       } catch (e: any) {
@@ -178,12 +189,18 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
 
         {/* 追加モード切り替え */}
         <div className="flex flex-col gap-2">
-             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{audioFile ? '音声を変更' : '音声を追加'}</h4>
-             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
-                  <button onClick={() => setAudioMode('upload')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
-                  <button onClick={() => setAudioMode('record')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'record' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>録音</button>
-                  <button onClick={() => setAudioMode('tts')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'tts' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>AI読み上げ</button>
-             </div>
+	             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{audioFile ? '音声を変更' : '音声を追加'}</h4>
+	             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
+	                  <button onClick={() => setAudioMode('upload')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
+	                  <button onClick={() => setAudioMode('record')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'record' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>録音</button>
+	                  <button
+	                      onClick={() => setAudioMode('tts')}
+	                      disabled={isAiLocked}
+	                      className={`flex-1 py-1.5 text-xs rounded-md disabled:opacity-40 disabled:cursor-not-allowed ${audioMode === 'tts' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white disabled:hover:text-slate-400'}`}
+	                  >
+	                      AI読み上げ
+	                  </button>
+	             </div>
 
              {/* Upload Mode */}
              {audioMode === 'upload' && (
@@ -226,17 +243,18 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
                              <label className="text-xs text-slate-400">スライドから原稿を生成</label>
                          </div>
                          <div className="bg-slate-800 p-2 rounded-lg border border-slate-700 space-y-2">
-                             <textarea 
-                                placeholder="生成への指示（例: 明るく、要点を3つに絞って）" 
-                                value={scriptPrompt}
-                                onChange={(e) => setScriptPrompt(e.target.value)}
-                                className="w-full bg-slate-900/50 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none resize-none h-12"
-                             />
-                             <button 
-                                onClick={handleAnalyzeSlide}
-                                disabled={isAnalyzingSlide}
-                                className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded text-xs font-bold transition-colors flex items-center justify-center gap-2"
-                             >
+	                             <textarea 
+	                                placeholder="生成への指示（例: 明るく、要点を3つに絞って）" 
+	                                value={scriptPrompt}
+	                                onChange={(e) => setScriptPrompt(e.target.value)}
+	                                disabled={isAiLocked}
+	                                className="w-full bg-slate-900/50 border border-slate-600 rounded px-2 py-1 text-xs text-white outline-none resize-none h-12 disabled:opacity-60 disabled:cursor-not-allowed"
+	                             />
+	                             <button 
+	                                onClick={handleAnalyzeSlide}
+	                                disabled={isAiLocked || isAnalyzingSlide}
+	                                className="w-full py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-700 disabled:text-slate-500 text-white rounded text-xs font-bold transition-colors flex items-center justify-center gap-2"
+	                             >
                                  {isAnalyzingSlide ? <span className="animate-spin">↻</span> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path d="M10 2a.75.75 0 01.75.75v5.59l2.684-2.227a.75.75 0 11.964 1.137l-4 3.32a.75.75 0 01-.964 0l-4-3.32a.75.75 0 11.964-1.137L9.25 8.34V2.75A.75.75 0 0110 2z" /></svg>}
                                  スライドから原稿を生成
                              </button>
@@ -245,21 +263,23 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
 
                      <div className="space-y-1">
                          <label className="text-xs text-slate-400">読み上げテキスト</label>
-                         <textarea 
-                             value={ttsText}
-                             onChange={(e) => setTtsText(e.target.value)}
-                             placeholder="ここに読み上げさせたい文章を入力してください"
-                             className="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white text-sm h-32 focus:ring-1 focus:ring-emerald-500 outline-none"
-                         />
+	                         <textarea 
+	                             value={ttsText}
+	                             onChange={(e) => setTtsText(e.target.value)}
+	                             disabled={isAiLocked}
+	                             placeholder="ここに読み上げさせたい文章を入力してください"
+	                             className="w-full bg-slate-800 border border-slate-600 rounded p-3 text-white text-sm h-32 focus:ring-1 focus:ring-emerald-500 outline-none disabled:opacity-60 disabled:cursor-not-allowed"
+	                         />
                      </div>
 
                      <div className="space-y-1">
                          <label className="text-xs text-slate-400">声の種類</label>
-                         <select 
-                             value={ttsVoice}
-                             onChange={(e) => setTtsVoice(e.target.value)}
-                             className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm outline-none"
-                         >
+	                         <select 
+	                             value={ttsVoice}
+	                             onChange={(e) => setTtsVoice(e.target.value)}
+	                             disabled={isAiLocked}
+	                             className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-sm outline-none"
+	                         >
                              {VOICES.map(v => (
                                  <option key={v.value} value={v.value}>{v.name}</option>
                              ))}
@@ -268,31 +288,33 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
 
                      <div className="space-y-1">
                          <label className="text-xs text-slate-400">話し方の指示 (オプション)</label>
-                         <textarea
-                             value={ttsStylePrompt}
-                             onChange={(e) => setTtsStylePrompt(e.target.value)}
-                             placeholder="例: 明るく元気な声で / 落ち着いたトーンで / 悲しげに / 早口で"
-                             className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-xs h-16 focus:ring-1 focus:ring-emerald-500 outline-none resize-y min-h-[64px]"
-                         />
-                     </div>
+	                         <textarea
+	                             value={ttsStylePrompt}
+	                             onChange={(e) => setTtsStylePrompt(e.target.value)}
+	                             disabled={isAiLocked}
+	                             placeholder="例: 明るく元気な声で / 落ち着いたトーンで / 悲しげに / 早口で"
+	                             className="w-full bg-slate-800 border border-slate-600 rounded p-2 text-white text-xs h-16 focus:ring-1 focus:ring-emerald-500 outline-none resize-y min-h-[64px] disabled:opacity-60 disabled:cursor-not-allowed"
+	                         />
+	                     </div>
 
-                     <button 
-                        onClick={handleGenerateTts}
-                        disabled={isGeneratingTts || !ttsText}
-                        className={`w-full py-3 rounded-lg font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2 ${isGeneratingTts || !ttsText ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
-                     >
+	                     <button 
+	                        onClick={handleGenerateTts}
+	                        disabled={isAiLocked || isGeneratingTts || !ttsText}
+	                        className={`w-full py-3 rounded-lg font-bold text-sm transition-all shadow-lg flex items-center justify-center gap-2 ${isAiLocked || isGeneratingTts || !ttsText ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
+	                     >
                          {isGeneratingTts ? (
                              <>
                                 <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                                 生成中...
                              </>
-                         ) : (
-                             '音声を生成 (Gemini)'
-                         )}
-                     </button>
-                 </div>
-             )}
-        </div>
+	                         ) : (
+	                             '音声を生成 (Gemini)'
+	                         )}
+	                     </button>
+	                     {isAiLocked && <div className="text-[11px] text-slate-500">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</div>}
+	                 </div>
+	             )}
+	        </div>
     </div>
   );
 };

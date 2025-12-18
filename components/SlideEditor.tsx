@@ -29,7 +29,8 @@ const SlideEditorLayout: React.FC<{
   onUsageUpdate?: (usage: TokenUsage) => void;
   onLoadProject?: (data: ProjectData) => void;
   onOpenProjectManager?: () => void;
-}> = ({ onStartConversion, onUsageUpdate, onLoadProject, onOpenProjectManager }) => {
+  aiEnabled: boolean;
+}> = ({ onStartConversion, onUsageUpdate, onLoadProject, onOpenProjectManager, aiEnabled }) => {
   const { 
       slides, updateSlides, undo, redo, canUndo, canRedo,
       videoSettings, 
@@ -345,13 +346,14 @@ const SlideEditorLayout: React.FC<{
             <div className="w-full h-full flex flex-col min-w-[320px]">
                 {selectedSlideId && selectedSlide ? (
                     <div className="flex flex-col h-full relative">
-                        <SlideInspector 
-                            slide={selectedSlide} 
-                            onUpdate={handleUpdateSlide} 
-                            onUsageUpdate={onUsageUpdate}
-                            sourceFile={sourceFile}
-                            onClose={handleCloseInspectorMobile} // Pass close handler
-                        />
+	                        <SlideInspector 
+	                            slide={selectedSlide} 
+	                            onUpdate={handleUpdateSlide} 
+	                            onUsageUpdate={onUsageUpdate}
+	                            aiEnabled={aiEnabled}
+	                            sourceFile={sourceFile}
+	                            onClose={handleCloseInspectorMobile} // Pass close handler
+	                        />
                     </div>
                 ) : (
                     <ProjectSettings onClose={handleCloseInspectorMobile} />
@@ -381,6 +383,7 @@ const SlideEditorLayout: React.FC<{
 };
 
 interface SlideEditorProps {
+  aiEnabled: boolean;
   slides: Slide[];
   onUpdateSlides: (slides: Slide[]) => void;
   onStartConversion: (
@@ -431,15 +434,16 @@ const SlideEditor: React.FC<SlideEditorProps> = (props) => {
       sourceFile={props.sourceFile}
       onAutoSave={props.onAutoSave}
       onOutputFileTargetChange={props.onOutputFileTargetChange}
-    >
-      <SlideEditorLayout 
-        onStartConversion={props.onStartConversion} 
-        onUsageUpdate={props.onUsageUpdate}
-        onLoadProject={props.onLoadProject}
-        onOpenProjectManager={props.onOpenProjectManager}
-      />
-    </EditorProvider>
-  );
+	    >
+	      <SlideEditorLayout 
+	        onStartConversion={props.onStartConversion} 
+	        onUsageUpdate={props.onUsageUpdate}
+	        onLoadProject={props.onLoadProject}
+	        onOpenProjectManager={props.onOpenProjectManager}
+	        aiEnabled={props.aiEnabled}
+	      />
+	    </EditorProvider>
+	  );
 };
 
 export default SlideEditor;

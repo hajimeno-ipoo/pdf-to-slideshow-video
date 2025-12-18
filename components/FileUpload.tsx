@@ -1,12 +1,13 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { AppStatus, TransitionType } from '../types';
 
 interface FileUploadProps {
   onFileSelect: (file: File, duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => void;
   status: AppStatus;
+  aiEnabled: boolean;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [duration, setDuration] = useState<number>(3); // Default 3 seconds
@@ -47,6 +48,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status }) => {
   };
 
   const isDisabled = status === AppStatus.CONVERTING;
+  const isAiLocked = !aiEnabled;
+
+  useEffect(() => {
+    if (isAiLocked) setAutoGenerateScript(false);
+  }, [isAiLocked]);
 
   return (
     <div 
@@ -105,29 +111,31 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status }) => {
              </div>
          </div>
          
-         {/* AI Script Generation Option */}
-         <div className="pt-4 border-t border-slate-700/50 space-y-3">
-             <label className="flex items-start gap-3 cursor-pointer group">
-                 <div className="relative flex items-center mt-0.5">
-                    <input 
-                        type="checkbox" 
-                        checked={autoGenerateScript} 
-                        onChange={(e) => setAutoGenerateScript(e.target.checked)} 
-                        className="peer sr-only"
-                    />
-                    <div className="w-10 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-purple-600"></div>
-                 </div>
-                 <div className="flex-1">
-                     <div className="flex items-center gap-2">
-                         <span className="text-white font-medium text-sm group-hover:text-indigo-300 transition-colors">AIでナレーション原稿を自動生成する (ベータ版)</span>
-                         <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">Gemini 2.5</span>
-                     </div>
-                     <p className="text-xs text-slate-400 mt-1">
-                         各スライドの画像をAIが解析し、説明文を自動で下書きします。<br/>
-                         <span className="text-amber-400/80">※ 解析時間が大幅に長くなる場合があります（1ページあたり約2~3秒追加）</span>
-                     </p>
-                 </div>
-             </label>
+	         {/* AI Script Generation Option */}
+	         <div className="pt-4 border-t border-slate-700/50 space-y-3">
+	             <label className={`flex items-start gap-3 ${isAiLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer group'}`}>
+	                 <div className="relative flex items-center mt-0.5">
+	                    <input 
+	                        type="checkbox" 
+	                        checked={autoGenerateScript} 
+	                        onChange={(e) => setAutoGenerateScript(e.target.checked)} 
+	                        disabled={isAiLocked}
+	                        className="peer sr-only"
+	                    />
+	                    <div className="w-10 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-indigo-600 peer-checked:to-purple-600"></div>
+	                 </div>
+	                 <div className="flex-1">
+	                     <div className="flex items-center gap-2">
+	                         <span className="text-white font-medium text-sm group-hover:text-indigo-300 transition-colors">AIでナレーション原稿を自動生成する (ベータ版)</span>
+	                         <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">Gemini 2.5</span>
+	                     </div>
+	                     <p className="text-xs text-slate-400 mt-1">
+	                         各スライドの画像をAIが解析し、説明文を自動で下書きします。<br/>
+	                         <span className="text-amber-400/80">※ 解析時間が大幅に長くなる場合があります（1ページあたり約2~3秒追加）</span>
+	                         {isAiLocked && <span className="block text-slate-500 mt-1">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</span>}
+	                     </p>
+	                 </div>
+	             </label>
 
              {/* Custom Prompt Input */}
              {autoGenerateScript && (
