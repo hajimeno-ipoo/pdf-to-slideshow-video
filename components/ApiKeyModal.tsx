@@ -17,11 +17,13 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
   const [usePass, setUsePass] = useState(!!initialPassphrase);
   const [pass, setPass] = useState(initialPassphrase || '');
   const [show, setShow] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
 
   useEffect(() => {
     setKey(initialKey);
     setRemember(initialRemember);
     setMode(initialRemember ? 'local' : 'session');
+    setShowHelp(false);
   }, [initialKey, initialRemember, open]);
 
   if (!open) return null;
@@ -51,7 +53,28 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
           <p className="text-[11px] text-slate-500">キーはサーバーに送信しません。この端末だけで使います。</p>
         </div>
         <div className="space-y-2">
-          <div className="text-xs text-slate-400">保存先</div>
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-slate-400">保存先</div>
+            <button
+              type="button"
+              onClick={() => setShowHelp((v) => !v)}
+              className="text-[11px] text-slate-300 hover:text-white px-2 py-1 rounded border border-slate-700 bg-slate-800 hover:bg-slate-700"
+              aria-label="保存先のヘルプ"
+            >
+              {showHelp ? 'ヘルプを閉じる' : 'ヘルプ'}
+            </button>
+          </div>
+          {showHelp && (
+            <div className="text-[11px] text-slate-300 bg-slate-800/60 border border-slate-700 rounded p-3 leading-relaxed space-y-2">
+              <div className="text-slate-200 font-semibold">保存先の違い</div>
+              <ul className="list-disc pl-4 space-y-1">
+                <li><span className="text-slate-100 font-semibold">メモリのみ</span>：このタブを開いてる間だけ。リロード（更新）やタブを閉じると消えるよ。</li>
+                <li><span className="text-slate-100 font-semibold">このタブだけ</span>：リロードしても残るけど、タブを閉じたら消えるよ。</li>
+                <li><span className="text-slate-100 font-semibold">この端末に保存</span>：タブを閉じても残るよ。同じ端末・同じブラウザなら次回も使えるよ。</li>
+              </ul>
+              <div className="text-slate-400">※保存先を変えて「保存して使う」を押すと、前の保存先にあったキーは消して、選んだ保存先だけに保存するよ。</div>
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-2 text-[11px]">
             <button onClick={() => { setMode('memory'); setRemember(false); }} className={`py-2 rounded border ${mode==='memory'?'border-emerald-500 text-emerald-300 bg-emerald-900/30':'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}>メモリのみ</button>
             <button onClick={() => { setMode('session'); setRemember(false); }} className={`py-2 rounded border ${mode==='session'?'border-emerald-500 text-emerald-300 bg-emerald-900/30':'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}>このタブだけ</button>
