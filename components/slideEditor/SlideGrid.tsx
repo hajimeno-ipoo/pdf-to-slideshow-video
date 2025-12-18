@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useEditor } from './SlideEditorContext';
-import { TransitionType, EffectType, Slide, Overlay } from '../../types';
+import { TransitionType, Slide } from '../../types';
 import { safeRandomUUID } from '../../utils/uuid';
 
 interface SlideGridProps {
@@ -104,6 +104,30 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
       {slides.map((slide, index) => {
         const isSelected = slide.id === selectedId;
         const isSolid = slide.pageIndex <= 0 && !!slide.backgroundColor && !slide.customImageFile;
+        const SLIDE_TOKEN = '__SLIDE__';
+        const overlays = Array.isArray(slide.overlays) ? slide.overlays : [];
+        const overlayIds = overlays.map(o => o.id);
+        let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
+        if (!layerOrder.includes(SLIDE_TOKEN)) layerOrder.unshift(SLIDE_TOKEN);
+        for (const id of overlayIds) if (!layerOrder.includes(id)) layerOrder.push(id);
+        layerOrder = layerOrder.filter(id => id === SLIDE_TOKEN || overlayIds.includes(id));
+        const slideIndex = layerOrder.indexOf(SLIDE_TOKEN);
+
+        const getOverlayById = (id: string) => overlays.find(o => o.id === id);
+        const isCanvasOverlay = (id: string) => {
+          const ov = getOverlayById(id);
+          if (!ov || ov.hidden) return false;
+          return (ov.space || 'slide') === 'canvas';
+        };
+
+        const canvasBefore = layerOrder.filter((id) => id !== SLIDE_TOKEN && isCanvasOverlay(id) && (slideIndex < 0 || layerOrder.indexOf(id) < slideIndex));
+
+        const canvasBgId = [...canvasBefore].reverse().find((id) => {
+          const ov = getOverlayById(id);
+          return !!ov && !ov.hidden && ov.type === 'image' && !!ov.imageData;
+        });
+        const canvasBgUrl = canvasBgId ? (getOverlayById(canvasBgId)?.imageData || '') : '';
+
         return (
         <div 
             key={slide.id} 
@@ -117,56 +141,37 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
              {slide.audioFile && <div className="bg-indigo-500/80 px-1 py-0.5 rounded text-[8px] text-white">♫</div>}
           </div>
           
-          <div 
-            draggable={true} 
-            onDragStart={(e) => onDragStart(e, index)} 
-            className="aspect-video w-full flex items-center justify-center overflow-hidden relative"
-            style={{ backgroundColor: getBackgroundColor() }}
-          >
-            {bgPreviewUrl && (<img src={bgPreviewUrl} className="absolute inset-0 w-full h-full object-cover opacity-50 pointer-events-none" />)}
-            
-            <div 
-                className="relative w-full h-full flex items-center justify-center"
-                style={{ 
-                    transform: `scale(${videoSettings.slideScale / 100})`, 
-                    boxShadow: videoSettings.slideScale < 100 ? '0 4px 6px -1px rgba(0, 0, 0, 0.5)' : 'none',
-                    borderRadius: `${videoSettings.slideBorderRadius * 0.4}px`, // Approximate scaling
-                    overflow: 'hidden'
-                }}
-            >
-                <img 
-                    src={slide.thumbnailUrl} 
-                    alt={`Slide ${index + 1}`} 
-                    className="object-contain pointer-events-none w-full h-full" 
-                    style={{ backgroundColor: isSolid ? slide.backgroundColor : undefined }}
-                />
-                
-                {/* Overlay Animations (GIFs) on Grid */}
-                {/* We render image overlays as separate DOM elements so GIFs animate */}
-                {slide.overlays && slide.overlays.length > 0 && (
-                    <div className="absolute inset-0 pointer-events-none">
-                        {slide.overlays.filter(o => !o.hidden && o.type === 'image' && o.imageData).map(ov => (
-                            <img 
-                                key={ov.id}
-                                src={ov.imageData} 
-                                alt=""
-                                style={{
-                                    position: 'absolute',
-                                    left: `${ov.x * 100}%`,
-                                    top: `${ov.y * 100}%`,
-                                    width: `${(ov.width || 0.2) * 100}%`,
-                                    height: `${(ov.height || 0.2) * 100}%`,
-                                    transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`,
-                                    opacity: ov.opacity ?? 1,
-                                    objectFit: 'fill',
-                                    filter: ov.shadowColor ? `drop-shadow(${ov.shadowOffsetX || 0}px ${ov.shadowOffsetY || 0}px ${ov.shadowBlur || 0}px ${ov.shadowColor})` : undefined
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-          </div>
+	          <div 
+	            draggable={true} 
+	            onDragStart={(e) => onDragStart(e, index)} 
+	            className="aspect-video w-full flex items-center justify-center overflow-hidden relative"
+	            style={{ backgroundColor: getBackgroundColor() }}
+	          >
+	            {bgPreviewUrl && (<img src={bgPreviewUrl} className="absolute inset-0 w-full h-full object-cover opacity-50 pointer-events-none" />)}
+	            
+	            <div 
+	                className="relative w-full h-full flex items-center justify-center"
+	                style={{ 
+	                    transform: `scale(${videoSettings.slideScale / 100})`, 
+	                    boxShadow: videoSettings.slideScale < 100 ? '0 4px 6px -1px rgba(0, 0, 0, 0.5)' : 'none',
+	                    borderRadius: `${videoSettings.slideBorderRadius * 0.4}px`, // Approximate scaling
+	                    overflow: 'hidden',
+                        // Slide thumbnail uses object-contain, so the empty area shows through.
+                        // If a canvas background image exists, use it to fill the “black bars” inside the slide frame.
+                        backgroundImage: canvasBgUrl ? `url(${canvasBgUrl})` : undefined,
+                        backgroundSize: canvasBgUrl ? 'cover' : undefined,
+                        backgroundPosition: canvasBgUrl ? 'center' : undefined,
+	                        backgroundRepeat: canvasBgUrl ? 'no-repeat' : undefined,
+	                }}
+	            >
+	                <img 
+	                    src={slide.thumbnailUrl} 
+	                    alt={`Slide ${index + 1}`} 
+	                    className="object-contain pointer-events-none w-full h-full" 
+	                    style={{ backgroundColor: isSolid ? slide.backgroundColor : undefined }}
+	                />
+	            </div>
+	          </div>
           
           <div className="h-10 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-2 gap-2" onClick={(e) => e.stopPropagation()}>
               {/* Transition Selector */}

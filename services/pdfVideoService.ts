@@ -683,7 +683,8 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
     }
 
     slideImage?.close?.();
-    return canvas.toDataURL('image/jpeg', 0.8);
+    // JPEG だと透明部分が黒に潰れて「黒帯が焼き込み」されるので、PNG で透明を保持する
+    return canvas.toDataURL('image/png');
 };
 
 export const generateVideoFromSlides = async (

@@ -663,36 +663,36 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   };
 
   const handleAddOverlay = (type: OverlayType, imageData?: string) => { 
-    if (type === 'image' && imageData) { 
-        const newOverlay: Overlay = {
-            id: safeRandomUUID(), 
-            type: 'image', 
-            x: 0.5, 
-            y: 0.5, 
-            rotation: 0, 
-            opacity: 1, 
-            startTime: 0,
-            duration: localDuration,
-            animationOut: 'fade',
-            imageData: imageData,
-            width: 0.3,
-            height: 0.3,
-            space: isCanvasMode ? 'canvas' : undefined
-        };
+		    if (type === 'image' && imageData) { 
+		        const newOverlay: Overlay = {
+		            id: safeRandomUUID(), 
+		            type: 'image', 
+		            x: 0.5, 
+		            y: 0.5, 
+	            rotation: 0, 
+	            opacity: 1, 
+	            startTime: 0,
+		            duration: localDuration,
+		            animationOut: 'fade',
+		            imageData: imageData,
+		            width: 0.3,
+		            height: 0.3,
+		            space: isCanvasMode ? 'canvas' : undefined
+		        };
 
         const img = new Image(); 
-        img.onload = () => { 
-            const imageAspect = img.width / img.height; 
-            const rect = getScreenRect();
-            const slideAspect = (rect.width > 0 && rect.height > 0) ? rect.width / rect.height : (slide.width / slide.height || 16/9);
-            const canvasAspect = stageSize.width > 0 && stageSize.height > 0 ? (stageSize.width / stageSize.height) : (16/9);
-            const baseAspect = (newOverlay.space === 'canvas') ? canvasAspect : slideAspect;
-            newOverlay.height = (0.3 * baseAspect) / imageAspect; 
-            setOverlays([...overlays, newOverlay]); 
-            setSelectedOverlayId(newOverlay.id); 
-            setSelectedLayerId(newOverlay.id);
-            setActiveTab('image'); 
-        }; 
+	        img.onload = () => { 
+	            const imageAspect = img.width / img.height; 
+		            const rect = getScreenRect();
+		            const slideAspect = (rect.width > 0 && rect.height > 0) ? rect.width / rect.height : (slide.width / slide.height || 16/9);
+		            const canvasAspect = stageSize.width > 0 && stageSize.height > 0 ? (stageSize.width / stageSize.height) : (16/9);
+		            const baseAspect = (newOverlay.space === 'canvas') ? canvasAspect : slideAspect;
+		            newOverlay.height = (0.3 * baseAspect) / imageAspect; 
+		            setOverlays([...overlays, newOverlay]); 
+		            setSelectedOverlayId(newOverlay.id); 
+		            setSelectedLayerId(newOverlay.id);
+		            setActiveTab('image'); 
+		        }; 
         img.src = imageData; 
     } else { 
         setPendingAddType(type);
