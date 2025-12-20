@@ -698,8 +698,7 @@ export const generateVideoFromSlides = async (
   globalAudioFile: File | null = null,
   globalAudioVolume: number = 1.0,
   onProgress?: (current: number, total: number) => void,
-  duckingOptions?: DuckingOptions,
-  outputFileHandle?: FileSystemFileHandle | null
+  duckingOptions?: DuckingOptions
 ): Promise<{ url: string, extension: string }> => {
     
     // Prepare assets for Worker
@@ -909,19 +908,14 @@ export const generateVideoFromSlides = async (
     return new Promise((resolve, reject) => {
         worker.onmessage = async (e) => {
             try {
-                const { type, buffer, extension, current, total, message, savedToDisk } = e.data;
+                const { type, buffer, extension, current, total, message } = e.data;
                 if (type === 'progress' && onProgress) {
                     onProgress(current, total);
                 } else if (type === 'done') {
                     let url: string;
-	                    if (savedToDisk && outputFileHandle && (extension === 'mp4' || extension === 'mov')) {
-	                        const file = await outputFileHandle.getFile();
-	                        url = URL.createObjectURL(file);
-	                    } else {
-	                        const mimeType = extension === 'mov' ? 'video/quicktime' : 'video/mp4';
-	                        const blob = new Blob([buffer], { type: mimeType });
-	                        url = URL.createObjectURL(blob);
-	                    }
+                    const mimeType = extension === 'mov' ? 'video/quicktime' : 'video/mp4';
+                    const blob = new Blob([buffer], { type: mimeType });
+                    url = URL.createObjectURL(blob);
                     worker.terminate();
                     URL.revokeObjectURL(workerUrl);
                     resolve({ url, extension });
@@ -957,8 +951,7 @@ export const generateVideoFromSlides = async (
                 duckingOptions,
                 audioChannels: audioDataL ? [audioDataL, audioDataR] : null,
                 bgImageBuffer,
-                bgMimeType,
-                outputFileHandle: outputFileHandle ?? null
+                bgMimeType
             };
 
             const transferables: Transferable[] = processedSlides.map(s => s.bitmap).filter(b => !!b) as unknown as Transferable[];

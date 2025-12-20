@@ -3,12 +3,10 @@ import React, { useRef, useState } from 'react';
 import { useEditor } from './slideEditor/SlideEditorContext';
 import BgmWaveformEditor from './BgmWaveformEditor';
 import { Resolution, OutputFormat, BackgroundFill, AspectRatio } from '../types';
-import { getVideoSaveFilePickerOptions, isFileSystemAccessSupported } from '../utils/fileSystemAccess';
 
 const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const { 
       videoSettings, setVideoSettings,
-      outputFileHandle, outputFileFormat, setOutputFileHandle,
       bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
       globalAudioFile, setGlobalAudioFile, globalAudioVolume, setGlobalAudioVolume,
       duckingOptions, setDuckingOptions,
@@ -52,25 +50,6 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const handleBgImageClear = () => {
     setVideoSettings({ backgroundImageFile: undefined, backgroundFill: 'black' });
     if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-  };
-
-  const fileSystemAccessSupported = isFileSystemAccessSupported(
-    typeof window === 'undefined' ? null : (window as any)
-  );
-
-  const handleConfigureOutputFile = async () => {
-    if (!fileSystemAccessSupported) return;
-
-    try {
-      const handle = await (window as any).showSaveFilePicker(
-        getVideoSaveFilePickerOptions(videoSettings.format)
-      );
-      setOutputFileHandle(handle, videoSettings.format);
-    } catch (e: any) {
-      if (e?.name === 'AbortError') return;
-      console.error(e);
-      alert('保存先の設定に失敗しました。');
-    }
   };
 
   const handleFitToAudio = () => {
@@ -137,49 +116,9 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
 	                </div>
 	              )}
 
-	              <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-700">
-	                  <div className="flex items-center justify-between gap-3">
-	                      <div className="flex flex-col min-w-0">
-	                          <span className="text-[12px] text-slate-300 uppercase">保存先</span>
-	                          <span className="text-[11px] text-slate-400 truncate">
-	                              {outputFileHandle ? outputFileHandle.name : '未設定'}
-	                          </span>
-	                      </div>
-	                  <button
-	                          onClick={handleConfigureOutputFile}
-	                          disabled={!fileSystemAccessSupported}
-	                          className={`px-3 py-2 text-xs rounded border transition-colors whitespace-nowrap ${
-	                              fileSystemAccessSupported
-	                                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-500/40'
-	                                  : 'bg-slate-800 text-slate-500 border-slate-700 cursor-not-allowed'
-	                          }`}
-	                      >
-	                          保存先を設定
-	                      </button>
-	                  </div>
-
-	                  {!fileSystemAccessSupported && (
-	                      <div className="mt-2 text-[11px] text-yellow-400">
-	                          このブラウザではMP4/MOV書き出しが使えないよ。Chrome/Edgeで開いてね。
-	                      </div>
-	                  )}
-
-	                  {fileSystemAccessSupported && outputFileHandle && !outputFileFormat && (
-	                      <div className="mt-2 text-[11px] text-yellow-400">
-	                          保存先の情報が古いっぽいから、もう一回「保存先を設定」してね。
-	                      </div>
-	                  )}
-
-	                  {fileSystemAccessSupported && outputFileHandle && outputFileFormat && outputFileFormat !== videoSettings.format && (
-	                      <div className="mt-2 text-[11px] text-yellow-400">
-	                          今の保存先は{outputFileFormat.toUpperCase()}用だよ。{videoSettings.format.toUpperCase()}で書き出すなら設定しなおしてね。
-	                      </div>
-	                  )}
-	              </div>
-
-	              <div className="space-y-3 pt-2">
-	                 <div className="space-y-1">
-	                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>スライド縮小</label><span>{videoSettings.slideScale}%</span></div>
+              <div className="space-y-3 pt-2">
+                 <div className="space-y-1">
+                    <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>スライド縮小</label><span>{videoSettings.slideScale}%</span></div>
 	                    <input type="range" min="50" max="100" value={videoSettings.slideScale} onChange={(e) => setVideoSettings({ slideScale: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                  </div>
                  <div className="space-y-1">

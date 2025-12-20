@@ -187,8 +187,6 @@ export interface ProjectData {
   slides: Slide[];
   sourceFile: File | null;
   videoSettings?: VideoSettings;
-  outputFileHandle?: FileSystemFileHandle | null;
-  outputFileFormat?: OutputFormat | null;
   bgmFile: File | null;
   bgmTimeRange?: BgmTimeRange;
   bgmVolume?: number;

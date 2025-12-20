@@ -3,7 +3,7 @@
 // We do this to avoid complex build configuration for workers in this environment.
 
 export const VIDEO_WORKER_CODE = `
-import { Output, Mp4OutputFormat, MovOutputFormat, StreamTarget, BufferTarget, CanvasSource, EncodedAudioPacketSource, EncodedPacket } from 'https://cdn.jsdelivr.net/npm/mediabunny@1.26.0/+esm';
+import { Output, Mp4OutputFormat, MovOutputFormat, BufferTarget, CanvasSource, EncodedAudioPacketSource, EncodedPacket } from 'https://cdn.jsdelivr.net/npm/mediabunny@1.26.0/+esm';
 
 // --- Helper Functions ---
 
@@ -428,7 +428,7 @@ self.onmessage = async (e) => {
 
     if (type === 'init') {
         try {
-            const { slides, videoSettings, bgmTimeRange, bgmVolume, globalAudioVolume, fadeOptions, duckingOptions, audioChannels, bgImageBuffer, bgMimeType, outputFileHandle } = payload;
+            const { slides, videoSettings, bgmTimeRange, bgmVolume, globalAudioVolume, fadeOptions, duckingOptions, audioChannels, bgImageBuffer, bgMimeType } = payload;
             const { width, height } = getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution);
             
             // 1. Prepare Slide Assets
@@ -605,18 +605,11 @@ self.onmessage = async (e) => {
 	                const canvas = new OffscreenCanvas(width, height);
 	                const ctx = canvas.getContext('2d', { alpha: false });
 
-	                let writableStream = null;
 	                let output = null;
 	                let completed = false;
 
 	                try {
-	                    let target;
-	                    if (outputFileHandle) {
-	                        writableStream = await outputFileHandle.createWritable();
-	                        target = new StreamTarget(writableStream, { chunked: true });
-	                    } else {
-	                        target = new BufferTarget();
-	                    }
+	                    const target = new BufferTarget();
 
 	                    const extension = videoSettings.format === 'mov' ? 'mov' : 'mp4';
 	                    output = new Output({
@@ -635,6 +628,7 @@ self.onmessage = async (e) => {
                     let audioSource = null;
                     let audioAddChain = Promise.resolve();
                     let audioHasDecoderConfig = false;
+                    let audioError = null;
 
                     if (audioChannels) {
                         audioSource = new EncodedAudioPacketSource('aac');
@@ -644,6 +638,10 @@ self.onmessage = async (e) => {
                     await output.start();
 
                     if (audioChannels && audioSource) {
+                        if (typeof AudioEncoder !== 'function') {
+                            throw new Error('このブラウザでは音つき動画が作れないよ。');
+                        }
+
                         const audioEncoder = new AudioEncoder({
                             output: (chunk, meta) => {
                                 const packet = EncodedPacket.fromEncodedChunk(chunk);
@@ -661,7 +659,7 @@ self.onmessage = async (e) => {
                                     audioAddChain = audioAddChain.then(() => audioSource.add(packet));
                                 }
                             },
-                            error: (e) => console.error("Worker Audio Enc Error", e)
+                            error: (e) => { audioError = e; }
                         });
                         audioEncoder.configure({ codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000 });
 
@@ -677,9 +675,18 @@ self.onmessage = async (e) => {
                             audioEncoder.encode(frame); frame.close();
                         }
 
-                        await audioEncoder.flush();
-                        await audioAddChain;
-                        audioEncoder.close();
+                        try {
+                            await audioEncoder.flush();
+                            await audioAddChain;
+                        } finally {
+                            try { audioEncoder.close(); } catch (_) {}
+                        }
+                        if (audioError) {
+                            throw audioError;
+                        }
+                        if (!audioHasDecoderConfig) {
+                            throw new Error('音声の情報が読み取れなかったよ。');
+                        }
                     }
 
 	                    await processFrames(videoSource, canvas, ctx);
@@ -687,16 +694,11 @@ self.onmessage = async (e) => {
 	                    await output.finalize();
 	                    completed = true;
 
-	                    if (outputFileHandle) {
-	                        self.postMessage({ type: 'done', extension, savedToDisk: true });
-	                    } else {
-	                        const buffer = target.buffer;
-	                        self.postMessage({ type: 'done', buffer, extension }, [buffer]);
-	                    }
+	                    const buffer = target.buffer;
+	                    self.postMessage({ type: 'done', buffer, extension }, [buffer]);
 	                } finally {
 	                    if (!completed) {
 	                        try { await output?.cancel?.(); } catch (_) {}
-	                        try { await writableStream?.abort?.(); } catch (_) {}
 	                    }
 	                }
 	            }

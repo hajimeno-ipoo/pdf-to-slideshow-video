@@ -8,12 +8,12 @@ import SlideEditor from './components/SlideEditor';
 import RestoreModal from './components/RestoreModal';
 import CooldownNotification from './components/CooldownNotification';
 import ApiKeyModal from './components/ApiKeyModal';
-import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions, OutputFormat } from './types';
+import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions } from './types';
 import { analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
 import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey, hasEncryptedStored, PersistMode } from './utils/apiKeyStore';
-import { ensureWritePermission, isFileSystemAccessSupported } from './utils/fileSystemAccess';
+import { getExportSupportError } from './utils/exportSupport';
 import { buildThumbnailCaptureTimes, clampSeconds, formatSecondsForFilename } from './utils/thumbnailExport';
 
 declare const pdfjsLib: any;
@@ -27,8 +27,6 @@ const App: React.FC = () => {
   });
   const [slides, setSlides] = useState<Slide[]>([]);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
-  const [outputFileHandle, setOutputFileHandle] = useState<FileSystemFileHandle | null>(null);
-  const [outputFileFormat, setOutputFileFormat] = useState<OutputFormat | null>(null);
   
   // API Status & Usage State
   const [apiStatus, setApiStatus] = useState<ApiConnectionStatus>('checking');
@@ -238,8 +236,6 @@ const App: React.FC = () => {
       if (restoreData) {
           setSlides(restoreData.slides);
           setSourceFile(restoreData.sourceFile);
-          setOutputFileHandle(restoreData.outputFileHandle ?? null);
-          setOutputFileFormat(restoreData.outputFileFormat ?? null);
           setState({
               status: AppStatus.EDITING, // Restore to editing state
               settings: restoreData.videoSettings,
@@ -261,8 +257,6 @@ const App: React.FC = () => {
   const handleProjectLoad = (data: ProjectData) => {
       setSlides(data.slides);
       setSourceFile(data.sourceFile);
-      setOutputFileHandle(null);
-      setOutputFileFormat(null);
       setState({
           status: AppStatus.EDITING,
           settings: data.videoSettings,
@@ -282,8 +276,6 @@ const App: React.FC = () => {
       await clearProject();
       setShowRestoreModal(false);
       setRestoreData(null);
-      setOutputFileHandle(null);
-      setOutputFileFormat(null);
   };
 
   // Step 1: Upload & Analyze
@@ -335,8 +327,7 @@ const App: React.FC = () => {
 	    bgmVolume: number = 1.0,
 	    globalAudioFile: File | null = null,
 	    globalAudioVolume: number = 1.0,
-	    duckingOptions?: DuckingOptions,
-	    targetFileHandle?: FileSystemFileHandle | null
+	    duckingOptions?: DuckingOptions
 	  ) => {
     if (!sourceFile && slides.every(s => s.customImageFile)) {
        // All custom images, no source file needed technically but kept for structure
@@ -345,21 +336,13 @@ const App: React.FC = () => {
 	    }
 	
 	    try {
-	      const fileSystemAccessSupported = isFileSystemAccessSupported(window as any);
-
-	      if (!fileSystemAccessSupported) {
-	        alert('このブラウザではMP4/MOV書き出しができないよ。Chrome/Edgeで開いてね。');
-	        return;
-	      }
-
-	      if (!targetFileHandle) {
-	        alert('保存先が未設定だよ。先に「保存先を設定」してね。');
-	        return;
-	      }
-
-	      const permissionOk = await ensureWritePermission(targetFileHandle);
-	      if (!permissionOk) {
-	        alert('保存先へのアクセス許可が必要だよ。もう一回「保存先を設定」してね。');
+	      const requiresAudio = !!bgmFile || !!globalAudioFile || slides.some(s => s.audioFile);
+	      const supportError = getExportSupportError(
+	        typeof window === 'undefined' ? null : window,
+	        { requireAudio: requiresAudio }
+	      );
+	      if (supportError) {
+	        alert(supportError);
 	        return;
 	      }
 	
@@ -385,8 +368,7 @@ const App: React.FC = () => {
 	            progress: { current, total }
 	          }));
 	        },
-	        duckingOptions,
-	        targetFileHandle
+	        duckingOptions
 	      );
 
       setState({ 
@@ -418,8 +400,6 @@ const App: React.FC = () => {
     setState({ status: AppStatus.IDLE });
     setSlides([]);
     setSourceFile(null);
-    setOutputFileHandle(null);
-    setOutputFileFormat(null);
     setSaveStatus('idle');
     setLastSavedTime(null);
   };
@@ -456,6 +436,17 @@ const App: React.FC = () => {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const downloadVideo = () => {
+    if (!state.videoUrl) return;
+    const extension = state.extension || 'mp4';
+    const a = document.createElement('a');
+    a.href = state.videoUrl;
+    a.download = `slideshow.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   };
 
   const isTaintedCanvasError = (e: any) => {
@@ -1075,12 +1066,10 @@ const App: React.FC = () => {
 		                    aiEnabled={aiEnabled}
 		                    slides={slides} 
 		                    onUpdateSlides={setSlides} 
-		                    onStartConversion={handleStartConversion}
-		                    isProcessing={false}
-		                    sourceFile={sourceFile}
+	                    onStartConversion={handleStartConversion}
+	                    isProcessing={false}
+	                    sourceFile={sourceFile}
 	                    initialSettings={state.settings}
-	                    initialOutputFileHandle={outputFileHandle}
-	                    initialOutputFileFormat={outputFileFormat}
 	                    initialBgmFile={state.bgmFile}
 	                    initialFadeOptions={state.fadeOptions}
 	                    initialBgmTimeRange={state.bgmTimeRange}
@@ -1088,10 +1077,6 @@ const App: React.FC = () => {
 	                    initialGlobalAudioFile={state.globalAudioFile}
 	                    initialGlobalAudioVolume={state.globalAudioVolume}
 	                    initialDuckingOptions={state.duckingOptions}
-	                    onOutputFileTargetChange={(handle, format) => {
-	                      setOutputFileHandle(handle);
-	                      setOutputFileFormat(format);
-	                    }}
 	                    onUsageUpdate={handleUsageUpdate}
 	                    onLoadProject={handleProjectLoad}
                       onOpenProjectManager={() => setProjectManagerOpen(true)}
@@ -1187,6 +1172,16 @@ const App: React.FC = () => {
                     </div>
 	                    
 		                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+		                        <button 
+		                        onClick={downloadVideo}
+		                        className="flex items-center justify-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-full font-medium transition-all shadow-lg shadow-amber-500/20 w-full sm:w-auto"
+		                        >
+		                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+		                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 3v12m0 0l-3.75-3.75M12 15l3.75-3.75" />
+		                        </svg>
+		                        動画をダウンロード
+		                        </button>
+
 		                        <button 
 		                        onClick={openThumbnailDialog}
 		                        className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-medium transition-all shadow-lg shadow-emerald-600/20 w-full sm:w-auto"
