@@ -46,6 +46,19 @@ const Header: React.FC<HeaderProps> = ({
   if (requestStats.tpm >= TPM_LIMIT) { tpmColor = 'bg-red-500'; tpmText = 'text-red-400 font-bold animate-pulse'; }
   else if (requestStats.tpm >= TPM_LIMIT * 0.8) { tpmColor = 'bg-yellow-500'; tpmText = 'text-yellow-400'; }
 
+  const baseUrl = import.meta.env.BASE_URL;
+  const openDoc = (e: React.MouseEvent<HTMLAnchorElement>, docPath: string) => {
+    // Allow browser default behavior for modifier keys / non-left click (open in new tab, etc.)
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+
+    e.preventDefault();
+    const url = `${baseUrl}${docPath}`;
+    const opened = window.open(url, 'pdf-video-docs');
+    if (!opened) {
+      window.location.href = url;
+    }
+  };
+
   return (
     <header className="w-full py-3 px-4 border-b border-slate-800 bg-slate-950 flex-none z-50">
       <div className="max-w-full mx-auto flex items-center justify-between gap-4">
@@ -65,6 +78,18 @@ const Header: React.FC<HeaderProps> = ({
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
+            {/* Docs Links */}
+            <nav className="flex items-center gap-3 text-[10px] font-medium">
+                <a href={`${baseUrl}usage.html`} onClick={(e) => openDoc(e, 'usage.html')} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                    利用について
+                </a>
+                <a href={`${baseUrl}terms.html`} onClick={(e) => openDoc(e, 'terms.html')} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                    利用規約
+                </a>
+                <a href={`${baseUrl}privacy.html`} onClick={(e) => openDoc(e, 'privacy.html')} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                    プライバシーポリシー
+                </a>
+            </nav>
             
             {/* Auto Save Status */}
             <div className={`flex items-center gap-2 transition-opacity duration-300 ${saveStatus === 'idle' ? 'opacity-50' : 'opacity-100'}`}>

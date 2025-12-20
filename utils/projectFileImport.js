@@ -1,4 +1,4 @@
-export const getProjectImportError = (file, { maxBytes = 50 * 1024 * 1024 } = {}) => {
+export const getProjectImportError = (file, { maxBytes = 100 * 1024 * 1024 } = {}) => {
   if (!file) return 'ファイルが選ばれてないよ。';
 
   const size = Number(file.size);

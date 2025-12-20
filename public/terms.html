@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>利用規約 | PDF to Video</title>
+    <style>
+      :root {
+        --bg-950: #0b1220;
+        --bg-900: #0e1a2b;
+        --border-800: #1f2937;
+        --text-main: #e5e7eb;
+        --text-sub: #9ca3af;
+        --link: #34d399;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+        background-color: var(--bg-900);
+        color: var(--text-main);
+      }
+      a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+      a:hover { text-decoration-thickness: 2px; }
+      header {
+        background: var(--bg-950);
+        border-bottom: 1px solid var(--border-800);
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 12px 16px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 16px 0 12px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 18px 0 8px;
+      }
+      p, li {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      p {
+        margin: 8px 0;
+      }
+      ul {
+        margin: 8px 0;
+        padding-left: 1.2em;
+      }
+      li {
+        margin: 6px 0;
+      }
+      .card {
+        margin: 12px 0 0;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid var(--border-800);
+        border-radius: 12px;
+      }
+      .meta {
+        color: var(--text-sub);
+        font-size: 12px;
+      }
+    </style>
+    <script>
+      function goBackToApp() {
+        if (window.opener && !window.opener.closed) {
+          try { window.opener.focus(); } catch (e) {}
+          try { window.close(); } catch (e) {}
+          return false;
+        }
+        if (history.length > 1) {
+          history.back();
+          return false;
+        }
+        location.href = './index.html';
+        return false;
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <a href="./index.html" onclick="return goBackToApp();">← アプリに戻る</a>
+      </div>
+    </header>
+    <main class="container">
+      <h1>利用規約</h1>
+      <article class="card">
+        <p class="meta">最終更新日：［2025-12-20］</p>
+
+        <section>
+          <h2>1. 提供内容</h2>
+          <p>本アプリは、PDF等からスライドショー動画等を作成するためのツールとして、個人開発により無償で一般公開しています。</p>
+        </section>
+
+        <section>
+          <h2>2. 無保証・免責</h2>
+          <p>本アプリは現状のまま提供されます。当方は、本アプリの動作、正確性、特定目的への適合、継続提供、データの保存等について保証しません。</p>
+          <p>本アプリの利用により利用者に生じた損害について、当方は責任を負いません。ただし、当方の故意または重大な過失による場合を除きます。</p>
+        </section>
+
+        <section>
+          <h2>3. 禁止事項</h2>
+          <p>利用者は、以下の行為をしてはなりません。</p>
+          <ul>
+            <li>法令または公序良俗に反する利用</li>
+            <li>サーバーに過度な負荷を与える行為、攻撃、スクレイピング等、運営を妨害する行為</li>
+            <li>自動化手段（ボット等）による大量アクセス、または当方が不正と判断するアクセス</li>
+            <li>本アプリを第三者向けに再提供する行為（例：本アプリへのアクセス権を販売・転売する、同一内容のサービスとして公開する、利用権をサブライセンスする等）</li>
+            <li>本アプリ自体の販売、または本アプリを組み込んだ形で本アプリ相当の機能を第三者向けに提供する行為</li>
+            <li>脆弱性の悪用、不正アクセス、その他不正な目的での利用</li>
+            <li>第三者の権利（著作権、商標権、プライバシー等）を侵害する入力素材の利用</li>
+            <li>本アプリのURLを紹介すること自体は自由です（ただし、アクセス権の販売・転売等は除きます）。</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. 出力物の利用</h2>
+          <p>利用者が本アプリを利用して作成した動画・画像・テキスト等の成果物（出力物）は、利用者の責任において自由に利用できます。業務利用、対外資料への利用、商用利用、納品等も妨げません。</p>
+          <p>ただし、入力素材（PDF、画像、音声、テキスト等）および出力物の利用が第三者の権利（著作権、商標権、プライバシー等）を侵害しないよう、利用者自身で必要な権利処理を行ってください。権利侵害に起因する紛争は利用者の責任で解決するものとします。</p>
+        </section>
+
+        <section>
+          <h2>5. 申し立て対応</h2>
+          <p>権利侵害等の申し立てがあった場合、当方は、必要に応じて利用者への通知、機能制限、アクセス遮断等の対応を行うことがあります。</p>
+        </section>
+
+        <section>
+          <h2>6. 変更・停止</h2>
+          <p>当方は、予告なく本アプリの内容を変更し、または提供を停止することがあります。</p>
+        </section>
+
+        <section>
+          <h2>7. 連絡先</h2>
+          <p>［<a href="https://x.com/hazimeno_ipoo" target="_blank" rel="noopener noreferrer">https://x.com/hazimeno_ipoo</a>］</p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>

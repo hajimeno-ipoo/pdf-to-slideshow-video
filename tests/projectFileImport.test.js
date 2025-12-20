@@ -11,11 +11,23 @@ test('getProjectImportError: empty file -> message', () => {
   assert.equal(getProjectImportError({ name: 'a.json', size: 0 }), 'ファイルが空っぽだよ。');
 });
 
+test('getProjectImportError: default maxBytes is 100MB', () => {
+  const maxBytes = 100 * 1024 * 1024;
+  assert.equal(
+    getProjectImportError({ name: 'a.json', size: maxBytes + 1 }),
+    `ファイルが大きすぎるよ（最大${maxBytes}バイトまで）。`
+  );
+});
+
 test('getProjectImportError: too large -> message', () => {
   assert.equal(
     getProjectImportError({ name: 'a.json', size: 11 }, { maxBytes: 10 }),
     'ファイルが大きすぎるよ（最大10バイトまで）。'
   );
+});
+
+test('getProjectImportError: maxBytes invalid -> ignores size limit', () => {
+  assert.equal(getProjectImportError({ name: 'a.json', size: 999 }, { maxBytes: Number.NaN }), null);
 });
 
 test('getProjectImportError: accepts .json even if type is empty', () => {
@@ -39,6 +51,10 @@ test('getProjectImportError: accepts text/json', () => {
 
 test('getProjectJsonTextError: empty -> message', () => {
   assert.equal(getProjectJsonTextError(''), 'ファイルが空っぽだよ。');
+});
+
+test('getProjectJsonTextError: null -> message', () => {
+  assert.equal(getProjectJsonTextError(null), 'ファイルが空っぽだよ。');
 });
 
 test('getProjectJsonTextError: invalid json -> message', () => {

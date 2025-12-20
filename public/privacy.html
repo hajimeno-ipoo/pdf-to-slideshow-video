@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>プライバシーポリシー | PDF to Video</title>
+    <style>
+      :root {
+        --bg-950: #0b1220;
+        --bg-900: #0e1a2b;
+        --border-800: #1f2937;
+        --text-main: #e5e7eb;
+        --text-sub: #9ca3af;
+        --link: #34d399;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+        background-color: var(--bg-900);
+        color: var(--text-main);
+      }
+      a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+      a:hover { text-decoration-thickness: 2px; }
+      header {
+        background: var(--bg-950);
+        border-bottom: 1px solid var(--border-800);
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 12px 16px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 16px 0 12px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 18px 0 8px;
+      }
+      p, li {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      p {
+        margin: 8px 0;
+      }
+      ul {
+        margin: 8px 0;
+        padding-left: 1.2em;
+      }
+      li {
+        margin: 6px 0;
+      }
+      .card {
+        margin: 12px 0 0;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid var(--border-800);
+        border-radius: 12px;
+      }
+      .meta {
+        color: var(--text-sub);
+        font-size: 12px;
+      }
+    </style>
+    <script>
+      function goBackToApp() {
+        if (window.opener && !window.opener.closed) {
+          try { window.opener.focus(); } catch (e) {}
+          try { window.close(); } catch (e) {}
+          return false;
+        }
+        if (history.length > 1) {
+          history.back();
+          return false;
+        }
+        location.href = './index.html';
+        return false;
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <a href="./index.html" onclick="return goBackToApp();">← アプリに戻る</a>
+      </div>
+    </header>
+    <main class="container">
+      <h1>プライバシーポリシー</h1>
+      <article class="card">
+        <p class="meta">最終更新日：［2025-12-20］</p>
+
+        <section>
+          <h2>1. 取得する情報</h2>
+          <p>当方は、本アプリの品質改善およびセキュリティ確保のため、アクセスログ（IPアドレス、ブラウザ情報、アクセス日時、エラー情報等）を取得する場合があります。</p>
+          <p>また、ホスティング事業者やCDN等の基盤サービスにより、同様のログが記録される場合があります。</p>
+        </section>
+
+        <section>
+          <h2>2. クッキー等</h2>
+          <p>本アプリの利便性向上やセキュリティのため、クッキーまたは類似技術を用いる場合があります。解析ツール等を導入する場合は、本ポリシーを更新して周知します。</p>
+        </section>
+
+        <section>
+          <h2>3. 入力データの取扱い</h2>
+          <p>本アプリは、可能な限り利用者のブラウザ内で処理する設計です。ただし、機能や環境により例外が生じる場合があります。</p>
+        </section>
+
+        <section>
+          <h2>4. AI機能と外部送信</h2>
+          <p>AI機能を利用した場合、入力したテキストや画像等の一部が外部AIサービス（例：Gemini）へ送信され、同サービス上で処理されることがあります。機密情報や個人情報の入力は避けてください。</p>
+          <p>外部AIサービス側での情報の取扱いは、当該サービス提供者の規約・ポリシーに従います。</p>
+        </section>
+
+        <section>
+          <h2>5. APIキー</h2>
+          <p>外部AIサービスのAPIキーを利用者が入力する場合、当方は原則として当該キーを当方サーバーに収集しない設計です。共有端末では利用者自身で管理してください。</p>
+        </section>
+
+        <section>
+          <h2>6. ポリシーの変更</h2>
+          <p>当方は、必要に応じて本ポリシーを変更することがあります。変更後の内容は、本アプリ上での掲示等により周知します。</p>
+        </section>
+
+        <section>
+          <h2>7. 連絡先</h2>
+          <p>［<a href="https://x.com/hazimeno_ipoo" target="_blank" rel="noopener noreferrer">https://x.com/hazimeno_ipoo</a>］</p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
