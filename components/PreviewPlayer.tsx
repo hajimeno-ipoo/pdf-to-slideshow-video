@@ -830,9 +830,6 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           narrationSourcesRef.current = [];
           if (previewRenderSourceRef.current) { previewRenderSourceRef.current.stop(); previewRenderSourceRef.current.disconnect(); previewRenderSourceRef.current = null; }
           lastDuckEndRef.current = 0;
-          if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-              audioCtxRef.current.suspend().catch(() => {});
-          }
       } catch (e) { /* ignore */ }
   };
 

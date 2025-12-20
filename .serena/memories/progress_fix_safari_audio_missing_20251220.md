@@ -1,0 +1,13 @@
+## 2025-12-20
+- 目的: Safariで「全体プレビュー」「書き出し画面プレビュー」「書き出し動画」が無音になる問題の対処。
+- 原因(推定):
+  - プレビュー: `PreviewPlayer.stopAudio()` の `AudioContext.suspend()` が非同期で、再生開始時の `resume()` とレースしてAudioContextがsuspendedのままになり得る。
+  - 書き出し: MediabunnyのAACトラックに必須な `decoderConfig.description` (AudioSpecificConfig) が欠ける/型が合わず、QuickTime/VLC/Safariでmp4aが認識できない可能性。
+- 対応:
+  - `components/PreviewPlayer.tsx`: `stopAudio()` から `audioCtxRef.current.suspend()` を撤去しレース回避。
+  - `services/videoWorkerScript.ts`: `meta.decoderConfig.description` を Uint8Array に正規化。無い/空の場合はAAC-LC(44100Hz, stereo)のAudioSpecificConfigを必ず付与して `audioSource.add(...,{decoderConfig})` に渡す。
+  - `utils/aacAudioSpecificConfig.js`: AAC-LCのAudioSpecificConfig生成関数を追加。
+  - `tests/aacAudioSpecificConfig.test.js`: 上記のユニットテスト追加。
+- テスト:
+  - `npm test` pass
+  - `npm run test:coverage` はサンドボックス制約のためエスカレート実行で pass（新規ファイルは100%）。

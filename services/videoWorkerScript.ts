@@ -2,6 +2,10 @@
 // This file contains the source code for the Web Worker as a string.
 // We do this to avoid complex build configuration for workers in this environment.
 
+import { createAacLcAudioSpecificConfig } from '../utils/aacAudioSpecificConfig';
+
+const DEFAULT_AAC_DESCRIPTION = Array.from(createAacLcAudioSpecificConfig(44100, 2));
+
 export const VIDEO_WORKER_CODE = `
 import { Output, Mp4OutputFormat, MovOutputFormat, BufferTarget, CanvasSource, EncodedAudioPacketSource, EncodedPacket } from 'https://cdn.jsdelivr.net/npm/mediabunny@1.26.0/+esm';
 
@@ -645,11 +649,23 @@ self.onmessage = async (e) => {
                         const audioEncoder = new AudioEncoder({
                             output: (chunk, meta) => {
                                 const packet = EncodedPacket.fromEncodedChunk(chunk);
-                                const decoderConfig = meta?.decoderConfig || {
-                                    codec: 'mp4a.40.2',
-                                    numberOfChannels: 2,
-                                    sampleRate: 44100,
-                                    description: meta?.decoderConfig?.description
+                                const metaConfig = meta?.decoderConfig;
+                                const fallbackDescription = new Uint8Array([${DEFAULT_AAC_DESCRIPTION.join(', ')}]); // AAC-LC, 44100Hz, Stereo
+                                let description = metaConfig?.description;
+                                if (description instanceof ArrayBuffer) {
+                                    description = new Uint8Array(description);
+                                } else if (ArrayBuffer.isView(description)) {
+                                    description = new Uint8Array(description.buffer, description.byteOffset, description.byteLength);
+                                }
+                                if (!description || description.byteLength === 0) {
+                                    description = fallbackDescription;
+                                }
+
+                                const decoderConfig = {
+                                    codec: metaConfig?.codec || 'mp4a.40.2',
+                                    numberOfChannels: metaConfig?.numberOfChannels || 2,
+                                    sampleRate: metaConfig?.sampleRate || 44100,
+                                    description
                                 };
 
                                 if (!audioHasDecoderConfig) {
