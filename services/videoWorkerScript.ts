@@ -641,55 +641,45 @@ self.onmessage = async (e) => {
 
                     await output.start();
 
-                    if (audioChannels && audioSource) {
-                        if (typeof AudioEncoder !== 'function') {
-                            throw new Error('このブラウザでは音つき動画が作れないよ。');
-                        }
+	                    if (audioChannels && audioSource) {
+	                        if (typeof AudioEncoder !== 'function') {
+	                            throw new Error('このブラウザでは音つき動画が作れないよ。');
+	                        }
 
-                        const audioEncoder = new AudioEncoder({
-                            output: (chunk, meta) => {
-                                const packet = EncodedPacket.fromEncodedChunk(chunk);
-                                const metaConfig = meta?.decoderConfig;
-                                const fallbackDescription = new Uint8Array([${DEFAULT_AAC_DESCRIPTION.join(', ')}]); // AAC-LC, 44100Hz, Stereo
-                                let description = metaConfig?.description;
-                                if (description instanceof ArrayBuffer) {
-                                    description = new Uint8Array(description);
-                                } else if (ArrayBuffer.isView(description)) {
-                                    description = new Uint8Array(description.buffer, description.byteOffset, description.byteLength);
-                                }
-                                if (!description || description.byteLength === 0) {
-                                    description = fallbackDescription;
-                                }
+	                        const aacDescription = new Uint8Array([${DEFAULT_AAC_DESCRIPTION.join(', ')}]); // AAC-LC, 44100Hz, Stereo
+	                        const aacDecoderConfig = {
+	                            codec: 'mp4a.40.2',
+	                            numberOfChannels: 2,
+	                            sampleRate: 44100,
+	                            description: aacDescription
+	                        };
 
-                                const decoderConfig = {
-                                    codec: metaConfig?.codec || 'mp4a.40.2',
-                                    numberOfChannels: metaConfig?.numberOfChannels || 2,
-                                    sampleRate: metaConfig?.sampleRate || 44100,
-                                    description
-                                };
-
-                                if (!audioHasDecoderConfig) {
-                                    audioHasDecoderConfig = true;
-                                    audioAddChain = audioAddChain.then(() => audioSource.add(packet, { decoderConfig }));
-                                } else {
-                                    audioAddChain = audioAddChain.then(() => audioSource.add(packet));
-                                }
-                            },
-                            error: (e) => { audioError = e; }
-                        });
+	                        const audioEncoder = new AudioEncoder({
+	                            output: (chunk) => {
+	                                const packet = EncodedPacket.fromEncodedChunk(chunk);
+	                                if (!audioHasDecoderConfig) {
+	                                    audioHasDecoderConfig = true;
+	                                    audioAddChain = audioAddChain.then(() => audioSource.add(packet, { decoderConfig: aacDecoderConfig }));
+	                                } else {
+	                                    audioAddChain = audioAddChain.then(() => audioSource.add(packet));
+	                                }
+	                            },
+	                            error: (e) => { audioError = e; }
+	                        });
                         audioEncoder.configure({ codec: 'mp4a.40.2', sampleRate: 44100, numberOfChannels: 2, bitrate: 128_000 });
 
                         const [audioDataL, audioDataR] = audioChannels;
-                        const lenSamples = audioDataL.length;
-                        const chunkSize = 4096;
-                        for (let i = 0; i < lenSamples; i += chunkSize) {
-                            const end = Math.min(i + chunkSize, lenSamples);
-                            const len = end - i;
-                            const data = new Float32Array(len * 2);
-                            for (let j = 0; j < len; j++) { data[j*2] = audioDataL[i+j]; data[j*2+1] = audioDataR[i+j]; }
-                            const frame = new AudioData({ format: 'f32', sampleRate: 44100, numberOfFrames: len, numberOfChannels: 2, timestamp: Math.round((i / 44100) * 1_000_000), data });
-                            audioEncoder.encode(frame); frame.close();
-                        }
+	                        const lenSamples = audioDataL.length;
+	                        const chunkSize = 4096;
+	                        for (let i = 0; i < lenSamples; i += chunkSize) {
+	                            const end = Math.min(i + chunkSize, lenSamples);
+	                            const len = end - i;
+	                            const data = new Float32Array(len * 2);
+	                            data.set(audioDataL.subarray(i, end), 0);
+	                            data.set(audioDataR.subarray(i, end), len);
+	                            const frame = new AudioData({ format: 'f32-planar', sampleRate: 44100, numberOfFrames: len, numberOfChannels: 2, timestamp: Math.round((i / 44100) * 1_000_000), data });
+	                            audioEncoder.encode(frame); frame.close();
+	                        }
 
                         try {
                             await audioEncoder.flush();

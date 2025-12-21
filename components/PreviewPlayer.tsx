@@ -439,6 +439,8 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const seekDebounceTimerRef = useRef<number | null>(null);
   const seekDebounceTokenRef = useRef<number>(0);
   const pendingSeekRef = useRef<number | null>(null);
+  const isSeekScrubbingRef = useRef<boolean>(false);
+  const resumeAfterSeekRef = useRef<boolean>(false);
   
   const pdfDocRef = useRef<any>(null);
   
@@ -837,6 +839,12 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       isPlayingRef.current = false;
       setIsPlayingState(false);
       stopAudio();
+      if (seekDebounceTimerRef.current) {
+          window.clearTimeout(seekDebounceTimerRef.current);
+          seekDebounceTimerRef.current = null;
+      }
+      seekDebounceTokenRef.current += 1;
+      pendingSeekRef.current = null;
       if (requestRef.current) {
           cancelAnimationFrame(requestRef.current);
           requestRef.current = null;
@@ -1114,8 +1122,9 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   
   const handleSeek = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const t = parseFloat(e.target.value);
+      pendingSeekRef.current = t;
       setCurrentTime(t);
-      if (isPlayingState) {
+      if (isPlayingRef.current) {
           stopAudio();
           pendingSeekRef.current = t;
           const token = ++seekDebounceTokenRef.current;
@@ -1130,6 +1139,30 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
       } else {
           await drawFrame(t);
       }
+  };
+
+  const beginSeekScrub = () => {
+      isSeekScrubbingRef.current = true;
+      resumeAfterSeekRef.current = isPlayingRef.current;
+      if (resumeAfterSeekRef.current) {
+          pausePlayback();
+      }
+  };
+
+  const endSeekScrub = (e?: React.PointerEvent<HTMLInputElement>) => {
+      if (!isSeekScrubbingRef.current) return;
+      isSeekScrubbingRef.current = false;
+      if (!resumeAfterSeekRef.current) return;
+      resumeAfterSeekRef.current = false;
+      const raw = e?.currentTarget?.value;
+      const fromInput = raw !== undefined ? Number(raw) : Number.NaN;
+      const t = Number.isFinite(fromInput) ? fromInput : (pendingSeekRef.current ?? currentTime);
+      pendingSeekRef.current = t;
+      startTimeRef.current = performance.now() - (t * 1000);
+      playAudio(t);
+      isPlayingRef.current = true;
+      setIsPlayingState(true);
+      requestRef.current = requestAnimationFrame(animate);
   };
 
   if (!isOpen) return null;
@@ -1251,16 +1284,19 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
               </button>
               
               <div className="flex-1">
-                  <input 
-                      type="range" 
-                      min="0" 
-                      max={totalDuration} 
-                      step="0.1" 
-                      value={currentTime}
-                      onChange={handleSeek}
-                      disabled={isLoading}
-                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 opacity-50"
-                  />
+	                  <input 
+	                      type="range" 
+	                      min="0" 
+	                      max={totalDuration} 
+	                      step="0.1" 
+	                      value={currentTime}
+	                      onChange={handleSeek}
+	                      onPointerDown={beginSeekScrub}
+	                      onPointerUp={endSeekScrub}
+	                      onPointerCancel={endSeekScrub}
+	                      disabled={isLoading}
+	                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 opacity-50"
+	                  />
                   <div className="flex justify-between text-xs text-slate-500 mt-1 font-mono">
                       <span>{Math.floor(currentTime)}s</span>
                       <span>{Math.floor(totalDuration)}s</span>
