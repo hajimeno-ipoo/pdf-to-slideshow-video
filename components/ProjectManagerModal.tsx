@@ -141,7 +141,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
               編集画面で「名前をつけて保存」したらここに出るよ〜
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
               {items.map(p => {
                 const selected = p.id === selectedId;
                 return (
@@ -166,16 +166,13 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
                         {p.slideCount}枚
                       </div>
                     </div>
-                    <div className="p-3">
-                      <div className="text-sm text-white font-bold truncate">{p.name || '（無名）'}</div>
-                      <div className="text-[11px] text-slate-500 mt-1">
+                    <div className="p-2">
+                      <div className="text-[13px] text-white font-bold truncate">{p.name || '（無名）'}</div>
+                      <div className="text-[11px] text-white/80 mt-1">
                         更新: {formatDateTime(p.updatedAt)}
                       </div>
-                      <div className="text-[11px] text-slate-600 mt-1">
+                      <div className="text-[11px] text-white/80 mt-1">
                         容量: {formatBytes(p.approxBytes || 0)}
-                      </div>
-                      <div className="text-[10px] text-slate-600 mt-2">
-                        ダブルクリックで開くよ
                       </div>
                     </div>
                   </button>

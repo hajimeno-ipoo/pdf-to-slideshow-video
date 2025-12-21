@@ -66,3 +66,18 @@
 - `index.html`: `#glass-distortion` の歪み強度（scale）を 14 → 8 に弱めた。
 - `index.css`: `.screen-idle .project-manager-panel.glass-strong::after` を `inset: -28px` にして、端が欠けて“凹んで見える”のを抑制。
 - 検証: `npm test` PASS
+
+
+### 追記（ProjectManagerModal: カード下部の文字）
+- `components/ProjectManagerModal.tsx`:
+  - プロジェクトカード下部の「更新/容量/ダブルクリック」テキストを白寄せ（`text-white/80` 等）にして視認性UP。
+  - フォントサイズを少し小さく（13px/10px/9px）。
+- 検証: `npm test` PASS
+
+
+### 追記（ProjectManagerModal: カード縮小/文言削除）
+- `components/ProjectManagerModal.tsx`:
+  - 「ダブルクリックで開くよ」を削除。
+  - カードを少し小さく（`lg:grid-cols-4` + `gap-2` + `p-2`）。
+  - 更新/容量の文字サイズを見やすい方向に調整（11px）。
+- 検証: `npm test` PASS
