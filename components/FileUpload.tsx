@@ -59,7 +59,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
       className={`w-full max-w-2xl mx-auto mt-6 sm:mt-10 transition-all duration-300 px-2 sm:px-0 ${isDisabled ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
     >
       {/* Settings Area */}
-      <div className="mb-6 bg-slate-800/50 p-4 sm:p-6 rounded-xl border border-slate-700 flex flex-col gap-4">
+      <div className="mb-6 glass p-4 sm:p-6 rounded-[32px] flex flex-col gap-4">
          <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-between">
              {/* Duration Setting */}
              <div className="flex flex-col sm:block space-y-2 sm:space-y-0">
@@ -83,7 +83,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
              </div>
 
              {/* Transition Setting */}
-             <div className="flex flex-col sm:block space-y-2 sm:space-y-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-slate-700/50 sm:border-l sm:pl-6">
+             <div className="flex flex-col sm:block space-y-2 sm:space-y-0 pt-4 sm:pt-0 border-t sm:border-t-0 border-black/10 sm:border-l sm:pl-6">
                 <div className="flex items-center justify-between sm:justify-start gap-4">
                   <label htmlFor="transition" className="text-slate-300 font-medium whitespace-nowrap">
                     切り替え効果:
@@ -112,7 +112,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
          </div>
          
 	         {/* AI Script Generation Option */}
-	         <div className="pt-4 border-t border-slate-700/50 space-y-3">
+	         <div className="pt-4 border-t border-black/10 space-y-3">
 	             <label className={`flex items-start gap-3 ${isAiLocked ? 'cursor-not-allowed opacity-60' : 'cursor-pointer group'}`}>
 	                 <div className="relative flex items-center mt-0.5">
 	                    <input 
@@ -167,10 +167,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-2xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-300 group
+          relative border-2 border-dashed rounded-[40px] p-8 sm:p-10 text-center cursor-pointer transition-all duration-300 group glass-strong
           ${isDragging 
-            ? 'border-emerald-500 bg-emerald-500/10 scale-[1.02]' 
-            : 'border-slate-700 hover:border-emerald-400/50 hover:bg-slate-800/50 bg-slate-800/30'
+            ? 'border-blue-500 bg-blue-500/10 scale-[1.02]' 
+            : 'border-blue-300/60 hover:border-blue-400/70'
           }
         `}
       >
@@ -183,14 +183,14 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
         />
         
         <div className="flex flex-col items-center justify-center gap-4">
-          <div className={`p-4 rounded-full bg-slate-800 group-hover:bg-slate-700 transition-colors shadow-lg ${isDragging ? 'text-emerald-400' : 'text-slate-400'}`}>
+          <div className={`p-4 rounded-full glass-thin transition-colors ${isDragging ? 'text-blue-600' : 'text-slate-400'}`}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
             </svg>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold text-white group-hover:text-emerald-300 transition-colors">
+            <h3 className="text-lg font-semibold text-white group-hover:text-blue-600 transition-colors">
               PDFファイルをアップロード
             </h3>
             <p className="text-sm text-slate-400 mt-2">

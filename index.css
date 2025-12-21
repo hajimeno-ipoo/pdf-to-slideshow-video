@@ -1,0 +1,180 @@
+/* IDLE（最初の画面）だけ Apple寄せの“ガラス素材”を当てる用
+   - レイアウトは変えない（見た目だけ）
+   - Tailwind全体の色上書きはしない（事故防止）
+*/
+
+.screen-idle {
+  /* Light abstract background (simple) */
+  background:
+    radial-gradient(1100px 700px at 18% 12%, rgba(0, 122, 255, 0.22), rgba(0, 122, 255, 0) 60%),
+    radial-gradient(900px 650px at 82% 10%, rgba(175, 82, 222, 0.16), rgba(175, 82, 222, 0) 55%),
+    linear-gradient(180deg, #ffffff 0%, #f6f8fc 48%, #ffffff 100%);
+  color: rgba(15, 23, 42, 0.92);
+}
+
+/* 既存の dark palette override（index.html内）に負けないよう、IDLE範囲だけ文字色を戻す */
+.screen-idle .idle-surface .text-white {
+  color: rgba(15, 23, 42, 0.92) !important;
+}
+.screen-idle .idle-surface .text-slate-300 {
+  color: rgba(15, 23, 42, 0.78) !important;
+}
+.screen-idle .idle-surface .text-slate-400 {
+  color: rgba(15, 23, 42, 0.62) !important;
+}
+.screen-idle .idle-surface .text-slate-500 {
+  color: rgba(15, 23, 42, 0.5) !important;
+}
+
+/* 素材（3段階）：thin / normal / strong */
+.screen-idle .glass-thin,
+.screen-idle .glass,
+.screen-idle .glass-strong {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  /* “本体は透明”にして、before/afterでガラスを作る（opacityは使わない） */
+  background: none !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* キーボードで選択された時の枠は、ガラスの邪魔になるので消す */
+.screen-idle .glass-thin:focus,
+.screen-idle .glass:focus,
+.screen-idle .glass-strong:focus {
+  outline: none;
+}
+
+/* before：ガラスの“内側の光（ツヤ）” */
+.screen-idle .glass-thin::before,
+.screen-idle .glass::before,
+.screen-idle .glass-strong::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 55%);
+  box-shadow: inset 0 0 15px -5px rgba(255, 255, 255, 1);
+}
+
+/* after：背景をぼかして、ちょい“ゆがみ”を足す（ガラス感の要） */
+.screen-idle .glass-thin::after,
+.screen-idle .glass::after,
+.screen-idle .glass-strong::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: -1;
+  -webkit-filter: url(#glass-distortion);
+  filter: url(#glass-distortion);
+}
+
+/* 厚み（透明度/ぼかし）は3段階で調整 */
+.screen-idle .glass-thin::after {
+  background: rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  backdrop-filter: blur(18px) saturate(180%);
+}
+.screen-idle .glass::after {
+  background: rgba(255, 255, 255, 0.68);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  backdrop-filter: blur(22px) saturate(180%);
+}
+.screen-idle .glass-strong::after {
+  background: rgba(255, 255, 255, 0.75);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  backdrop-filter: blur(26px) saturate(180%);
+}
+
+/* 中身はガラスの上に出す */
+.screen-idle .glass-thin > *,
+.screen-idle .glass > *,
+.screen-idle .glass-strong > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* フォールバック（blurが無い環境でも“白い板”に見えるように） */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .screen-idle .glass-thin::after,
+  .screen-idle .glass::after,
+  .screen-idle .glass-strong::after {
+    -webkit-filter: none;
+    filter: none;
+    background: rgba(255, 255, 255, 0.92);
+  }
+}
+
+/* Primary button (blue only) */
+.screen-idle .idle-btn-primary {
+  background: #007aff !important;
+  color: #fff !important;
+}
+.screen-idle .idle-btn-primary:hover {
+  background: #0a84ff !important;
+}
+.screen-idle .idle-btn-primary:active {
+  background: #0066d6 !important;
+}
+.screen-idle .idle-btn-primary:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.28);
+}
+
+/* Secondary button = glass */
+.screen-idle .idle-btn-glass {
+  background: rgba(255, 255, 255, 0.18) !important;
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  border-right-color: rgba(255, 255, 255, 0.24) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.24) !important;
+  color: rgba(15, 23, 42, 0.86) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+}
+.screen-idle .idle-btn-glass:hover {
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+
+/* Form controls inside IDLE surface */
+.screen-idle .idle-surface input,
+.screen-idle .idle-surface select,
+.screen-idle .idle-surface textarea {
+  background: rgba(255, 255, 255, 0.5) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: rgba(15, 23, 42, 0.9) !important;
+}
+.screen-idle .idle-surface input:focus,
+.screen-idle .idle-surface select:focus,
+.screen-idle .idle-surface textarea:focus {
+  border-color: rgba(0, 122, 255, 0.35) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
+}
+
+/* Header (IDLEだけライトガラスに寄せる) */
+.screen-idle header.bg-slate-950 {
+  background: rgba(255, 255, 255, 0.14) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(22px) saturate(160%);
+}
+.screen-idle header.border-slate-800 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+.screen-idle header .text-slate-300 {
+  color: rgba(15, 23, 42, 0.64) !important;
+}
+.screen-idle header .text-slate-500 {
+  color: rgba(15, 23, 42, 0.46) !important;
+}
+.screen-idle header h1 {
+  background-image: linear-gradient(90deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.52)) !important;
+}
+.screen-idle header a:hover {
+  color: #007aff !important;
+}
+.screen-idle header .bg-gradient-to-br {
+  background-image: linear-gradient(135deg, #007aff, #5ac8fa) !important;
+}

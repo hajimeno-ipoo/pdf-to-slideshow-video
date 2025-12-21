@@ -854,10 +854,11 @@ const App: React.FC = () => {
   };
 
 	  const isEditing = state.status === AppStatus.EDITING;
+	  const isIdle = state.status === AppStatus.IDLE;
 	  const aiEnabled = apiStatus === 'connected';
 
   return (
-    <div className="h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30 flex flex-col overflow-hidden">
+    <div className={`h-screen flex flex-col overflow-hidden ${isIdle ? 'screen-idle' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30'}`}>
       
       {/* Mobile Landscape Warning: 500px以下の高さかつ横画面の場合に表示 */}
       <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center p-8 text-center hidden [@media(max-height:500px)_and_(orientation:landscape)]:flex h-screen w-screen touch-none">
@@ -1085,13 +1086,13 @@ const App: React.FC = () => {
             </div>
         ) : (
             // Non-Editor Views (Landing, Processing, Result)
-            <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col">
+            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${isIdle ? 'idle-surface' : ''}`}>
                 {/* Hero Section */}
                 {state.status === AppStatus.IDLE && (
                 <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
                     <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm leading-tight">
                     PDF資料を<br className="sm:hidden" />
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400">
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-sky-500">
                         動画ファイル
                     </span>
                     に変換
@@ -1108,7 +1109,7 @@ const App: React.FC = () => {
                   <div className="w-full max-w-2xl mx-auto mb-4 flex flex-col items-center gap-2 px-2 sm:px-0">
                     <button
                       onClick={() => setProjectManagerOpen(true)}
-                      className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors"
+                      className="px-4 py-2 rounded-lg transition-colors idle-btn-glass"
                     >
                       プロジェクト管理を開く
                     </button>
