@@ -1171,48 +1171,48 @@ const App: React.FC = () => {
                         ヒント: ダウンロードしたファイル({state.extension})がQuickTimeで再生できない場合は、VLC Playerやブラウザで開いてください。
                     </div>
 	                    
-		                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-		                        <button 
-		                        onClick={downloadVideo}
-		                        className="flex items-center justify-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-white rounded-full font-medium transition-all shadow-lg shadow-amber-500/20 w-full sm:w-auto"
+				                    <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-3 w-full sm:w-auto justify-center">
+				                        <button 
+				                        onClick={downloadVideo}
+				                        className="flex items-center justify-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-amber-500/20 w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
+				                        >
+				                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+				                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 3v12m0 0l-3.75-3.75M12 15l3.75-3.75" />
+				                        </svg>
+				                        動画ダウンロード
+				                        </button>
+
+				                        <button 
+				                        onClick={openThumbnailDialog}
+				                        className="flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-emerald-600/20 w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
+				                        >
+			                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+			                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 4.5h10.5A2.25 2.25 0 0119.5 6.75v10.5A2.25 2.25 0 0117.25 19.5H6.75A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5z" />
+			                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 11.25l1.5 1.5 2.25-3 3.75 5.25H7.5l.75-3.75z" />
+			                        </svg>
+			                        画像ダウンロード
+			                        </button>
+
+			                        <button 
+			                        onClick={handleBackToEdit}
+			                        className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-blue-600/20 w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
 		                        >
-		                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-		                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 3v12m0 0l-3.75-3.75M12 15l3.75-3.75" />
+		                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+		                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
 		                        </svg>
-		                        動画をダウンロード
+		                        再編集
 		                        </button>
-
+		                        
 		                        <button 
-		                        onClick={openThumbnailDialog}
-		                        className="flex items-center justify-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-medium transition-all shadow-lg shadow-emerald-600/20 w-full sm:w-auto"
+		                        onClick={handleReset}
+		                        className="flex items-center justify-center gap-2 px-5 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-2xl text-sm font-semibold transition-all w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
 		                        >
-	                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-	                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 4.5h10.5A2.25 2.25 0 0119.5 6.75v10.5A2.25 2.25 0 0117.25 19.5H6.75A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5z" />
-	                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 11.25l1.5 1.5 2.25-3 3.75 5.25H7.5l.75-3.75z" />
-	                        </svg>
-	                        サムネ画像を書き出す
+		                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+		                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+		                        </svg>
+		                        最初から
 	                        </button>
-
-	                        <button 
-	                        onClick={handleBackToEdit}
-	                        className="flex items-center justify-center gap-2 px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white rounded-full font-medium transition-all shadow-lg shadow-blue-600/20 w-full sm:w-auto"
-                        >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                        </svg>
-                        再編集する
-                        </button>
-                        
-                        <button 
-                        onClick={handleReset}
-                        className="flex items-center justify-center gap-2 px-8 py-4 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-full font-medium transition-all w-full sm:w-auto"
-                        >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                        </svg>
-                        最初から
-                        </button>
-                    </div>
+	                    </div>
                     </div>
                 </div>
                 )}
