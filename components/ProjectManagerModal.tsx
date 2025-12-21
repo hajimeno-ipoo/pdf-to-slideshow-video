@@ -118,14 +118,16 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-5xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm project-manager-overlay">
+      <div className="w-full max-w-5xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden project-manager-panel glass-strong">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
           <div className="flex flex-col">
             <h3 className="text-white font-bold text-lg">プロジェクト管理</h3>
-            <div className="text-xs text-slate-500">最近のプロジェクトから選んで開けるよ〜</div>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-2">
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -133,33 +135,6 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
         </div>
 
         <div className="p-5">
-          <div className="flex items-center justify-between mb-3">
-            <div className="text-xs text-slate-400 font-bold uppercase tracking-wider">最近のプロジェクト</div>
-            <div className="flex items-center gap-2">
-              <input
-                type="file"
-                accept=".json,application/json"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={handleImportJson}
-              />
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={busy}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-              >
-                JSONから読込
-              </button>
-              <button
-                onClick={refresh}
-                disabled={busy}
-                className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs"
-              >
-                更新
-              </button>
-            </div>
-          </div>
-
           {items.length === 0 ? (
             <div className="p-8 bg-slate-800/30 border border-slate-800 rounded-xl text-center text-slate-400 text-sm">
               まだ保存したプロジェクトが無いよ。<br />
@@ -210,15 +185,35 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
           )}
         </div>
 
-        <div className="px-5 py-4 border-t border-slate-800 bg-slate-950/30 flex items-center justify-between">
-          <div className="text-xs text-slate-500">
-            クリックで選択 → 「読込」ボタンでも開けるよ。
+        <div className="px-5 py-4 border-t border-slate-800 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              accept=".json,application/json"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleImportJson}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={busy}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs idle-btn-glass"
+            >
+              JSONから読込
+            </button>
+            <button
+              onClick={refresh}
+              disabled={busy}
+              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs idle-btn-glass"
+            >
+              更新
+            </button>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
               disabled={busy}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold"
+              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold idle-btn-glass"
             >
               新規作成
             </button>

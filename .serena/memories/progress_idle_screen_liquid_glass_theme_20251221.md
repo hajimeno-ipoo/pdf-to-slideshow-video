@@ -25,3 +25,44 @@
 ### 変更ファイル
 - 追加: `index.css`, `tests/idleGlassTheme.test.js`
 - 変更: `App.tsx`, `components/FileUpload.tsx`
+
+### 追記（ProjectManagerModal）
+- `components/ProjectManagerModal.tsx`:
+  - IDLE時だけモーダルの暗幕/境界線を調整できるよう、`project-manager-overlay` / `project-manager-panel` を付与。
+  - パネルに `glass-strong` を付与して、IDLE時はガラス素材で表示。
+  - IDLE時の見た目を揃えるため、操作ボタンに `idle-btn-glass` を付与。
+- `index.css`:
+  - `.screen-idle .project-manager-overlay` で暗幕を弱める。
+  - `.screen-idle .project-manager-panel.border-slate-800` で境界線をヘアライン寄せ。
+- 検証: `npm test` PASS
+
+
+### 追記（ProjectManagerModal: 文言削除/フッター色）
+- `components/ProjectManagerModal.tsx`:
+  - ヘッダー補足文「最近のプロジェクトから選んで開けるよ〜」を削除。
+  - フッター補足文「クリックで選択 → 「読込」ボタンでも開けるよ。」を削除。
+  - フッターの `bg-slate-950/30` を外して、ヘッダーと同じ見え方（ガラス面の上で統一）に。
+- 検証: `npm test` PASS
+
+
+### 追記（ProjectManagerModal: ボタン配置移動/見出し削除）
+- `components/ProjectManagerModal.tsx`:
+  - 「JSONから読込」「更新」をヘッダー右側へ移動（閉じるボタンの左）。
+  - 「最近のプロジェクト」見出しを削除。
+  - フッターの「新規作成/削除/読込」ボタン群を右寄せに。
+- 検証: `npm test` PASS
+
+
+### 追記（ProjectManagerModal: フッター左へ移動/閉じる改善/フィルタ範囲）
+- `components/ProjectManagerModal.tsx`:
+  - 「JSONから読込」「更新」をフッター左へ移動。
+  - 閉じるボタンを見やすく（背景・枠・hover/activeで色変化）。
+- `index.html`:
+  - `#glass-distortion` の filter 領域を拡張（端の欠け/凹み見え対策）。
+- 検証: `npm test` PASS
+
+
+### 追記（ProjectManagerModal: 端の凹み見え対策）
+- `index.html`: `#glass-distortion` の歪み強度（scale）を 14 → 8 に弱めた。
+- `index.css`: `.screen-idle .project-manager-panel.glass-strong::after` を `inset: -28px` にして、端が欠けて“凹んで見える”のを抑制。
+- 検証: `npm test` PASS
