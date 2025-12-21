@@ -197,3 +197,60 @@
   /* 端が“凹んで”見えるのを防ぐため、歪みレイヤーを少しはみ出させてからクリップ */
   inset: -28px;
 }
+
+/* API Key Modal（IDLE時だけガラス寄せ） */
+.screen-idle .api-key-overlay {
+  background: rgba(0, 0, 0, 0.35) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+}
+.screen-idle .api-key-panel.border-slate-800 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+.screen-idle .api-key-panel.glass-strong::after {
+  inset: -28px;
+}
+.screen-idle .api-key-panel .api-key-control {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+}
+.screen-idle .api-key-panel .api-key-control::placeholder {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+.screen-idle .api-key-panel .api-key-control:focus {
+  outline: none;
+  border-color: rgba(0, 122, 255, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.22) !important;
+}
+.screen-idle .api-key-panel .api-key-control-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.35) !important;
+  color: rgba(255, 255, 255, 0.92) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+}
+.screen-idle .api-key-panel .api-key-control-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+.screen-idle .api-key-panel .api-key-control-btn:active {
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+.screen-idle .api-key-panel .api-key-mode-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+}
+.screen-idle .api-key-panel .api-key-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+.screen-idle .api-key-panel .api-key-mode-selected {
+  background: rgba(0, 122, 255, 0.18) !important;
+  border-color: rgba(0, 122, 255, 0.65) !important;
+  color: rgba(255, 255, 255, 0.96) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
+}

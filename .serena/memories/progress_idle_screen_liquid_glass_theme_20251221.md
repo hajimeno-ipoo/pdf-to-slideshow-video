@@ -81,3 +81,26 @@
   - カードを少し小さく（`lg:grid-cols-4` + `gap-2` + `p-2`）。
   - 更新/容量の文字サイズを見やすい方向に調整（11px）。
 - 検証: `npm test` PASS
+
+
+### 追記（ApiKeyModal: IDLEガラス寄せ）
+- `components/ApiKeyModal.tsx`:
+  - IDLE時だけ調整できるよう、`api-key-overlay` / `api-key-panel` を付与。
+  - パネルに `glass-strong` を付与して、IDLE時はガラス素材で表示。
+- `index.css`:
+  - `.screen-idle .api-key-overlay` で暗幕を弱め＋軽いblur。
+  - `.screen-idle .api-key-panel.border-slate-800` で境界線をヘアライン寄せ。
+  - `.screen-idle .api-key-panel.glass-strong::after` を `inset:-28px` にして端の欠けを抑制。
+- 検証: `npm test` PASS
+
+
+### 追記（ApiKeyModal: 中身の配色/閉じるボタン）
+- `components/ApiKeyModal.tsx`:
+  - 閉じるボタンを ProjectManager と同じ丸ボタン（hover/activeあり）へ変更。
+  - 「APIキー」「保存先」ラベルを白文字＋太字。
+  - 注意文「キーはサーバーに送信しません…」を赤文字＋太字。
+  - 入力/小ボタン/保存先ボタン用のフッククラス（`api-key-control`/`api-key-control-btn`/`api-key-mode-btn`）を追加。
+  - 「保存して使う」に `idle-btn-primary` を付与（IDLE時は青のPrimary）。
+- `index.css`:
+  - IDLE時だけ、ApiKeyModal内の入力/ボタンをガラス寄せ配色に上書き。
+- 検証: `npm test` PASS
