@@ -186,6 +186,69 @@
   background-image: linear-gradient(135deg, #007aff, #5ac8fa) !important;
 }
 
+/* Header controls（IDLE時だけガラス寄せ） */
+.screen-idle header .idle-header-apikey {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: rgba(15, 23, 42, 0.86) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+.screen-idle header .idle-header-apikey:hover {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+.screen-idle header .idle-header-apikey:active {
+  background: rgba(255, 255, 255, 0.24) !important;
+}
+.screen-idle header .idle-header-apikey.idle-header-apikey--set {
+  border-color: rgba(0, 122, 255, 0.35) !important;
+  color: rgba(0, 122, 255, 0.92) !important;
+}
+
+.screen-idle header .idle-header-devlabel {
+  color: rgba(15, 23, 42, 0.62) !important;
+}
+.screen-idle header .idle-header-devlabel.idle-header-devlabel--on {
+  color: #007aff !important;
+}
+
+.screen-idle header .idle-header-switch-track {
+  background: rgba(255, 255, 255, 0.16) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+.screen-idle header input.peer:checked + .idle-header-switch-track {
+  background: rgba(0, 122, 255, 0.22) !important;
+  border-color: rgba(0, 122, 255, 0.35) !important;
+}
+.screen-idle header .idle-header-switch-thumb {
+  background: rgba(255, 255, 255, 0.92) !important;
+}
+.screen-idle header input.peer:checked ~ .idle-header-switch-thumb {
+  background: #007aff !important;
+}
+
+.screen-idle header .idle-header-stats {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  backdrop-filter: blur(16px) saturate(160%);
+}
+.screen-idle header .idle-header-stats-cell {
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+.screen-idle header .idle-header-stats .border-slate-800 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+.screen-idle header .idle-header-stats .text-slate-400 {
+  color: rgba(15, 23, 42, 0.72) !important;
+}
+.screen-idle header .idle-header-stats .text-slate-600 {
+  color: rgba(15, 23, 42, 0.5) !important;
+}
+.screen-idle header .idle-header-stats-bar {
+  background: rgba(15, 23, 42, 0.14) !important;
+}
+
 /* Project Manager Modal（IDLE時だけガラス寄せ） */
 .screen-idle .project-manager-overlay {
   background: rgba(0, 0, 0, 0.35) !important;

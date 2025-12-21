@@ -105,54 +105,62 @@ const Header: React.FC<HeaderProps> = ({
 
             {/* Developer Mode Toggle */}
             <label className="flex items-center gap-2 cursor-pointer group">
-                <span className={`text-[10px] font-medium transition-colors ${showDevMode ? 'text-emerald-400' : 'text-slate-600 group-hover:text-slate-500'}`}>Dev Mode</span>
+                <span className={`text-[10px] font-medium transition-colors idle-header-devlabel ${showDevMode ? 'idle-header-devlabel--on text-emerald-400' : 'text-slate-600 group-hover:text-slate-500'}`}>Dev Mode</span>
                 <div className="relative">
                     <input type="checkbox" checked={showDevMode} onChange={e => setShowDevMode(e.target.checked)} className="sr-only peer" />
-                    <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-emerald-900/50 peer-checked:border-emerald-500/50 border border-slate-700 transition-all"></div>
-                    <div className="absolute top-0.5 left-0.5 bg-slate-500 w-3 h-3 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-emerald-400"></div>
+                    <div className="w-8 h-4 bg-slate-800 rounded-full peer peer-checked:bg-emerald-900/50 peer-checked:border-emerald-500/50 border border-slate-700 transition-all idle-header-switch-track"></div>
+                    <div className="absolute top-0.5 left-0.5 bg-slate-500 w-3 h-3 rounded-full transition-all peer-checked:translate-x-4 peer-checked:bg-emerald-400 idle-header-switch-thumb"></div>
                 </div>
             </label>
             
-            {/* API Key Button */}
-            <button
-              onClick={onOpenApiKey}
-              className={`px-3 py-1.5 rounded text-xs font-semibold border transition-colors ${hasApiKey ? 'border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
-            >
-              APIキー
-            </button>
-
             {/* Stats Block (Only visible in Dev Mode) */}
             {showDevMode && (
-                <div className="flex items-stretch bg-slate-900 rounded border border-slate-800 shadow-sm overflow-hidden h-8 animate-fade-in">
+                <div className="flex items-stretch bg-slate-900 rounded border border-slate-800 shadow-sm overflow-hidden h-8 animate-fade-in idle-header-stats">
                     {/* Status */}
-                    <div className="flex items-center px-2 border-r border-slate-800 bg-slate-800/30 gap-1.5">
+                    <div className="flex items-center px-2 border-r border-slate-800 bg-slate-800/30 gap-1.5 idle-header-stats-cell">
                         <div className={`w-1.5 h-1.5 rounded-full ${apiStatus === 'connected' ? 'bg-emerald-500' : (apiStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500')}`}></div>
                         <span className="text-[10px] font-bold text-slate-400">API</span>
                     </div>
 
                     {/* RPM */}
-                    <div className="flex flex-col justify-center px-2 border-r border-slate-800 min-w-[60px]">
+                    <div className="flex flex-col justify-center px-2 border-r border-slate-800 min-w-[60px] idle-header-stats-cell">
                         <div className="flex justify-between items-end">
                             <span className="text-[8px] text-slate-600 font-bold">RPM</span>
                             <span className={`text-[9px] font-mono leading-none ${rpmText}`}>{requestStats.rpm}</span>
                         </div>
-                        <div className="w-full h-0.5 bg-slate-800 rounded-full mt-0.5">
+                        <div className="w-full h-0.5 bg-slate-800 rounded-full mt-0.5 idle-header-stats-bar">
                             <div className={`h-full ${rpmColor}`} style={{ width: `${rpmPercentage}%` }} />
                         </div>
                     </div>
 
                     {/* TPM */}
-                    <div className="flex flex-col justify-center px-2 min-w-[60px]">
+                    <div className="flex flex-col justify-center px-2 min-w-[60px] idle-header-stats-cell">
                         <div className="flex justify-between items-end">
                             <span className="text-[8px] text-slate-600 font-bold">TPM</span>
                             <span className={`text-[9px] font-mono leading-none ${tpmText}`}>{(requestStats.tpm / 1000).toFixed(0)}k</span>
                         </div>
-                        <div className="w-full h-0.5 bg-slate-800 rounded-full mt-0.5">
+                        <div className="w-full h-0.5 bg-slate-800 rounded-full mt-0.5 idle-header-stats-bar">
                             <div className={`h-full ${tpmColor}`} style={{ width: `${tpmPercentage}%` }} />
                         </div>
                     </div>
                 </div>
             )}
+
+            {/* API Key Button (icon) */}
+            <button
+              onClick={onOpenApiKey}
+              aria-label="APIキー"
+              className={`p-2 rounded-full border transition-colors idle-header-apikey ${hasApiKey ? 'idle-header-apikey--set border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15.75 5.25a3.75 3.75 0 10-2.728 6.322l-6.272 6.272v2.25h2.25l.75-.75h1.5l.75-.75h1.5l2.25-2.25"
+                />
+              </svg>
+            </button>
         </div>
       </div>
     </header>

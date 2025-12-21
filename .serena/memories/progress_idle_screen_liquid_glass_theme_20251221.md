@@ -104,3 +104,18 @@
 - `index.css`:
   - IDLE時だけ、ApiKeyModal内の入力/ボタンをガラス寄せ配色に上書き。
 - 検証: `npm test` PASS
+
+
+### 追記（Header: IDLE時の右上コントロールをガラス化）
+- `components/Header.tsx`:
+  - Dev Modeトグル、APIキー、Dev stats にフッククラスを追加（`idle-header-*`）。
+- `index.css`:
+  - `.screen-idle header` スコープで、上記コントロールをガラス寄せ（背景/枠/文字/トグルON色を青に）。
+- 検証: `npm test` PASS
+
+
+### 追記（Header: APIキーボタンをアイコン化）
+- `components/Header.tsx`:
+  - 「APIキー」テキストボタンをアイコンボタンに変更（アクセシビリティ用に `aria-label`）。
+  - ボタンを一番右（Dev stats の右）へ移動。
+- 検証: `npm test` PASS
