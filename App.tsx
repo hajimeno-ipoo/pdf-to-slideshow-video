@@ -872,16 +872,17 @@ const App: React.FC = () => {
           </div>
       </div>
 
-      <Header 
-        apiStatus={apiStatus} 
-        tokenUsage={totalUsage} 
-        lifetimeUsage={lifetimeUsage}
-        requestStats={reqStats}
-        saveStatus={saveStatus}
-        lastSavedTime={lastSavedTime}
-        hasApiKey={!!apiKeyValue}
-        onOpenApiKey={() => setApiKeyModalOpen(true)}
-      />
+	      <Header 
+	        apiStatus={apiStatus} 
+	        tokenUsage={totalUsage} 
+	        lifetimeUsage={lifetimeUsage}
+	        requestStats={reqStats}
+	        saveStatus={saveStatus}
+	        lastSavedTime={lastSavedTime}
+	        hasApiKey={!!apiKeyValue}
+	        idleTheme={isIdle}
+	        onOpenApiKey={() => setApiKeyModalOpen(true)}
+	      />
 
 	      <ApiKeyModal
 	        open={apiKeyModalOpen}
@@ -1088,17 +1089,14 @@ const App: React.FC = () => {
             // Non-Editor Views (Landing, Processing, Result)
             <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${isIdle ? 'idle-surface' : ''}`}>
                 {/* Hero Section */}
-                {state.status === AppStatus.IDLE && (
-                <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
-                    <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-sm leading-tight">
-                    PDF資料を<br className="sm:hidden" />
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-sky-500">
-                        動画ファイル
-                    </span>
-                    に変換
-                    </h2>
-                </div>
-                )}
+	                {state.status === AppStatus.IDLE && (
+	                <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
+	                    <h2 className="idle-title-3d text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+	                      PDF資料を<br className="sm:hidden" />
+	                      動画ファイルに変換
+	                    </h2>
+	                </div>
+	                )}
 
                 {/* Upload Area */}
                 {state.status === AppStatus.IDLE && (

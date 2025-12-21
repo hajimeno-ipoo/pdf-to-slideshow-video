@@ -119,3 +119,29 @@
   - 「APIキー」テキストボタンをアイコンボタンに変更（アクセシビリティ用に `aria-label`）。
   - ボタンを一番右（Dev stats の右）へ移動。
 - 検証: `npm test` PASS
+
+
+### 追記（Public docs: IDLE時だけガラス寄せ）
+- `components/Header.tsx` / `App.tsx`:
+  - IDLE時だけ `usage.html / terms.html / privacy.html` のURLに `?theme=idle` を付けて開く（hrefにも反映）。
+- `public/usage.html`, `public/terms.html`, `public/privacy.html`:
+  - `theme=idle` のとき `html.theme-idle` を付与。
+  - `theme-idle` 時だけ、ライト背景（抽象グラデ）＋ガラスカード（blur + 内側ハイライト）に切替。
+- 検証: `npm test` PASS
+
+
+### 追記（IDLE Hero タイトルの可読性）
+- `App.tsx`: タイトル文字（「PDF資料を…に変換」）を `.idle-title-glass` で包んで、背景写真でも読めるように“ほぼ透明ガラス板”を追加。
+- `index.css`: `.screen-idle .idle-title-glass` を追加（低い白透過 + blur + 内側ハイライト）。
+- 検証: `npm test` PASS
+
+
+### 追記（IDLE Hero タイトル: 案C / Appleっぽい寄せ）
+- `index.css`: `.idle-title-glass` を“Appleっぽい”方向に調整（歪みfilterを外して、blur/saturate/brightness強め + ピル形状 + ヘアライン/ハイライトを強化）。
+- 検証: `npm test` PASS
+
+
+### 追記（IDLE Hero タイトル: 元に戻して白文字3D）
+- `App.tsx`: IDLEタイトルのガラス板（`.idle-title-glass`）を撤去し、文言を「PDF資料を動画ファイルに変換」に統一。
+- `index.css`: `.idle-title-glass` を削除し、白文字＋立体感用の `.idle-title-3d`（text-shadow）を追加。
+- 検証: `npm test` PASS

@@ -11,6 +11,7 @@ interface HeaderProps {
   lastSavedTime?: Date | null;
   hasApiKey?: boolean;
   onOpenApiKey?: () => void;
+  idleTheme?: boolean;
 }
 
 const WARNING_THRESHOLD = 500000;
@@ -26,7 +27,8 @@ const Header: React.FC<HeaderProps> = ({
     saveStatus = 'idle',
     lastSavedTime = null,
     hasApiKey = false,
-    onOpenApiKey
+    onOpenApiKey,
+    idleTheme = false
 }) => {
   const [showDevMode, setShowDevMode] = useState(false);
 
@@ -47,12 +49,16 @@ const Header: React.FC<HeaderProps> = ({
   else if (requestStats.tpm >= TPM_LIMIT * 0.8) { tpmColor = 'bg-yellow-500'; tpmText = 'text-yellow-400'; }
 
   const baseUrl = import.meta.env.BASE_URL;
-  const openDoc = (e: React.MouseEvent<HTMLAnchorElement>, docPath: string) => {
+  const getDocUrl = (docPath: string) => {
+    const url = `${baseUrl}${docPath}`;
+    return idleTheme ? `${url}?theme=idle` : url;
+  };
+
+  const openDoc = (e: React.MouseEvent<HTMLAnchorElement>, url: string) => {
     // Allow browser default behavior for modifier keys / non-left click (open in new tab, etc.)
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
 
     e.preventDefault();
-    const url = `${baseUrl}${docPath}`;
     const opened = window.open(url, 'pdf-video-docs');
     if (!opened) {
       window.location.href = url;
@@ -80,13 +86,13 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-4">
             {/* Docs Links */}
             <nav className="flex items-center gap-3 text-[10px] font-medium">
-                <a href={`${baseUrl}usage.html`} onClick={(e) => openDoc(e, 'usage.html')} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                <a href={getDocUrl('usage.html')} onClick={(e) => openDoc(e, getDocUrl('usage.html'))} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
                     利用について
                 </a>
-                <a href={`${baseUrl}terms.html`} onClick={(e) => openDoc(e, 'terms.html')} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                <a href={getDocUrl('terms.html')} onClick={(e) => openDoc(e, getDocUrl('terms.html'))} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
                     利用規約
                 </a>
-                <a href={`${baseUrl}privacy.html`} onClick={(e) => openDoc(e, 'privacy.html')} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                <a href={getDocUrl('privacy.html')} onClick={(e) => openDoc(e, getDocUrl('privacy.html'))} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
                     プライバシーポリシー
                 </a>
             </nav>

@@ -26,6 +26,16 @@
   color: rgba(15, 23, 42, 0.5) !important;
 }
 
+/* IDLE Hero title: 白文字 + 立体感（背景写真でも読めるように） */
+.screen-idle .idle-surface .idle-title-3d {
+  color: rgba(255, 255, 255, 0.98) !important;
+  text-shadow:
+    0 -1px 0 rgba(255, 255, 255, 0.22),
+    0 1px 0 rgba(0, 0, 0, 0.22),
+    0 8px 22px rgba(0, 0, 0, 0.38),
+    0 20px 60px rgba(0, 0, 0, 0.24);
+}
+
 /* 素材（3段階）：thin / normal / strong */
 .screen-idle .glass-thin,
 .screen-idle .glass,
