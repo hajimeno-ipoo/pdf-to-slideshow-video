@@ -4,11 +4,8 @@
 */
 
 .screen-idle {
-  /* Light abstract background (simple) */
-  background:
-    radial-gradient(1100px 700px at 18% 12%, rgba(0, 122, 255, 0.22), rgba(0, 122, 255, 0) 60%),
-    radial-gradient(900px 650px at 82% 10%, rgba(175, 82, 222, 0.16), rgba(175, 82, 222, 0) 55%),
-    linear-gradient(180deg, #ffffff 0%, #f6f8fc 48%, #ffffff 100%);
+  background: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png') center / cover no-repeat;
+  background-color: #ffffff;
   color: rgba(15, 23, 42, 0.92);
 }
 
@@ -75,19 +72,19 @@
 
 /* 厚み（透明度/ぼかし）は3段階で調整 */
 .screen-idle .glass-thin::after {
-  background: rgba(255, 255, 255, 0.6);
-  -webkit-backdrop-filter: blur(18px) saturate(180%);
-  backdrop-filter: blur(18px) saturate(180%);
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(6px) saturate(180%);
+  backdrop-filter: blur(6px) saturate(180%);
 }
 .screen-idle .glass::after {
-  background: rgba(255, 255, 255, 0.68);
-  -webkit-backdrop-filter: blur(22px) saturate(180%);
-  backdrop-filter: blur(22px) saturate(180%);
+  background: rgba(255, 255, 255, 0.14);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  backdrop-filter: blur(8px) saturate(180%);
 }
 .screen-idle .glass-strong::after {
-  background: rgba(255, 255, 255, 0.75);
-  -webkit-backdrop-filter: blur(26px) saturate(180%);
-  backdrop-filter: blur(26px) saturate(180%);
+  background: rgba(255, 255, 255, 0.18);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  backdrop-filter: blur(10px) saturate(180%);
 }
 
 /* 中身はガラスの上に出す */
@@ -96,6 +93,13 @@
 .screen-idle .glass-strong > * {
   position: relative;
   z-index: 1;
+}
+
+/* absolute を使いたい子要素だけは、relative強制を上書きする */
+.screen-idle .glass-thin > .absolute,
+.screen-idle .glass > .absolute,
+.screen-idle .glass-strong > .absolute {
+  position: absolute;
 }
 
 /* フォールバック（blurが無い環境でも“白い板”に見えるように） */
@@ -127,13 +131,13 @@
 
 /* Secondary button = glass */
 .screen-idle .idle-btn-glass {
-  background: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
   border: 1px solid rgba(255, 255, 255, 0.5) !important;
   border-right-color: rgba(255, 255, 255, 0.24) !important;
   border-bottom-color: rgba(255, 255, 255, 0.24) !important;
   color: rgba(15, 23, 42, 0.86) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
 }
 .screen-idle .idle-btn-glass:hover {
   background: rgba(255, 255, 255, 0.24) !important;

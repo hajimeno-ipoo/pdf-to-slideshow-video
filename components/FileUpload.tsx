@@ -126,13 +126,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
 	                 </div>
 	                 <div className="flex-1">
 	                     <div className="flex items-center gap-2">
-	                         <span className="text-white font-medium text-sm group-hover:text-indigo-300 transition-colors">AIでナレーション原稿を自動生成する (ベータ版)</span>
-	                         <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 py-0.5 rounded border border-indigo-500/30">Gemini 2.5</span>
+	                         <span className="text-slate-300 font-bold text-sm">AIでナレーション原稿を自動生成する</span>
 	                     </div>
-	                     <p className="text-xs text-slate-400 mt-1">
+	                     <p className="text-xs text-slate-300 font-bold mt-1">
 	                         各スライドの画像をAIが解析し、説明文を自動で下書きします。<br/>
-	                         <span className="text-amber-400/80">※ 解析時間が大幅に長くなる場合があります（1ページあたり約2~3秒追加）</span>
-	                         {isAiLocked && <span className="block text-slate-500 mt-1">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</span>}
+	                         <span className="text-red-500">※ 解析時間が大幅に長くなる場合があります（1ページあたり約2~3秒追加）</span>
+	                         {isAiLocked && <span className="block text-red-500 mt-1">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</span>}
 	                     </p>
 	                 </div>
 	             </label>
@@ -167,10 +166,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
         className={`
-          relative border-2 border-dashed rounded-[40px] p-8 sm:p-10 text-center cursor-pointer transition-all duration-300 group glass-strong
+          relative border-2 border-transparent rounded-[40px] p-8 sm:p-10 pb-16 sm:pb-20 text-center cursor-pointer transition-all duration-300 group glass-strong
           ${isDragging 
-            ? 'border-blue-500 bg-blue-500/10 scale-[1.02]' 
-            : 'border-blue-300/60 hover:border-blue-400/70'
+            ? 'border-dashed border-blue-500 bg-blue-500/10 scale-[1.02]' 
+            : ''
           }
         `}
       >
@@ -198,11 +197,11 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
             </p>
           </div>
         </div>
+
+        <p className="absolute inset-x-0 bottom-4 sm:bottom-5 px-6 text-center text-xs text-red-500 font-bold pointer-events-none">
+          ※ サーバーにファイルは送信されません。ブラウザ内で安全に変換されます。
+        </p>
       </div>
-      
-      <p className="text-center text-xs text-slate-500 mt-4 px-4">
-        ※ サーバーにファイルは送信されません。ブラウザ内で安全に変換されます。
-      </p>
     </div>
   );
 };

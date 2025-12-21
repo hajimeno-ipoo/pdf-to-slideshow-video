@@ -1097,10 +1097,6 @@ const App: React.FC = () => {
                     </span>
                     に変換
                     </h2>
-                    <p className="text-base sm:text-lg text-slate-400 leading-relaxed">
-                    PDFの各ページから余白を自動的に除去し、<br className="hidden sm:block"/>
-                    編集機能で構成を整えてから動画を作成します。
-                    </p>
                 </div>
                 )}
 
@@ -1113,9 +1109,6 @@ const App: React.FC = () => {
                     >
                       プロジェクト管理を開く
                     </button>
-                    <div className="text-xs text-slate-500 text-center">
-                      保存済みのプロジェクトを開いたり、JSONから読み込めるよ。
-                    </div>
                   </div>
                 )}
                 {state.status === AppStatus.IDLE && (

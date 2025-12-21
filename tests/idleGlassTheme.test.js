@@ -37,4 +37,7 @@ test('idle screen theme: FileUpload uses glass + blue drag state', () => {
   assert.ok(src.includes('glass-strong'));
   assert.ok(src.includes('border-blue-500'));
   assert.ok(src.includes('group-hover:text-blue-600'));
+  assert.ok(!src.includes('(ベータ版)'));
+  assert.ok(!src.includes('Gemini 2.5'));
+  assert.ok(src.includes('text-red-500'));
 });
