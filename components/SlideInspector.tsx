@@ -944,7 +944,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
               <button 
                   onClick={handleApplyChanges}
                   disabled={isUpdating}
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold transition-colors shadow-sm flex items-center gap-2"
+                  className="px-3 py-1.5 idle-btn-primary rounded text-xs font-bold transition-colors shadow-sm flex items-center gap-2"
               >
                   {isUpdating ? <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a10 10 0 1010 10A10 10 0 0012 2zm0 18a8 8 0 118-8 8 8 0 01-8 8z" className="opacity-25" /><path fill="currentColor" d="M12 4a8 8 0 018 8V2a10 10 0 00-10 10z" className="opacity-75" /></svg> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>}
                   {isUpdating ? '更新中' : '適用'}

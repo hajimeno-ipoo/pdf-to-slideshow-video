@@ -38,11 +38,32 @@
 
 /* EDITOR（スライド編集）: IDLEと同じ“ガラス素材”構造で当てる（レイアウトは触らない） */
 .screen-idle .editor-glass {
+  /* 3段階：thin / mid / strong（中身が埋もれないように“濃さ”を変える） */
+  --editor-glass-bg: rgba(15, 23, 42, 0.14);
+  --editor-glass-blur: 10px;
+  --editor-glass-sat: 180%;
+  --editor-glass-shine: rgba(255, 255, 255, 0.22);
+
   position: relative;
   isolation: isolate;
   overflow: hidden;
   background: none !important;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+}
+.screen-idle .editor-glass.editor-glass--thin {
+  --editor-glass-bg: rgba(15, 23, 42, 0.1);
+  --editor-glass-blur: 8px;
+  --editor-glass-shine: rgba(255, 255, 255, 0.18);
+}
+.screen-idle .editor-glass.editor-glass--mid {
+  --editor-glass-bg: rgba(15, 23, 42, 0.14);
+  --editor-glass-blur: 10px;
+  --editor-glass-shine: rgba(255, 255, 255, 0.22);
+}
+.screen-idle .editor-glass.editor-glass--strong {
+  --editor-glass-bg: rgba(15, 23, 42, 0.2);
+  --editor-glass-blur: 12px;
+  --editor-glass-shine: rgba(255, 255, 255, 0.26);
 }
 .screen-idle .editor-glass:focus {
   outline: none;
@@ -54,7 +75,7 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 55%);
+  background: linear-gradient(180deg, var(--editor-glass-shine), rgba(255, 255, 255, 0) 55%);
   box-shadow: inset 0 0 15px -5px rgba(255, 255, 255, 0.7);
 }
 .screen-idle .editor-glass::after {
@@ -64,9 +85,9 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: -1;
-  background: rgba(15, 23, 42, 0.14);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  backdrop-filter: blur(10px) saturate(180%);
+  background: var(--editor-glass-bg);
+  -webkit-backdrop-filter: blur(var(--editor-glass-blur)) saturate(var(--editor-glass-sat));
+  backdrop-filter: blur(var(--editor-glass-blur)) saturate(var(--editor-glass-sat));
   -webkit-filter: url(#glass-distortion);
   filter: url(#glass-distortion);
 }
@@ -79,6 +100,99 @@
 .screen-idle .editor-glass > * {
   position: relative;
   z-index: 1;
+}
+
+/* EDITOR内の“暗いベタ塗り(bg-slate系)”もガラス寄せに（ガラス面を隠さない）
+   - ここも3段階っぽくして、全部が同じ明るさにならないようにする */
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-900,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-900\/30 {
+  background: rgba(15, 23, 42, 0.16) !important;
+}
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800\/30,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800\/50,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800\/60,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-700\/60 {
+  background: rgba(15, 23, 42, 0.12) !important;
+}
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-700,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-700\/50,
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-600 {
+  background: rgba(15, 23, 42, 0.08) !important;
+}
+.screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button)[class*='hover:bg-slate-']:hover {
+  background: rgba(15, 23, 42, 0.16) !important;
+}
+
+/* 区切り線っぽい “1px線” は少しだけ濃くして見えるように */
+.screen-idle .editor-glass .bg-slate-700.w-px,
+.screen-idle .editor-glass .bg-slate-700.h-px,
+.screen-idle .editor-glass .bg-slate-700\/50.w-px,
+.screen-idle .editor-glass .bg-slate-700\/50.h-px,
+.screen-idle .editor-glass .bg-slate-800.w-px,
+.screen-idle .editor-glass .bg-slate-800.h-px {
+  background: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* 枠線もダークからヘアライン（白うっすら）へ寄せる */
+.screen-idle .editor-glass .border-slate-900,
+.screen-idle .editor-glass .border-slate-800,
+.screen-idle .editor-glass .border-slate-800\/50,
+.screen-idle .editor-glass .border-slate-700,
+.screen-idle .editor-glass .border-slate-700\/50,
+.screen-idle .editor-glass .border-slate-600 {
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+/* EDITOR内の“中の面”用ガラス（3段階） */
+.screen-idle .editor-glass .editor-glass-pane {
+  --editor-pane-bg: rgba(15, 23, 42, 0.1);
+  --editor-pane-blur: 8px;
+  background: var(--editor-pane-bg) !important;
+  -webkit-backdrop-filter: blur(var(--editor-pane-blur)) saturate(160%);
+  backdrop-filter: blur(var(--editor-pane-blur)) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+}
+.screen-idle .editor-glass .editor-glass-pane.editor-glass-pane--thin {
+  --editor-pane-bg: rgba(15, 23, 42, 0.08);
+  --editor-pane-blur: 6px;
+}
+.screen-idle .editor-glass .editor-glass-pane.editor-glass-pane--mid {
+  --editor-pane-bg: rgba(15, 23, 42, 0.1);
+  --editor-pane-blur: 8px;
+}
+.screen-idle .editor-glass .editor-glass-pane.editor-glass-pane--strong {
+  --editor-pane-bg: rgba(15, 23, 42, 0.16);
+  --editor-pane-blur: 10px;
+}
+
+/* EDITOR内のボタン/入力も “ガラス寄せ” に統一（IDLEっぽい質感） */
+.screen-idle .editor-glass button:not(.idle-btn-primary) {
+  background: rgba(255, 255, 255, 0.1) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
+}
+.screen-idle .editor-glass button:not(.idle-btn-primary):hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+}
+.screen-idle .editor-glass button:not(.idle-btn-primary):active {
+  background: rgba(255, 255, 255, 0.22) !important;
+}
+
+.screen-idle .editor-glass input:not([type='range']):not([type='checkbox']),
+.screen-idle .editor-glass select,
+.screen-idle .editor-glass textarea {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+}
+.screen-idle .editor-glass input:not([type='range']):not([type='checkbox']):focus,
+.screen-idle .editor-glass select:focus,
+.screen-idle .editor-glass textarea:focus {
+  border-color: rgba(0, 122, 255, 0.35) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
 }
 
 /* 素材（3段階）：thin / normal / strong */

@@ -57,12 +57,10 @@ const drawWaveform = (
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, renderWidth, height);
 
-  // Background
-  ctx.fillStyle = '#0f172a';
-  ctx.fillRect(0, 0, renderWidth, height);
-
   // Grid
-  ctx.strokeStyle = '#334155';
+  // 背景は親のガラス面（editor-glass-pane）の色を見せたいので、canvas側では塗らない
+  // グリッドだけ薄く描いて、波形の視認性を保つ
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let t = 0; t <= totalDuration; t += 1) {
@@ -655,7 +653,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                  </div>
 
                  {/* Narration Track */}
-	                 <div className="h-[48px] relative w-full bg-transparent border-t border-white/10 flex overflow-hidden flex-shrink-0">
+	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex overflow-hidden flex-shrink-0">
 	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">Slide Audio</div>
                      {displaySlides.map((slide) => {
                          const slideWidth = slide.duration * scale;
@@ -678,14 +676,14 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                  </div>
 
                  {/* Global Narration Track */}
-	                 <div className="h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
 	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">Global Audio</div>
                      <canvas ref={globalAudioCanvasRef} className="absolute top-0 left-0 h-full" />
                      {!globalAudioFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">全体音声なし</div>}
                  </div>
 
                  {/* BGM Waveform Track */}
-	                 <div className="h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
 	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">BGM</div>
                      <canvas ref={canvasRef} className="absolute top-0 left-0 h-full" />
                      {!bgmFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">BGMなし</div>}

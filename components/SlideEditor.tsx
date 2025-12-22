@@ -219,8 +219,8 @@ const SlideEditorLayout: React.FC<{
 	        {/* Left Column: 3 cards (Top controls / Grid / Timeline) */}
 	        <div className="flex-1 flex flex-col min-w-0 h-full gap-3">
 	          {/* Card 1: Buttons + Global settings + Add slide */}
-	          <div className="editor-glass rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-none">
-	            <div className="editor-glass-pane flex-none flex justify-between items-center p-3 border-b border-slate-800 bg-transparent overflow-x-auto gap-4 scrollbar-hide">
+	          <div className="editor-glass editor-glass--mid rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-none">
+	            <div className="editor-glass-pane editor-glass-pane--strong flex-none flex justify-between items-center p-3 border-b border-slate-800 bg-transparent overflow-x-auto gap-4 scrollbar-hide">
 	              <div className="flex items-center gap-2 flex-shrink-0">
 	                <input type="file" ref={projectInputRef} accept=".json" className="hidden" onChange={handleImportProject} />
 	                <button onClick={() => projectInputRef.current?.click()} disabled={isImporting} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap">
@@ -249,13 +249,13 @@ const SlideEditorLayout: React.FC<{
 
 	              <div className="flex gap-2 items-center flex-shrink-0">
 	                <button onClick={() => setIsPreviewOpen(true)} className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded shadow transition-colors whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" /></svg><span className="hidden sm:inline">全画面</span>プレビュー</button>
-	                <button
-	                  onClick={handleStartClick}
-	                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded shadow transition-colors whitespace-nowrap bg-emerald-600 hover:bg-emerald-500 text-white"
-	                >
-	                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clipRule="evenodd" /></svg>
-	                  書き出し
-	                </button>
+		                <button
+		                  onClick={handleStartClick}
+		                  className="flex items-center gap-1.5 px-4 py-1.5 text-xs font-bold rounded shadow transition-colors whitespace-nowrap idle-btn-primary"
+		                >
+		                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clipRule="evenodd" /></svg>
+		                  書き出し
+		                </button>
 
 	                <div className="w-px h-6 bg-slate-700 mx-2"></div>
 
@@ -277,14 +277,14 @@ const SlideEditorLayout: React.FC<{
 	          </div>
 
 	          {/* Card 2: Slide grid */}
-	          <div className="editor-glass rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-1 min-h-0">
+	          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-1 min-h-0">
 	            <div className="flex-1 overflow-y-auto custom-scrollbar h-full">
 	              <SlideGrid onSelect={handleSlideSelect} selectedId={selectedSlideId} />
 	            </div>
 	          </div>
 
 	          {/* Card 3: Timeline */}
-	          <div className="editor-glass rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none h-[300px] relative">
+	          <div className="editor-glass editor-glass--strong rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none h-[300px] relative">
 	            <TimelineEditor 
 	              slides={slides} 
 	              onUpdateSlides={(updatedSlides) => updateSlides(updatedSlides, true)}
@@ -303,7 +303,7 @@ const SlideEditorLayout: React.FC<{
 	        {/* Right Column: Sidebar card (Project settings / Inspector) */}
 	        <div 
 	          className={`
-	            editor-glass rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col 
+	            editor-glass editor-glass--strong rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col 
 	            transition-all duration-300 ease-in-out z-50
 	            absolute inset-0 lg:relative lg:inset-auto lg:h-full lg:shadow-2xl
 	            ${isInspectorOpen 

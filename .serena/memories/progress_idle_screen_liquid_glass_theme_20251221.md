@@ -186,3 +186,45 @@
 - `components/slideEditor/SlideGrid.tsx`:
   - スライドカード本体と下部バーの `bg-slate-*` を `bg-transparent` に変更。
 - 検証: `npm test` PASS
+
+
+### 追記（編集画面: ボタン/入力もIDLE寄せのガラスに統一）
+- `index.css`:
+  - `.screen-idle .editor-glass` 配下の `button` と `input/select/textarea` にガラス寄せ（半透明+blur+ヘアライン）を追加。
+  - `idle-btn-primary`（青Primary）は除外して優先できるようにした。
+- `components/SlideEditor.tsx`:
+  - 「書き出し」ボタンを `idle-btn-primary`（青Primary）に変更。
+- `components/SlideInspector.tsx`:
+  - 「適用」ボタンを `idle-btn-primary`（青Primary）に変更。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: 暗いベタ塗りパネル（bg-slate）もガラス寄せ）
+- `index.css`:
+  - `.screen-idle .editor-glass` 内の `bg-slate-*` を半透明（白うっすら）に上書きして、ガラス面が見えるようにした。
+  - hover の `hover:bg-slate-*` で暗さが戻らないよう、hover時の背景も上書きした。
+  - `border-slate-*` を白のヘアライン寄せに統一した。
+  - `w-px/h-px` の区切り線だけ、見えるように少し濃くした。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: ガラスを3段階に分けて読みやすさを改善）
+- `index.css`:
+  - `.screen-idle .editor-glass` を `editor-glass--thin / --mid / --strong` の3段階に分けた（背景色/blur/ツヤを段階化）。
+  - `bg-slate-*` の上書きも3段階っぽく調整して、全部が同じ明るさにならないようにした。
+  - 内側の面用に `editor-glass-pane--thin / --mid / --strong` を追加（タイムラインの行などに使える）。
+- `components/SlideEditor.tsx`:
+  - 4カードに `editor-glass--thin/mid/strong` を割り当て（Grid=thin / Top=mid / Timeline=strong / Sidebar=strong）。
+  - Card1ヘッダーに `editor-glass-pane--strong` を付与。
+- `components/TimelineEditor.tsx`:
+  - Slide Audio / Global Audio / BGM 行を `editor-glass-pane--strong` にして、BGM/ナレーション部分が見やすいようにした。
+- 検証: `npm test` PASS
+
+
+### 追記（タイムライン波形: 暗いベタ塗りを撤去してガラス面を見せる）
+- `components/TimelineEditor.tsx`:
+  - 波形canvasの背景 `fillRect('#0f172a')` をやめて透明にし、親のガラス（pane）が透けるようにした。
+  - グリッド線を白うっすら（`rgba(255,255,255,0.12)`）に変更して、ガラス上でも見えるようにした。
+- `index.css`:
+  - `editor-glass-pane` に “うっすら枠” の inset shadow を追加した。
+- 検証: `npm test` PASS
