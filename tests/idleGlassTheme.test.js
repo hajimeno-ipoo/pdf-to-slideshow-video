@@ -40,6 +40,7 @@ test('idle screen theme: FileUpload uses glass + blue drag state', () => {
   assert.ok(src.includes('glass-strong'));
   assert.ok(src.includes('border-blue-500'));
   assert.ok(src.includes('group-hover:text-blue-600'));
+  assert.ok(src.includes('idle-sidebar-typography'));
   assert.ok(!src.includes('(ベータ版)'));
   assert.ok(!src.includes('Gemini 2.5'));
   assert.ok(src.includes('text-red-500'));
@@ -51,6 +52,14 @@ test('idle screen theme: sidebar panels opt-in to idle typography', () => {
 
   assert.ok(projectSettings.includes('idle-sidebar-typography'));
   assert.ok(inspector.includes('idle-sidebar-typography'));
+});
+
+test('idle screen theme: modals opt-in to idle typography', () => {
+  const projectManager = readUtf8('components/ProjectManagerModal.tsx');
+  const apiKey = readUtf8('components/ApiKeyModal.tsx');
+
+  assert.ok(projectManager.includes('idle-sidebar-typography'));
+  assert.ok(apiKey.includes('idle-sidebar-typography'));
 });
 
 test('idle screen theme: editor cards opt-in to idle typography', () => {

@@ -119,10 +119,10 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
 
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm project-manager-overlay">
-      <div className="w-full max-w-5xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden project-manager-panel glass-strong">
+      <div className="w-full max-w-5xl mx-auto bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden project-manager-panel glass-strong idle-sidebar-typography">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800">
           <div className="flex flex-col">
-            <h3 className="text-white font-bold text-lg">プロジェクト管理</h3>
+            <h3 className="text-slate-200 font-bold text-lg">プロジェクト管理</h3>
           </div>
           <button
             onClick={onClose}
@@ -136,7 +136,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
 
         <div className="p-5">
           {items.length === 0 ? (
-            <div className="p-8 bg-slate-800/30 border border-slate-800 rounded-xl text-center text-slate-400 text-sm">
+            <div className="p-8 glass-thin border border-black/10 rounded-xl text-center text-slate-400 text-sm">
               まだ保存したプロジェクトが無いよ。<br />
               編集画面で「名前をつけて保存」したらここに出るよ〜
             </div>
@@ -150,11 +150,11 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
                     type="button"
                     onClick={() => setSelectedId(p.id)}
                     onDoubleClick={() => handleLoadById(p.id)}
-                    className={`text-left bg-slate-800/40 hover:bg-slate-800/60 border rounded-xl overflow-hidden transition-colors ${
-                      selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-slate-800'
+                    className={`text-left border rounded-xl overflow-hidden transition-colors glass-thin ${
+                      selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-black/10'
                     }`}
                   >
-                  <div className="relative w-full aspect-video bg-slate-950">
+                  <div className="relative w-full aspect-video bg-black/10">
                       {p.thumbnailUrl ? (
                         <img src={p.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />
                       ) : (
@@ -162,16 +162,16 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
                           サムネなし
                         </div>
                       )}
-                      <div className="absolute bottom-2 right-2 text-[10px] bg-black/60 text-slate-200 px-2 py-0.5 rounded border border-slate-700">
+                      <div className="absolute bottom-2 right-2 text-[10px] bg-white/25 text-slate-700 px-2 py-0.5 rounded border border-black/10">
                         {p.slideCount}枚
                       </div>
                     </div>
                     <div className="p-2">
-                      <div className="text-[13px] text-white font-bold truncate">{p.name || '（無名）'}</div>
-                      <div className="text-[11px] text-white/80 mt-1">
+                      <div className="text-[13px] text-slate-200 font-bold truncate">{p.name || '（無名）'}</div>
+                      <div className="text-[11px] text-slate-400 mt-1">
                         更新: {formatDateTime(p.updatedAt)}
                       </div>
-                      <div className="text-[11px] text-white/80 mt-1">
+                      <div className="text-[11px] text-slate-400 mt-1">
                         容量: {formatBytes(p.approxBytes || 0)}
                       </div>
                     </div>

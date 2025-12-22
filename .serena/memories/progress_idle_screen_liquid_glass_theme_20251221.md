@@ -320,3 +320,31 @@
   - `timeline-grid-overlay` のCSSを削除。
   - ルーラー目盛りを `::after` で描画（minor/majorの長さ＆太さを分ける）。
 - 検証: `npm test` PASS
+
+
+### 追記（タイポグラフィ: IDLE/モーダルも“文字階級＋太さ”を統一）
+- 要望: PDFアップロード画面 / APIキー設定モーダル / プロジェクト管理モーダルも、スライド編集画面と同じ「文字色の階級（primary/secondary/muted/faint）＋太さ（bold=600）」に揃える。
+- `components/FileUpload.tsx`:
+  - ルートに `idle-sidebar-typography` を付与して、IDLE側も同じ階級ルールで統一。
+- `components/ApiKeyModal.tsx`:
+  - パネルに `idle-sidebar-typography` を付与。
+  - 見出し/ラベルの一部を `text-slate-200` に寄せて、階級ルールで整うようにした。
+- `components/ProjectManagerModal.tsx`:
+  - パネルに `idle-sidebar-typography` を付与。
+  - カード内の文字（名前/更新/容量）を `text-slate-*` に寄せて階級で統一。
+- `index.css`:
+  - `.glass-*` 内の input/select/textarea を編集画面と同じ“ガラス寄せ”に揃え（背景・枠・フォーカス）。
+- `tests/idleGlassTheme.test.js`:
+  - FileUpload/モーダルが `idle-sidebar-typography` を含むことをチェック。
+- 検証: `npm test` PASS
+
+
+### 追記（モーダル/カード/入力が暗く見える問題を改善）
+- 要望: (1) モーダルを開くと全体が暗くなる (2) プロジェクトカードが暗い (3) APIキー入力が暗めに見える → 暗くならないように調整。
+- `index.css`:
+  - `.screen-idle .project-manager-overlay` / `.screen-idle .api-key-overlay` を **黒い暗幕→白いスクラム** に変更（背景が暗くならない）。
+  - `.screen-idle .api-key-panel .api-key-control` / `api-key-control-btn` / `api-key-mode-btn` を **ライト寄せ**（背景を明るく、文字色はdark階級に）。
+- `components/ProjectManagerModal.tsx`:
+  - 空状態/カードを `glass-thin` ベースにして、`bg-slate-*` の暗い板を撤去。
+  - サムネ背景/バッジも暗すぎないように軽く調整。
+- 検証: `npm test` PASS

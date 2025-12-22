@@ -56,7 +56,7 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
 
   return (
     <div 
-      className={`w-full max-w-2xl mx-auto mt-6 sm:mt-10 transition-all duration-300 px-2 sm:px-0 ${isDisabled ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
+      className={`w-full max-w-2xl mx-auto mt-6 sm:mt-10 transition-all duration-300 px-2 sm:px-0 idle-sidebar-typography ${isDisabled ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
     >
       {/* Settings Area */}
       <div className="mb-6 glass p-4 sm:p-6 rounded-[32px] flex flex-col gap-4">

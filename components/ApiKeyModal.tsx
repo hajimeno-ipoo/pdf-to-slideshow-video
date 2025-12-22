@@ -30,9 +30,9 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
 
   return (
     <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 px-4 api-key-overlay">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-md p-5 space-y-4 api-key-panel glass-strong">
+      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-md p-5 space-y-4 api-key-panel glass-strong idle-sidebar-typography">
         <div className="flex items-center justify-between">
-          <h3 className="text-white font-bold text-lg">Gemini APIキー</h3>
+          <h3 className="text-slate-200 font-bold text-lg">Gemini APIキー</h3>
           <button
             onClick={onClose}
             className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors"
@@ -43,7 +43,7 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
           </button>
         </div>
         <div className="space-y-2">
-          <label className="text-xs text-white font-bold">APIキー</label>
+          <label className="text-xs text-slate-200 font-bold">APIキー</label>
           <div className="flex gap-2 items-center">
             <input
               type={show ? 'text' : 'password'}
@@ -64,7 +64,7 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <div className="text-xs text-white font-bold">保存先</div>
+            <div className="text-xs text-slate-200 font-bold">保存先</div>
             <button
               type="button"
               onClick={() => setShowHelp((v) => !v)}

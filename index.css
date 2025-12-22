@@ -394,6 +394,34 @@
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
 }
 
+/* IDLEのガラスカード（FileUpload等）のフォーム要素も、編集画面と同じ見え方に揃える */
+.screen-idle .glass-thin input:not([type='range']):not([type='checkbox']),
+.screen-idle .glass-thin select,
+.screen-idle .glass-thin textarea,
+.screen-idle .glass input:not([type='range']):not([type='checkbox']),
+.screen-idle .glass select,
+.screen-idle .glass textarea,
+.screen-idle .glass-strong input:not([type='range']):not([type='checkbox']),
+.screen-idle .glass-strong select,
+.screen-idle .glass-strong textarea {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.28) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  backdrop-filter: blur(8px) saturate(160%);
+}
+.screen-idle .glass-thin input:not([type='range']):not([type='checkbox']):focus,
+.screen-idle .glass-thin select:focus,
+.screen-idle .glass-thin textarea:focus,
+.screen-idle .glass input:not([type='range']):not([type='checkbox']):focus,
+.screen-idle .glass select:focus,
+.screen-idle .glass textarea:focus,
+.screen-idle .glass-strong input:not([type='range']):not([type='checkbox']):focus,
+.screen-idle .glass-strong select:focus,
+.screen-idle .glass-strong textarea:focus {
+  border-color: rgba(0, 122, 255, 0.35) !important;
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
+}
+
 /* 素材（3段階）：thin / normal / strong */
 .screen-idle .glass-thin,
 .screen-idle .glass,
@@ -619,7 +647,10 @@
 
 /* Project Manager Modal（IDLE時だけガラス寄せ） */
 .screen-idle .project-manager-overlay {
-  background: rgba(0, 0, 0, 0.35) !important;
+  /* 暗幕にしない（背景が暗くならないよう、白いスクラム＋blurだけにする） */
+  background: rgba(255, 255, 255, 0.06) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
 }
 .screen-idle .project-manager-panel.border-slate-800 {
   border-color: rgba(15, 23, 42, 0.08) !important;
@@ -631,7 +662,8 @@
 
 /* API Key Modal（IDLE時だけガラス寄せ） */
 .screen-idle .api-key-overlay {
-  background: rgba(0, 0, 0, 0.35) !important;
+  /* 暗幕にしない（背景が暗くならないよう、白いスクラム＋blurだけにする） */
+  background: rgba(255, 255, 255, 0.06) !important;
   -webkit-backdrop-filter: blur(10px) saturate(160%);
   backdrop-filter: blur(10px) saturate(160%);
 }
@@ -642,14 +674,14 @@
   inset: -28px;
 }
 .screen-idle .api-key-panel .api-key-control {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-  color: rgba(255, 255, 255, 0.92) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
-  backdrop-filter: blur(8px) saturate(160%);
+  background: rgba(255, 255, 255, 0.32) !important;
+  border-color: rgba(15, 23, 42, 0.16) !important;
+  color: var(--idle-text-primary) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(160%);
+  backdrop-filter: blur(6px) saturate(160%);
 }
 .screen-idle .api-key-panel .api-key-control::placeholder {
-  color: rgba(255, 255, 255, 0.58) !important;
+  color: var(--idle-text-muted) !important;
 }
 .screen-idle .api-key-panel .api-key-control:focus {
   outline: none;
@@ -657,27 +689,27 @@
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.22) !important;
 }
 .screen-idle .api-key-panel .api-key-control-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.35) !important;
-  color: rgba(255, 255, 255, 0.92) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
-  backdrop-filter: blur(8px) saturate(160%);
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(15, 23, 42, 0.16) !important;
+  color: var(--idle-text-primary) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(160%);
+  backdrop-filter: blur(6px) saturate(160%);
 }
 .screen-idle .api-key-panel .api-key-control-btn:hover {
-  background: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.28) !important;
 }
 .screen-idle .api-key-panel .api-key-control-btn:active {
-  background: rgba(255, 255, 255, 0.24) !important;
+  background: rgba(255, 255, 255, 0.34) !important;
 }
 .screen-idle .api-key-panel .api-key-mode-btn {
-  background: rgba(255, 255, 255, 0.1) !important;
-  border-color: rgba(255, 255, 255, 0.3) !important;
-  color: rgba(255, 255, 255, 0.9) !important;
-  -webkit-backdrop-filter: blur(8px) saturate(160%);
-  backdrop-filter: blur(8px) saturate(160%);
+  background: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(15, 23, 42, 0.14) !important;
+  color: var(--idle-text-secondary) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(160%);
+  backdrop-filter: blur(6px) saturate(160%);
 }
 .screen-idle .api-key-panel .api-key-mode-btn:hover {
-  background: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(255, 255, 255, 0.28) !important;
 }
 .screen-idle .api-key-panel .api-key-mode-selected {
   background: rgba(0, 122, 255, 0.18) !important;
