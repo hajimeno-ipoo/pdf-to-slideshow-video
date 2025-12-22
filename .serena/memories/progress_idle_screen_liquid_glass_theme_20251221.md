@@ -228,3 +228,15 @@
 - `index.css`:
   - `editor-glass-pane` に “うっすら枠” の inset shadow を追加した。
 - 検証: `npm test` PASS
+
+
+### 追記（スライダー: ProjectSettings/インスペクタ系のデザイン統一）
+- `index.css`:
+  - IDLE用のApple寄せレンジスライダー（`idle-range`）を追加（トラック/つまみ/フォーカスリングを統一）。
+- `components/ProjectSettings.tsx`:
+  - `type="range"` に `idle-range` を付与（スライド縮小/角丸/標準切替時間/ダッキング量）。
+- `components/BgmWaveformEditor.tsx`:
+  - 音量スライダーに `idle-range` を付与。
+- `components/cropModal/AudioSettingsPanel.tsx` / `components/cropModal/ImageSettingsPanel.tsx` / `components/cropModal/OverlaySettingsPanel.tsx`:
+  - 各rangeに `idle-range` を付与して、インスペクタ周りのスライダー見た目を統一。
+- 検証: `npm test` PASS

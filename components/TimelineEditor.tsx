@@ -542,7 +542,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
           </div>
           <div className="flex items-center gap-2">
               <span className="text-[11px] text-slate-400">Zoom</span>
-              <input type="range" min="10" max="100" value={scale} onChange={(e) => setScale(Number(e.target.value))} className="w-24 h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
+              <input type="range" min="10" max="100" value={scale} onChange={(e) => setScale(Number(e.target.value))} className="w-24 idle-range h-1 bg-slate-600 rounded-lg appearance-none cursor-pointer accent-emerald-500" />
           </div>
       </div>
 

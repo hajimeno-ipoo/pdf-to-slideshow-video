@@ -182,7 +182,7 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
                 )}
                 <div className="space-y-1">
                     <label className="text-xs text-slate-400 flex justify-between"><span>音量</span><span>{Math.round(audioVolume * 100)}%</span></label>
-                    <input type="range" min="0" max="2" step="0.1" value={audioVolume} onChange={(e) => onVolumeChange(parseFloat(e.target.value))} className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
+	                    <input type="range" min="0" max="2" step="0.1" value={audioVolume} onChange={(e) => onVolumeChange(parseFloat(e.target.value))} className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                 </div>
             </div>
         )}

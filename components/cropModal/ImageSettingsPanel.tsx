@@ -141,7 +141,7 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                <div className="space-y-3">
                   <div className="space-y-1">
                      <label className="text-xs text-slate-400 flex justify-between"><span>不透明度</span><span>{Math.round((selectedOverlay.opacity ?? 1) * 100)}%</span></label>
-                     <input type="range" min="0" max="1" step="0.1" value={selectedOverlay.opacity ?? 1} onChange={(e) => onUpdateOverlay({ opacity: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                     <input type="range" min="0" max="1" step="0.1" value={selectedOverlay.opacity ?? 1} onChange={(e) => onUpdateOverlay({ opacity: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                   </div>
                   <div className="space-y-3 pt-2 border-t border-slate-800">
                       <h5 className="text-xs text-slate-400 font-bold">アニメーション</h5>
@@ -158,7 +158,7 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                                   step="0.1" 
                                   value={selectedOverlay.startTime || 0} 
                                   onChange={(e) => onUpdateOverlay({ startTime: parseFloat(e.target.value) })} 
-                                  className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
                               />
                           </div>
                           <div className="space-y-1">
@@ -173,7 +173,7 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                                   step="0.1" 
                                   value={selectedOverlay.duration || (slideDuration - (selectedOverlay.startTime || 0))} 
                                   onChange={(e) => onUpdateOverlay({ duration: parseFloat(e.target.value) })} 
-                                  className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
                               />
                           </div>
                       </div>
@@ -192,7 +192,7 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                   </div>
                   <div className="space-y-1 pt-2 border-t border-slate-800">
                       <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
-                      <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                      <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                   </div>
                   <div className="space-y-3 pt-2 border-t border-slate-800">
                       <h5 className="text-xs text-slate-400 font-bold">影 (ドロップシャドウ)</h5>
@@ -202,7 +202,7 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                       </div>
                       <div className="space-y-1">
                           <label className="text-xs text-slate-400 flex justify-between"><span>ぼかし</span><span>{selectedOverlay.shadowBlur || 0}px</span></label>
-                          <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                          <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                       </div>
 	                      <div className="grid grid-cols-2 gap-2">
 	                          <div className="space-y-1">
@@ -210,14 +210,14 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 	                                  <span>X</span>
 	                                  <span className="text-sm text-slate-200 font-medium tabular-nums">{selectedOverlay.shadowOffsetX || 0}</span>
 	                              </label>
-	                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetX || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetX: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+		                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetX || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetX: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
 	                          </div>
 	                          <div className="space-y-1">
 	                              <label className="text-xs text-slate-400 flex items-center justify-between">
 	                                  <span>Y</span>
 	                                  <span className="text-sm text-slate-200 font-medium tabular-nums">{selectedOverlay.shadowOffsetY || 0}</span>
 	                              </label>
-	                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetY || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetY: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+		                              <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetY || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetY: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
 	                          </div>
 	                      </div>
 	                  </div>

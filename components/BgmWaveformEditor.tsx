@@ -537,7 +537,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
                  step="0.01" 
                  value={volume}
                  onChange={(e) => onVolumeChange(parseFloat(e.target.value))}
-                 className={`w-full min-w-[100px] h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer ${readonly ? 'accent-indigo-500 hover:accent-indigo-400' : 'accent-emerald-500 hover:accent-emerald-400'}`}
+                 className={`w-full min-w-[100px] idle-range h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer ${readonly ? 'accent-indigo-500 hover:accent-indigo-400' : 'accent-emerald-500 hover:accent-emerald-400'}`}
                  title={`Volume: ${Math.round(volume * 100)}%`}
                />
                <span className="text-[10px] text-slate-500 w-8 text-right font-mono">{Math.round(volume * 100)}%</span>

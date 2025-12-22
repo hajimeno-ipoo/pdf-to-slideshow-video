@@ -16,6 +16,7 @@ test('idle screen theme: index.css defines scoped glass styles', () => {
   assert.ok(css.includes('.screen-idle'));
   assert.ok(css.includes('.glass-thin'));
   assert.ok(css.includes('.glass-strong'));
+  assert.ok(css.includes('.idle-range'));
   assert.ok(css.includes('backdrop-filter'));
   assert.ok(css.includes('-webkit-backdrop-filter'));
   assert.ok(css.includes('glass-distortion'));

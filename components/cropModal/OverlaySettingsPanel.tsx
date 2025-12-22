@@ -154,7 +154,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                               step="0.1" 
                               value={selectedOverlay.startTime || 0} 
                               onChange={(e) => onUpdateOverlay({ startTime: parseFloat(e.target.value) })} 
-                              className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+                              className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
                           />
                       </div>
                       <div className="space-y-1">
@@ -169,7 +169,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                               step="0.1" 
                               value={selectedOverlay.duration || (slideDuration - (selectedOverlay.startTime || 0))} 
                               onChange={(e) => onUpdateOverlay({ duration: parseFloat(e.target.value) })} 
-                              className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+                              className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
                           />
                       </div>
                   </div>
@@ -201,7 +201,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                                <span>サイズ</span>
                                <span>{((selectedOverlay.fontSize ?? 5)).toFixed(1)}px</span>
                              </label>
-                             <input type="range" min="1" max="100" step="0.5" value={selectedOverlay.fontSize || 5} onChange={(e) => onUpdateOverlay({ fontSize: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                             <input type="range" min="1" max="100" step="0.5" value={selectedOverlay.fontSize || 5} onChange={(e) => onUpdateOverlay({ fontSize: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                          </div>
                      )}
                   </div>
@@ -219,12 +219,12 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                       <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
                           <div className="space-y-1">
                               <label className="text-xs text-slate-400 flex justify-between"><span>幅</span><span>{Math.round((selectedOverlay.width || 0.2) * 100)}%</span></label>
-                              <input type="range" min="0.01" max="1.0" step="0.01" value={selectedOverlay.width || 0.2} onChange={(e) => onUpdateOverlay({ width: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                              <input type="range" min="0.01" max="1.0" step="0.01" value={selectedOverlay.width || 0.2} onChange={(e) => onUpdateOverlay({ width: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                           </div>
                           {selectedOverlay.type !== 'line' && (
                               <div className="space-y-1">
                                   <label className="text-xs text-slate-400 flex justify-between"><span>高さ</span><span>{Math.round((selectedOverlay.height || 0.2) * 100)}%</span></label>
-                                  <input type="range" min="0.01" max="1.0" step="0.01" value={selectedOverlay.height || 0.2} onChange={(e) => onUpdateOverlay({ height: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                                  <input type="range" min="0.01" max="1.0" step="0.01" value={selectedOverlay.height || 0.2} onChange={(e) => onUpdateOverlay({ height: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                               </div>
                           )}
                       </div>
@@ -236,7 +236,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                              <InlineColorPicker value={bgColorState.hex} onChange={updateBgColorHex} />
                              <div className="space-y-1">
                                  <label className="text-[10px] text-slate-400 flex justify-between"><span>透明度</span><span>{Math.round(bgColorState.alpha * 100)}%</span></label>
-                                 <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
+                                 <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full idle-range accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                              </div>
                          </div>
                       </div>
@@ -249,7 +249,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                                 <InlineColorPicker value={bgColorState.hex} onChange={updateBgColorHex} />
                                 <div className="space-y-1">
                                     <label className="text-[10px] text-slate-400 flex justify-between"><span>透明度</span><span>{Math.round(bgColorState.alpha * 100)}%</span></label>
-                                    <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
+                                    <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full idle-range accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                                 </div>
                             </div>
                         </div>
@@ -258,7 +258,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                   )}
                   <div className="space-y-1 pt-2 border-t border-slate-800">
                       <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
-                      <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                      <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                   </div>
               </div>
           )}
@@ -271,12 +271,12 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                           <InlineColorPicker value={selectedOverlay.strokeColor || '#000000'} onChange={(hex) => onUpdateOverlay({ strokeColor: hex })} />
                         </div>
                      )}
-                     <input type="range" min="0" max="100" step="0.5" value={selectedOverlay.strokeWidth || 0} onChange={(e) => onUpdateOverlay({ strokeWidth: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                     <input type="range" min="0" max="100" step="0.5" value={selectedOverlay.strokeWidth || 0} onChange={(e) => onUpdateOverlay({ strokeWidth: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                  </div>
                  {selectedOverlay.type === 'rect' && (
                      <div className="space-y-1">
                          <label className="text-xs text-slate-400 flex justify-between"><span>角丸</span><span>{selectedOverlay.borderRadius || 0}px</span></label>
-                         <input type="range" min="0" max="100" step="1" value={selectedOverlay.borderRadius || 0} onChange={(e) => onUpdateOverlay({ borderRadius: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                         <input type="range" min="0" max="100" step="1" value={selectedOverlay.borderRadius || 0} onChange={(e) => onUpdateOverlay({ borderRadius: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                      </div>
                  )}
                  
@@ -310,7 +310,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                   </div>
                   <div className="space-y-1">
                       <label className="text-xs text-slate-400 flex justify-between"><span>ぼかし</span><span>{selectedOverlay.shadowBlur || 0}px</span></label>
-                      <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+                      <input type="range" min="0" max="100" value={selectedOverlay.shadowBlur || 0} onChange={(e) => onUpdateOverlay({ shadowBlur: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
                   </div>
 	                  <div className="grid grid-cols-2 gap-2">
 	                      <div className="space-y-1">
@@ -318,14 +318,14 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
 	                              <span>X</span>
 	                              <span className="text-sm text-slate-200 font-medium tabular-nums">{selectedOverlay.shadowOffsetX || 0}</span>
 	                          </label>
-	                          <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetX || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetX: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+	                          <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetX || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetX: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
 	                      </div>
 	                      <div className="space-y-1">
 	                          <label className="text-xs text-slate-400 flex items-center justify-between">
 	                              <span>Y</span>
 	                              <span className="text-sm text-slate-200 font-medium tabular-nums">{selectedOverlay.shadowOffsetY || 0}</span>
 	                          </label>
-	                          <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetY || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetY: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-8" />
+	                          <input type="range" min="-100" max="100" value={selectedOverlay.shadowOffsetY || 0} onChange={(e) => onUpdateOverlay({ shadowOffsetY: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
 	                      </div>
 	                  </div>
 	              </div>
