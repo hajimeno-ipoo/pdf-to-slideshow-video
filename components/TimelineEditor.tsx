@@ -60,10 +60,27 @@ const drawWaveform = (
   // Grid
   // 背景は親のガラス面（editor-glass-pane）の色を見せたいので、canvas側では塗らない
   // グリッドだけ薄く描いて、波形の視認性を保つ
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+  const rootStyle = getComputedStyle(canvas);
+  const gridMinor = (rootStyle.getPropertyValue('--timeline-grid-minor') || '').trim() || 'rgba(15, 23, 42, 0.12)';
+  const gridMajor = (rootStyle.getPropertyValue('--timeline-grid-major') || '').trim() || 'rgba(15, 23, 42, 0.2)';
+
+  // minor grid (every 1s except multiples of 5)
+  ctx.strokeStyle = gridMinor;
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let t = 0; t <= totalDuration; t += 1) {
+      const x = totalDuration > 0 ? (t / totalDuration) * renderWidth : 0;
+      if (t % 5 === 0) continue;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+  }
+  ctx.stroke();
+
+  // major grid (every 5s)
+  ctx.strokeStyle = gridMajor;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let t = 0; t <= totalDuration; t += 5) {
       const x = totalDuration > 0 ? (t / totalDuration) * renderWidth : 0;
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
@@ -531,7 +548,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   const popupLeft = Math.max(80, Math.min(editorWidth - 80, playheadX));
 
   return (
-    <div className="w-full bg-transparent select-none flex flex-col relative group/timeline h-full">
+    <div className="w-full bg-transparent select-none flex flex-col relative group/timeline h-full timeline-surface">
       {/* Toolbar */}
       <div className="flex items-center justify-between px-4 py-1.5 border-b border-white/10 bg-transparent flex-none h-10">
           <div className="flex items-center gap-2">
@@ -568,20 +585,24 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
         onMouseDown={handleTimelineMouseDown}
         onScroll={handleScroll}
       >
-         <div 
-            ref={containerRef}
-            style={{ width: `${Math.max(scrollContainerRef.current?.clientWidth || 0, totalDuration * scale + 100)}px`, minWidth: '100%', minHeight: '100%' }} 
-            className="relative flex flex-col"
-         >
+	         <div 
+	            ref={containerRef}
+	            style={{ width: `${Math.max(scrollContainerRef.current?.clientWidth || 0, totalDuration * scale + 100)}px`, minWidth: '100%', minHeight: '100%' }}
+	            className="relative flex flex-col"
+	         >
              
              {/* Ruler */}
-             <div className="h-6 w-full border-b border-white/10 flex items-end text-[11px] text-slate-400 relative bg-transparent sticky top-0 z-30 pointer-events-none">
-                 {Array.from({ length: Math.ceil(totalDuration) + 2 }).map((_, i) => (
-                     <div key={i} className="absolute bottom-0 border-l border-slate-700 pl-1 h-3 flex items-center" style={{ left: `${i * scale}px` }}>
-                         {i % 5 === 0 && <span>{formatTime(i)}</span>}
-                     </div>
-                 ))}
-             </div>
+	             <div className="h-6 w-full border-b border-white/10 flex items-end text-[11px] text-slate-400 relative bg-transparent sticky top-0 z-30 pointer-events-none timeline-ruler">
+	                 {Array.from({ length: Math.ceil(totalDuration) + 2 }).map((_, i) => (
+	                     <div
+	                       key={i}
+	                       className={`timeline-ruler-tick ${i % 5 === 0 ? 'timeline-ruler-tick--major' : 'timeline-ruler-tick--minor'}`}
+	                       style={{ left: `${i * scale}px` }}
+	                     >
+	                         {i % 5 === 0 && <span className="timeline-ruler-label">{formatTime(i)}</span>}
+	                     </div>
+	                 ))}
+	             </div>
 
              {/* Playhead (Red Line) */}
              <div 
@@ -602,9 +623,9 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                      </div>
                  )}
 
-                 {/* Slides Track */}
-	                 <div className="h-[64px] flex items-center z-10 border-b border-white/10 relative bg-transparent flex-shrink-0">
-                     {displaySlides.map((slide, index) => {
+	                 {/* Slides Track */}
+		                 <div className="editor-glass-pane editor-glass-pane--mid timeline-row timeline-row--even h-[64px] flex items-center z-10 border-b border-white/10 relative bg-transparent flex-shrink-0">
+	                     {displaySlides.map((slide, index) => {
                          const width = slide.duration * scale;
                          const isDragging = draggingSlideIndex === index;
                          const isBeingResized = isResizingTransition === slide.id;
@@ -652,10 +673,10 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                      })}
                  </div>
 
-                 {/* Narration Track */}
-	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex overflow-hidden flex-shrink-0">
-	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Slide Audio</div>
-                     {displaySlides.map((slide) => {
+	                 {/* Narration Track */}
+		                 <div className="editor-glass-pane editor-glass-pane--strong timeline-row timeline-row--odd h-[48px] relative w-full bg-transparent border-t border-white/10 flex overflow-hidden flex-shrink-0">
+		                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Slide Audio</div>
+	                     {displaySlides.map((slide) => {
                          const slideWidth = slide.duration * scale;
                          const offset = slide.audioOffset || 0;
                          const offsetPx = offset * scale;
@@ -676,14 +697,14 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                  </div>
 
                  {/* Global Narration Track */}
-	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+	                 <div className="editor-glass-pane editor-glass-pane--strong timeline-row timeline-row--even h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
 	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Global Audio</div>
                      <canvas ref={globalAudioCanvasRef} className="absolute top-0 left-0 h-full" />
                      {!globalAudioFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">全体音声なし</div>}
                  </div>
 
                  {/* BGM Waveform Track */}
-	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+	                 <div className="editor-glass-pane editor-glass-pane--strong timeline-row timeline-row--odd h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
 	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">BGM</div>
                      <canvas ref={canvasRef} className="absolute top-0 left-0 h-full" />
                      {!bgmFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">BGMなし</div>}

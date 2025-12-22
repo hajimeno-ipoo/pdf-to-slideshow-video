@@ -111,6 +111,74 @@
   color: var(--idle-text-primary) !important;
 }
 
+/* Timeline（IDLEテーマ）: 読みやすさ改善（①スクラム ②段差 ③線のメリハリ） */
+.screen-idle .timeline-surface {
+  --timeline-scrim-bg: rgba(255, 255, 255, 0.08);
+  --timeline-row-odd: rgba(255, 255, 255, 0.14);
+  --timeline-row-even: rgba(255, 255, 255, 0.2);
+  /* 目盛り/枠線: 白っぽさを避けて“濃いグレー寄り”＋見やすさ重視 */
+  --timeline-line-minor: rgba(15, 23, 42, 0.18);
+  --timeline-line-major: rgba(15, 23, 42, 0.34);
+  --timeline-grid-minor: rgba(15, 23, 42, 0.12);
+  --timeline-grid-major: rgba(15, 23, 42, 0.26);
+  isolation: isolate;
+}
+.screen-idle .timeline-surface::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: var(--timeline-scrim-bg);
+}
+
+/* ② 行の段差（ゼブラ）: editor-glass-pane の背景を交互に変える */
+.screen-idle .timeline-surface .timeline-row.timeline-row--odd {
+  --editor-pane-bg: var(--timeline-row-odd) !important;
+}
+.screen-idle .timeline-surface .timeline-row.timeline-row--even {
+  --editor-pane-bg: var(--timeline-row-even) !important;
+}
+
+/* ③ 線のメリハリ: タイムライン内だけ、枠線/目盛り線を少し濃くする */
+.screen-idle .timeline-surface .border-white\/10,
+.screen-idle .timeline-surface .border-slate-700,
+.screen-idle .timeline-surface .border-slate-800,
+.screen-idle .timeline-surface .border-slate-800\/50 {
+  border-color: var(--timeline-line-minor) !important;
+}
+
+/* ルーラー（上の時間表示）: 一般的な目盛り（線＋数字。数字は線の上） */
+.screen-idle .timeline-surface .timeline-ruler-tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+}
+.screen-idle .timeline-surface .timeline-ruler-tick::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  height: 8px;
+  background: var(--timeline-line-minor);
+}
+.screen-idle .timeline-surface .timeline-ruler-tick--major::after {
+  width: 2px;
+  height: 16px;
+  background: var(--timeline-line-major);
+}
+.screen-idle .timeline-surface .timeline-ruler-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  transform: translateX(6px);
+  white-space: nowrap;
+  line-height: 1;
+}
+
 /* EDITOR（スライド編集）: IDLEと同じ“ガラス素材”構造で当てる（レイアウトは触らない） */
 .screen-idle .editor-glass {
   /* 3段階：thin / mid / strong（中身が埋もれないように“濃さ”を変える） */

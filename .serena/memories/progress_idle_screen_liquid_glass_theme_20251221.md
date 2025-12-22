@@ -269,3 +269,54 @@
   - 編集内の `bg-slate-*` 上書き（ガラスを隠すベタ塗り）も白系の共通変数へ置き換え。
   - `.screen-idle header.bg-slate-950` の背景も共通変数（`--idle-glass-bg`）参照に変更。
 - 検証: `npm test` PASS
+
+
+### 追記（編集画面: タイムラインの可読性改善：①スクラム ②段差 ③線メリハリ）
+- `components/TimelineEditor.tsx`:
+  - ルートに `timeline-surface` を追加。
+  - ルーラーの目盛りに `timeline-ruler-tick--major/--minor` を付与（5秒ごとにメリハリ）。
+  - 各トラック行に `timeline-row--odd/--even` を付与、Slides行にも `editor-glass-pane--mid` を追加。
+  - 波形のグリッド線を minor/major（1秒/5秒）で描き分け、CSS変数（`--timeline-grid-minor/major`）から色を取得。
+- `index.css`:
+  - `.screen-idle .timeline-surface` にスクラム（薄い膜）を追加。
+  - 行のゼブラ背景（`--editor-pane-bg`）を odd/even で交互に変更。
+  - タイムライン内の境界線/目盛り線を少し濃く（`--timeline-line-minor/major`）。
+- 検証: `npm test` PASS
+
+
+### 追記（タイムライン: 表示が下にズレて隠れる不具合修正）
+- 原因: `.screen-idle .timeline-surface > * { position: relative; }` が、プレビューPopup（`absolute`）まで relative に上書きしてDOM上で場所を取ってしまい、トラックが下に押し出されていた。
+- `index.css`:
+  - `.timeline-surface` に `isolation: isolate` を追加。
+  - `.timeline-surface::before`（スクラム）を `z-index: -1` にし、子要素の position 上書きを削除してレイアウト崩れを回避。
+- 検証: `npm test` PASS
+
+
+### 追記（タイムライン: 目盛り線の見やすさ調整）
+- ユーザー要望: メジャー目盛りを太く＆濃く、マイナーは細く短く、白じゃなく濃いグレー寄りに。
+- `index.css`:
+  - `.screen-idle .timeline-surface` の `--timeline-line-*` / `--timeline-grid-*` を濃いグレー寄りに調整（alphaを少し上げて視認性UP）。
+  - `.timeline-ruler-tick--minor` を短く（`height: 8px`）＋余計な `pl-1` を打ち消し。
+  - `.timeline-ruler-tick--major` を太く（`border-left-width: 2px`）に。
+- 検証: `npm test` PASS
+
+
+### 追記（タイムライン: スライド画像行/Slide Audio行にも目盛り線）
+- 要望: ルーラーだけじゃなく、画像（スライド）行と Slide Audio 行にも時間の目盛りが欲しい。
+- `components/TimelineEditor.tsx`:
+  - タイムラインコンテンツに `--timeline-scale`（px/秒）を渡して、CSSで繰り返し目盛りがスケールに追従できるようにした。
+  - Slides Track / Narration Track（Slide Audio）に `timeline-grid-overlay` を付与。
+- `index.css`:
+  - `.timeline-grid-overlay::after` で minor（1秒）/ major（5秒）を `repeating-linear-gradient` で描画（pointer-events none）。
+- 検証: `npm test` PASS
+
+
+### 追記（タイムライン: 目盛りは“上のルーラーだけ”に変更）
+- ユーザー要望: スライド（画像）行に縦線を貫通させず、上の時間表示エリア（ルーラー）にだけ一般的な目盛り（線＋数字、数字は線の上）を出したい。
+- `components/TimelineEditor.tsx`:
+  - Slides/Narration（Slide Audio）行に入れていた `timeline-grid-overlay` を撤去。
+  - ルーラーの目盛りDOMを `timeline-ruler-tick` + `timeline-ruler-label` に整理。
+- `index.css`:
+  - `timeline-grid-overlay` のCSSを削除。
+  - ルーラー目盛りを `::after` で描画（minor/majorの長さ＆太さを分ける）。
+- 検証: `npm test` PASS
