@@ -7,8 +7,8 @@ import { sanitizeMessage } from "../utils/sanitize";
 let cachedClient: GoogleGenAI | null = null;
 let cachedKey: string | null = null;
 
-const getClient = () => {
-  const key = getUserApiKey();
+const getClient = async () => {
+  const key = await getUserApiKey();
   if (!key) throw new Error("Gemini APIキーを設定してください");
   if (cachedClient && cachedKey === key) return cachedClient;
   cachedKey = key;
@@ -286,7 +286,7 @@ export const checkApiConnection = async (): Promise<boolean> => {
     await callWithRetry(async () => {
       // Direct call, bypassing queue for quick check
       if (requestListener) requestListener();
-      const ai = getClient();
+      const ai = await getClient();
       return await ai.models.generateContent({
         model: VISION_MODEL,
         contents: { parts: [{ text: "hi" }] },
@@ -328,7 +328,7 @@ export const generateSpeech = async (text: string, voiceName: string = 'Kore', s
 
     try {
       const response = await callWithRetry(async () => {
-          const ai = getClient();
+          const ai = await getClient();
           return await ai.models.generateContent({
             model: TTS_MODEL,
             contents: {
@@ -378,7 +378,7 @@ export const generateImage = async (prompt: string): Promise<{ imageData: string
 
     try {
       const response = await callWithRetry(async () => {
-          const ai = getClient();
+          const ai = await getClient();
           return await ai.models.generateContent({
             model: IMAGE_GEN_MODEL,
             contents: {
@@ -444,7 +444,7 @@ export const generateSlideScript = async (imageBase64: string, previousContext?:
 
         try {
             const response = await callWithRetry(async () => {
-                const ai = getClient();
+                const ai = await getClient();
                 return await ai.models.generateContent({
                     model: VISION_MODEL,
                     contents: {
