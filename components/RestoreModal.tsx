@@ -19,8 +19,8 @@ const RestoreModal: React.FC<RestoreModalProps> = ({ isOpen, onRestore, onDiscar
   });
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-fade-in">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-emerald-900/20">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 restore-modal-overlay animate-fade-in">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full shadow-2xl restore-modal-panel glass-strong idle-sidebar-typography">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -28,27 +28,27 @@ const RestoreModal: React.FC<RestoreModalProps> = ({ isOpen, onRestore, onDiscar
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">作業の続きから始めますか？</h3>
+            <h3 className="text-lg font-bold text-slate-200">作業の続きから始めますか？</h3>
             <p className="text-xs text-slate-400">前回保存された作業内容が見つかりました。</p>
           </div>
         </div>
 
-        <div className="bg-slate-800/50 rounded-lg p-3 mb-6 border border-slate-700">
+        <div className="glass-thin rounded-lg p-3 mb-6 border border-slate-800 restore-modal-info">
           <p className="text-sm text-slate-300 text-center">
-            最終更新: <span className="font-mono text-emerald-400 font-bold">{dateStr}</span>
+            最終更新: <span className="font-mono text-slate-200 font-bold">{dateStr}</span>
           </p>
         </div>
 
         <div className="flex gap-3">
           <button 
             onClick={onDiscard}
-            className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors border border-slate-600"
+            className="flex-1 px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors border border-slate-600 idle-btn-glass"
           >
             破棄して新規作成
           </button>
           <button 
             onClick={onRestore}
-            className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/30"
+            className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-sm font-bold transition-colors shadow-lg shadow-emerald-900/30 idle-btn-primary"
           >
             復元する
           </button>

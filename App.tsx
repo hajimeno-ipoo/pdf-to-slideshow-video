@@ -869,11 +869,12 @@ const App: React.FC = () => {
 		  const isEditing = state.status === AppStatus.EDITING;
 		  const isIdle = state.status === AppStatus.IDLE;
 		  const isProcessing = state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING;
-		  const useGlassTheme = isIdle || isEditing || isProcessing;
+		  const isCompleted = state.status === AppStatus.COMPLETED;
+		  const useGlassTheme = isIdle || isEditing || isProcessing || isCompleted;
 		  const aiEnabled = apiStatus === 'connected';
 
   return (
-		    <div className={`h-screen flex flex-col overflow-hidden ${(isIdle || isProcessing) ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
+		    <div className={`h-screen flex flex-col overflow-hidden ${(isIdle || isProcessing || isCompleted) ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
       
       {/* Mobile Landscape Warning: 500px以下の高さかつ横画面の場合に表示 */}
       <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center p-8 text-center hidden [@media(max-height:500px)_and_(orientation:landscape)]:flex h-screen w-screen touch-none">
@@ -942,88 +943,88 @@ const App: React.FC = () => {
           }}
         />
 
-	      {thumbnailDialogOpen && (
-	        <div className="fixed inset-0 z-[9998] bg-black/60 flex items-center justify-center p-4">
-	          <div className="w-full max-w-md bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-2xl">
-	            <div className="flex items-center justify-between mb-3">
-	              <h3 className="text-lg font-bold text-white">サムネ画像を書き出す</h3>
-	              <button
-	                onClick={() => setThumbnailDialogOpen(false)}
-	                disabled={thumbnailExporting}
-	                className="text-slate-400 hover:text-white px-2 py-1 rounded hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-	                aria-label="閉じる"
-	              >
-	                ×
-	              </button>
-	            </div>
+		      {thumbnailDialogOpen && (
+		        <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 thumbnail-export-overlay">
+		          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl thumbnail-export-panel glass-strong idle-sidebar-typography">
+		            <div className="flex items-center justify-between mb-3">
+		              <h3 className="text-lg font-bold text-slate-200">サムネ画像を書き出す</h3>
+		              <button
+		                onClick={() => setThumbnailDialogOpen(false)}
+		                disabled={thumbnailExporting}
+		                className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+		                aria-label="閉じる"
+		              >
+		                ×
+		              </button>
+		            </div>
 
 	            <div className="space-y-3">
-	              <div className="flex gap-2">
-	                <button
-	                  onClick={() => setThumbnailMode('single')}
-	                  disabled={thumbnailExporting}
-	                  className={`flex-1 px-3 py-2 text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-	                    thumbnailMode === 'single'
-	                      ? 'bg-emerald-600 text-white border-emerald-500/40'
-	                      : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
-	                  }`}
-	                >
-	                  1枚
-	                </button>
-	                <button
-	                  onClick={() => setThumbnailMode('range')}
-	                  disabled={thumbnailExporting}
-	                  className={`flex-1 px-3 py-2 text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-	                    thumbnailMode === 'range'
-	                      ? 'bg-emerald-600 text-white border-emerald-500/40'
-	                      : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700'
-	                  }`}
-	                >
-	                  ZIP（最大20枚）
-	                </button>
-	              </div>
+		              <div className="flex gap-2">
+		                <button
+		                  onClick={() => setThumbnailMode('single')}
+		                  disabled={thumbnailExporting}
+		                  className={`flex-1 px-3 py-2 text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+		                    thumbnailMode === 'single'
+		                      ? 'bg-blue-600 text-white border-blue-500/40 idle-btn-primary'
+		                      : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 idle-btn-glass'
+		                  }`}
+		                >
+		                  1枚
+		                </button>
+		                <button
+		                  onClick={() => setThumbnailMode('range')}
+		                  disabled={thumbnailExporting}
+		                  className={`flex-1 px-3 py-2 text-sm rounded border transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+		                    thumbnailMode === 'range'
+		                      ? 'bg-blue-600 text-white border-blue-500/40 idle-btn-primary'
+		                      : 'bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 idle-btn-glass'
+		                  }`}
+		                >
+		                  ZIP（最大20枚）
+		                </button>
+		              </div>
 
-	              {thumbnailMode === 'single' ? (
-	                <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-3 space-y-2">
-	                  <label className="text-xs text-slate-300 block">時間（秒）</label>
-	                  <input
-	                    type="number"
-	                    min="0"
-	                    step="0.1"
-	                    value={thumbnailSingleSeconds}
-	                    onChange={(e) => setThumbnailSingleSeconds(e.target.value)}
-	                    disabled={thumbnailExporting}
-	                    className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 disabled:opacity-50"
-	                  />
-	                  <div className="text-[11px] text-slate-400">例: 12.3</div>
-	                </div>
-	              ) : (
-	                <div className="bg-slate-800/50 border border-slate-700 rounded-xl p-3 space-y-2">
-	                  <label className="text-xs text-slate-300 block">範囲（秒）</label>
-	                  <div className="flex items-center gap-2">
-	                    <input
-	                      type="number"
-	                      min="0"
-	                      step="0.1"
-	                      value={thumbnailRangeStartSeconds}
-	                      onChange={(e) => setThumbnailRangeStartSeconds(e.target.value)}
-	                      disabled={thumbnailExporting}
-	                      className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 disabled:opacity-50"
-	                      placeholder="開始"
-	                    />
-	                    <span className="text-slate-400">〜</span>
-	                    <input
-	                      type="number"
-	                      min="0"
-	                      step="0.1"
-	                      value={thumbnailRangeEndSeconds}
-	                      onChange={(e) => setThumbnailRangeEndSeconds(e.target.value)}
-	                      disabled={thumbnailExporting}
-	                      className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 disabled:opacity-50"
-	                      placeholder="終了"
-	                    />
-	                  </div>
-	                  <div className="text-[11px] text-slate-400">この範囲を最大20枚でZIPにまとめるよ。</div>
+		              {thumbnailMode === 'single' ? (
+		                <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-3 space-y-2 glass-thin">
+		                  <label className="text-xs text-slate-200 font-bold block">時間（秒）</label>
+		                  <input
+		                    type="number"
+		                    min="0"
+		                    step="0.1"
+		                    value={thumbnailSingleSeconds}
+		                    onChange={(e) => setThumbnailSingleSeconds(e.target.value)}
+		                    disabled={thumbnailExporting}
+		                    className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white outline-none focus:border-blue-500 disabled:opacity-50"
+		                  />
+		                  <div className="text-[11px] text-slate-400">例: 12.3</div>
+		                </div>
+		              ) : (
+		                <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-3 space-y-2 glass-thin">
+		                  <label className="text-xs text-slate-200 font-bold block">範囲（秒）</label>
+		                  <div className="flex items-center gap-2">
+		                    <input
+		                      type="number"
+		                      min="0"
+		                      step="0.1"
+		                      value={thumbnailRangeStartSeconds}
+		                      onChange={(e) => setThumbnailRangeStartSeconds(e.target.value)}
+		                      disabled={thumbnailExporting}
+		                      className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white outline-none focus:border-blue-500 disabled:opacity-50"
+		                      placeholder="開始"
+		                    />
+		                    <span className="text-slate-400">〜</span>
+		                    <input
+		                      type="number"
+		                      min="0"
+		                      step="0.1"
+		                      value={thumbnailRangeEndSeconds}
+		                      onChange={(e) => setThumbnailRangeEndSeconds(e.target.value)}
+		                      disabled={thumbnailExporting}
+		                      className="w-full bg-slate-900 border border-slate-600 rounded px-3 py-2 text-sm text-white outline-none focus:border-blue-500 disabled:opacity-50"
+		                      placeholder="終了"
+		                    />
+		                  </div>
+		                  <div className="text-[11px] text-slate-400">この範囲を最大20枚でZIPにまとめるよ。</div>
 	                </div>
 	              )}
 
@@ -1038,23 +1039,23 @@ const App: React.FC = () => {
 	              )}
 	            </div>
 
-	            <div className="mt-4 flex gap-3 justify-end">
-	              <button
-	                onClick={() => setThumbnailDialogOpen(false)}
-	                disabled={thumbnailExporting}
-	                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-	              >
-	                キャンセル
-	              </button>
-	              <button
-	                onClick={handleConfirmThumbnailExport}
-	                disabled={thumbnailExporting}
-	                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg border border-emerald-500/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-	              >
-	                {thumbnailMode === 'single' ? '1枚ダウンロード' : 'ZIPでダウンロード'}
-	              </button>
-	            </div>
-	          </div>
+		            <div className="mt-4 flex gap-3 justify-end">
+		              <button
+		                onClick={() => setThumbnailDialogOpen(false)}
+		                disabled={thumbnailExporting}
+		                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed idle-btn-glass"
+		              >
+		                キャンセル
+		              </button>
+		              <button
+		                onClick={handleConfirmThumbnailExport}
+		                disabled={thumbnailExporting}
+		                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg border border-blue-500/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed idle-btn-primary"
+		              >
+		                {thumbnailMode === 'single' ? '1枚ダウンロード' : 'ZIPでダウンロード'}
+		              </button>
+		            </div>
+		          </div>
 	        </div>
 	      )}
 	      
@@ -1102,7 +1103,7 @@ const App: React.FC = () => {
             </div>
         ) : (
             // Non-Editor Views (Landing, Processing, Result)
-	            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${(isIdle || isProcessing) ? 'idle-surface' : ''}`}>
+	            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${(isIdle || isProcessing || isCompleted) ? 'idle-surface' : ''}`}>
                 {/* Hero Section */}
 	                {state.status === AppStatus.IDLE && (
 	                <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
@@ -1156,67 +1157,64 @@ const App: React.FC = () => {
                 </div>
                 )}
 
-                {/* Result Display */}
-                {state.status === AppStatus.COMPLETED && state.videoUrl && (
-                <div className="mt-8 w-full flex flex-col items-center animate-fade-in space-y-6 px-2">
-	                    <div 
-	                    className="bg-slate-800/40 backdrop-blur rounded-3xl border border-slate-700 p-2 shadow-2xl shadow-emerald-500/10 w-full flex justify-center"
-	                    style={{ maxWidth: 'fit-content' }}
-	                    >
-	                        <video 
-	                        ref={completedVideoRef}
-	                        src={state.videoUrl} 
+	                {/* Result Display */}
+	                {state.status === AppStatus.COMPLETED && state.videoUrl && (
+	                <div className="mt-8 w-full flex flex-col items-center animate-fade-in space-y-6 px-2 idle-sidebar-typography">
+		                    <div 
+		                    className="glass-strong rounded-3xl border border-black/10 p-2 w-full flex justify-center"
+		                    style={{ maxWidth: 'fit-content' }}
+		                    >
+		                        <video 
+		                        ref={completedVideoRef}
+		                        src={state.videoUrl} 
 	                        controls 
 	                        autoPlay 
 	                        className="rounded-2xl bg-black shadow-lg max-h-[70vh]"
 	                        style={getPlayerStyle(state.settings?.aspectRatio)}
 	                        />
-	                    </div>
-	                    
-	                    <div className="flex flex-col items-center justify-center gap-4 pt-4 max-w-2xl text-center w-full">
-	                    <div className="text-sm text-slate-400 bg-slate-800/50 px-4 py-2 rounded-lg w-full sm:w-auto">
-                        ヒント: ダウンロードしたファイル({state.extension})がQuickTimeで再生できない場合は、VLC Playerやブラウザで開いてください。
-                    </div>
-	                    
-				                    <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-3 w-full sm:w-auto justify-center">
-				                        <button 
-				                        onClick={downloadVideo}
-				                        className="flex items-center justify-center gap-2 px-5 py-3 bg-amber-500 hover:bg-amber-400 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-amber-500/20 w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
-				                        >
-				                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-				                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 3v12m0 0l-3.75-3.75M12 15l3.75-3.75" />
-				                        </svg>
+		                    </div>
+		                    
+		                    <div className="flex flex-col items-center justify-center gap-4 pt-4 max-w-2xl text-center w-full">
+		                    
+					                    <div className="flex flex-col sm:flex-row sm:flex-nowrap gap-3 w-full sm:w-auto justify-center">
+					                        <button 
+					                        onClick={downloadVideo}
+					                        className="flex items-center justify-center gap-2 px-5 py-3 idle-btn-primary text-white rounded-2xl text-sm font-semibold transition-colors shadow-sm w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
+					                        >
+					                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+					                            <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M12 3v12m0 0l-3.75-3.75M12 15l3.75-3.75" />
+					                        </svg>
 				                        動画ダウンロード
 				                        </button>
 
-				                        <button 
-				                        onClick={openThumbnailDialog}
-				                        className="flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-emerald-600/20 w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
-				                        >
-			                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-			                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 4.5h10.5A2.25 2.25 0 0119.5 6.75v10.5A2.25 2.25 0 0117.25 19.5H6.75A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5z" />
-			                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 11.25l1.5 1.5 2.25-3 3.75 5.25H7.5l.75-3.75z" />
+					                        <button 
+					                        onClick={openThumbnailDialog}
+					                        className="flex items-center justify-center gap-2 px-5 py-3 idle-btn-glass rounded-2xl text-sm font-semibold transition-colors w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
+					                        >
+				                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+				                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 4.5h10.5A2.25 2.25 0 0119.5 6.75v10.5A2.25 2.25 0 0117.25 19.5H6.75A2.25 2.25 0 014.5 17.25V6.75A2.25 2.25 0 016.75 4.5z" />
+				                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 11.25l1.5 1.5 2.25-3 3.75 5.25H7.5l.75-3.75z" />
 			                        </svg>
 			                        画像ダウンロード
 			                        </button>
 
-			                        <button 
-			                        onClick={handleBackToEdit}
-			                        className="flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-sm font-semibold transition-all shadow-lg shadow-blue-600/20 w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
-		                        >
-		                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-		                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+				                        <button 
+				                        onClick={handleBackToEdit}
+				                        className="flex items-center justify-center gap-2 px-5 py-3 idle-btn-glass rounded-2xl text-sm font-semibold transition-colors w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
+			                        >
+			                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+			                            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
 		                        </svg>
 		                        再編集
 		                        </button>
 		                        
-		                        <button 
-		                        onClick={handleReset}
-		                        className="flex items-center justify-center gap-2 px-5 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-2xl text-sm font-semibold transition-all w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
-		                        >
-		                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
-		                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-		                        </svg>
+			                        <button 
+			                        onClick={handleReset}
+			                        className="flex items-center justify-center gap-2 px-5 py-3 idle-btn-glass rounded-2xl text-sm font-semibold transition-colors w-full sm:w-auto sm:shrink-0 whitespace-nowrap"
+			                        >
+			                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
+			                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+			                        </svg>
 		                        最初から
 	                        </button>
 	                    </div>
