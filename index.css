@@ -1,7 +1,16 @@
 /* IDLE（最初の画面）だけ Apple寄せの“ガラス素材”を当てる用
-   - レイアウトは変えない（見た目だけ）
-   - Tailwind全体の色上書きはしない（事故防止）
-*/
+	   - レイアウトは変えない（見た目だけ）
+	   - Tailwind全体の色上書きはしない（事故防止）
+	*/
+
+/* Safariだけ“ゆがみ”をOFF（ちらつき対策） */
+.browser-safari .screen-idle .glass-thin::after,
+.browser-safari .screen-idle .glass::after,
+.browser-safari .screen-idle .glass-strong::after,
+.browser-safari .screen-idle .editor-glass::after {
+  -webkit-filter: none !important;
+  filter: none !important;
+}
 
 .screen-idle {
   background: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png') center / cover no-repeat;

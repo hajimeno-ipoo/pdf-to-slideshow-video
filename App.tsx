@@ -101,6 +101,19 @@ const App: React.FC = () => {
       prevStatusRef.current = state.status;
   }, [state.status]);
 
+  // Safariだけ “ガラスのゆがみ” を無効化するためのクラス付与（ちらつき対策）
+  useEffect(() => {
+      const ua = navigator.userAgent || '';
+      const vendor = (navigator as any).vendor || '';
+      const isSafari = vendor.includes('Apple') && !/Chrome|CriOS|FxiOS|Edg|OPR|SamsungBrowser/i.test(ua);
+
+      const root = document.documentElement;
+      if (isSafari) root.classList.add('browser-safari');
+      else root.classList.remove('browser-safari');
+
+      return () => root.classList.remove('browser-safari');
+  }, []);
+
   // Request Tracking Logic & Cooldown Listener
   useEffect(() => {
       // Listener called whenever Gemini Service makes a request
