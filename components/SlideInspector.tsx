@@ -928,9 +928,9 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 border-l border-slate-800">
+    <div className="flex flex-col h-full bg-transparent border-l border-white/10">
       {/* 1. Header & Tabs */}
-      <div className="flex-none p-3 border-b border-slate-800 bg-slate-900 z-10 flex flex-col gap-3">
+      <div className="flex-none p-3 border-b border-white/10 bg-transparent z-10 flex flex-col gap-3">
           <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                   {onClose && (
@@ -950,7 +950,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                   {isUpdating ? '更新中' : '適用'}
               </button>
           </div>
-          <div className="flex bg-slate-800 rounded p-0.5 overflow-x-auto">
+          <div className="flex bg-black/15 rounded p-0.5 overflow-x-auto border border-white/10">
               <button onClick={() => setActiveTab('crop')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'crop' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>トリミング</button>
               <button onClick={() => setActiveTab('overlay')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'overlay' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>装飾</button>
               <button onClick={() => setActiveTab('image')} className={`flex-1 px-3 py-1.5 rounded text-[10px] whitespace-nowrap transition-colors ${activeTab === 'image' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>画像</button>
@@ -962,7 +962,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       <div className="flex-1 flex flex-col landscape:flex-row lg:!flex-col overflow-hidden">
           
           {/* 2. Visual Editor (Canvas) */}
-          <div className="relative bg-slate-950 flex items-center justify-center p-4 
+	          <div className="relative bg-transparent flex items-center justify-center p-4 
                           border-b border-slate-800
                           landscape:border-b-0 landscape:border-r lg:!border-b lg:!border-r-0
                           overflow-hidden select-none group/canvas flex-shrink-0
@@ -1258,7 +1258,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           </div>
 
           {/* 3. Property Editor (Scrollable) */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar bg-slate-900 landscape:w-1/2 lg:!w-full">
+          <div className="flex-1 overflow-y-auto custom-scrollbar bg-transparent landscape:w-1/2 lg:!w-full">
               {activeTab !== 'crop' && (showCanvasStage ? layerOrder.length > 0 : overlays.length > 0) && (
                   <div className="p-4 pb-3 border-b border-slate-800">
                       <div className="flex items-center justify-between">

@@ -97,7 +97,7 @@ export const Toolbar: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-2 mb-2 bg-slate-900 border-b border-slate-800 pb-2 px-1 select-none">
+    <div className="flex flex-col gap-2 mb-2 bg-transparent border-b border-white/10 pb-2 px-1 select-none">
          
          {/* Group 1: Global Settings (Accordion) */}
          <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 overflow-hidden">

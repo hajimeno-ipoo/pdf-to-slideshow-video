@@ -62,8 +62,8 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-slate-900 text-slate-300">
-       <div className="p-4 border-b border-slate-800 bg-slate-900 sticky top-0 z-10 flex items-center gap-2">
+    <div className="flex flex-col h-full bg-transparent text-slate-300">
+       <div className="p-4 border-b border-white/10 bg-transparent sticky top-0 z-10 flex items-center gap-2">
            {onClose && (
                <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-sm font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>

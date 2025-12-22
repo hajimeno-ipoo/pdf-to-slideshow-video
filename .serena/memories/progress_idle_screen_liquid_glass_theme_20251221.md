@@ -145,3 +145,44 @@
 - `App.tsx`: IDLEタイトルのガラス板（`.idle-title-glass`）を撤去し、文言を「PDF資料を動画ファイルに変換」に統一。
 - `index.css`: `.idle-title-glass` を削除し、白文字＋立体感用の `.idle-title-3d`（text-shadow）を追加。
 - 検証: `npm test` PASS
+
+
+### 追記（編集画面: ガラス寄せ）
+- `App.tsx`: 編集画面（AppStatus.EDITING）でも背景に `screen-idle`（写真背景）を適用し、ヘッダーの docs も `?theme=idle` を付けて統一。
+- `components/SlideEditor.tsx`: 外枠と主要パネルに `editor-glass` / `editor-glass-pane` を付与し、背景を透過寄せに調整。
+- `index.css`: `editor-glass` / `editor-glass-pane` に `backdrop-filter`（blur + saturate）と上側ハイライトを追加。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: 背景画像も見えるように）
+- `components/SlideEditor.tsx`: 主要パネルの背景を `bg-transparent` にして、`editor-glass` / `editor-glass-pane` のガラス膜が効くように調整。
+- `index.css`: `editor-glass` / `editor-glass-pane` に暗め透過の背景色（画像が透ける）を付与。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: 4カード分割）
+- `components/SlideEditor.tsx`: 編集画面を4カードに分割（上: ボタン＋一括設定＋追加 / グリッド / タイムライン / サイドバー）。
+  - サイドバーを閉じた時、デスクトップで枠線だけ残らないよう `lg:border-0` / `lg:shadow-none` を追加。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: 4カードもIDLE同等のガラス構造へ）
+- `index.css`:
+  - `.screen-idle .editor-glass` を、IDLEの `glass-*` と同じ構造（`::before`=内側の光 / `::after`=blur+distortion）に変更。
+  - Timeline用に `overflow-visible` のときは `::after` の `inset` を 0 にしてはみ出しを防止。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: 中身のベタ塗りを減らしてガラスが見えるように）
+- `components/TimelineEditor.tsx`:
+  - タイムライン全体/スクロール部/主要トラックの `bg-slate-*` を `bg-transparent` に寄せ、ヘアライン（`border-white/10`）で区切る。
+- `components/ProjectSettings.tsx`:
+  - ルート/ヘッダーの `bg-slate-900` を `bg-transparent` に変更。
+- `components/SlideInspector.tsx`:
+  - ルート/ヘッダー/スクロール部の `bg-slate-900` を `bg-transparent` に変更。
+  - タブバーを `bg-black/15 + border-white/10` にして、ガラス上でも境界が分かるように。
+- `components/slideEditor/Toolbar.tsx`:
+  - ツールバー全体の `bg-slate-900` を `bg-transparent` に変更。
+- `components/slideEditor/SlideGrid.tsx`:
+  - スライドカード本体と下部バーの `bg-slate-*` を `bg-transparent` に変更。
+- 検証: `npm test` PASS

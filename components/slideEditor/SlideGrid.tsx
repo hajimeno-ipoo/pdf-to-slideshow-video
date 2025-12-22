@@ -134,7 +134,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
             onClick={() => onSelect(slide.id)}
             onDragOver={(e) => onDragOver(e, index)} 
             onDrop={(e) => onDrop(e, index)} 
-            className={`relative group rounded-lg overflow-hidden border transition-all flex flex-col cursor-pointer ${isSelected ? 'ring-2 ring-emerald-500 border-emerald-500' : (draggedItemIndex === index ? 'opacity-50 border-emerald-500' : 'border-slate-700 hover:border-slate-500 bg-slate-800')}`}
+	            className={`relative group rounded-lg overflow-hidden border transition-all flex flex-col cursor-pointer ${isSelected ? 'ring-2 ring-emerald-500 border-emerald-500' : (draggedItemIndex === index ? 'opacity-50 border-emerald-500' : 'border-slate-700 hover:border-slate-500 bg-transparent')}`}
         >
           <div className="absolute top-1 left-1 z-20 flex gap-1 pointer-events-none">
              <div className="bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-[8px] text-white font-mono">{index + 1}</div>
@@ -173,7 +173,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
 	            </div>
 	          </div>
           
-          <div className="h-10 bg-slate-900 border-t border-slate-800 flex items-center justify-between px-2 gap-2" onClick={(e) => e.stopPropagation()}>
+	          <div className="h-10 bg-transparent border-t border-white/10 flex items-center justify-between px-2 gap-2" onClick={(e) => e.stopPropagation()}>
               {/* Transition Selector */}
               <div className="relative group/select hover:opacity-100 transition-opacity max-w-[40%] sm:max-w-[50%]">
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-medium transition-colors ${getTransitionColor(slide.transitionType)}`}>

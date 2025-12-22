@@ -853,12 +853,13 @@ const App: React.FC = () => {
     }
   };
 
-	  const isEditing = state.status === AppStatus.EDITING;
-	  const isIdle = state.status === AppStatus.IDLE;
-	  const aiEnabled = apiStatus === 'connected';
+		  const isEditing = state.status === AppStatus.EDITING;
+		  const isIdle = state.status === AppStatus.IDLE;
+		  const useGlassTheme = isIdle || isEditing;
+		  const aiEnabled = apiStatus === 'connected';
 
   return (
-    <div className={`h-screen flex flex-col overflow-hidden ${isIdle ? 'screen-idle' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30'}`}>
+	    <div className={`h-screen flex flex-col overflow-hidden ${isIdle ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
       
       {/* Mobile Landscape Warning: 500px以下の高さかつ横画面の場合に表示 */}
       <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center p-8 text-center hidden [@media(max-height:500px)_and_(orientation:landscape)]:flex h-screen w-screen touch-none">
@@ -872,17 +873,17 @@ const App: React.FC = () => {
           </div>
       </div>
 
-	      <Header 
-	        apiStatus={apiStatus} 
-	        tokenUsage={totalUsage} 
-	        lifetimeUsage={lifetimeUsage}
-	        requestStats={reqStats}
-	        saveStatus={saveStatus}
-	        lastSavedTime={lastSavedTime}
-	        hasApiKey={!!apiKeyValue}
-	        idleTheme={isIdle}
-	        onOpenApiKey={() => setApiKeyModalOpen(true)}
-	      />
+		      <Header 
+		        apiStatus={apiStatus} 
+		        tokenUsage={totalUsage} 
+		        lifetimeUsage={lifetimeUsage}
+		        requestStats={reqStats}
+		        saveStatus={saveStatus}
+		        lastSavedTime={lastSavedTime}
+		        hasApiKey={!!apiKeyValue}
+		        idleTheme={useGlassTheme}
+		        onOpenApiKey={() => setApiKeyModalOpen(true)}
+		      />
 
 	      <ApiKeyModal
 	        open={apiKeyModalOpen}

@@ -533,9 +533,9 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
   const popupLeft = Math.max(80, Math.min(editorWidth - 80, playheadX));
 
   return (
-    <div className="w-full bg-slate-950 border-t border-slate-800 select-none flex flex-col relative group/timeline h-full">
+    <div className="w-full bg-transparent select-none flex flex-col relative group/timeline h-full">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-1.5 border-b border-slate-800 bg-slate-900/50 flex-none h-10">
+      <div className="flex items-center justify-between px-4 py-1.5 border-b border-white/10 bg-transparent flex-none h-10">
           <div className="flex items-center gap-2">
               <span className="text-[12px] font-bold text-slate-300 uppercase tracking-wider">Timeline</span>
               <span className="text-[12px] text-slate-400 ml-2">Total: <span className="text-white">{totalDuration.toFixed(1)}s</span></span>
@@ -566,7 +566,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
       {/* Timeline Scroll Area */}
       <div 
         ref={scrollContainerRef}
-        className="w-full overflow-x-auto overflow-y-hidden scrollbar-hide relative bg-slate-950 cursor-text flex-1"
+        className="w-full overflow-x-auto overflow-y-hidden scrollbar-hide relative bg-transparent cursor-text flex-1"
         onMouseDown={handleTimelineMouseDown}
         onScroll={handleScroll}
       >
@@ -577,7 +577,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
          >
              
              {/* Ruler */}
-             <div className="h-6 w-full border-b border-slate-700 flex items-end text-[11px] text-slate-400 relative bg-slate-900/90 sticky top-0 z-30 pointer-events-none">
+             <div className="h-6 w-full border-b border-white/10 flex items-end text-[11px] text-slate-400 relative bg-transparent sticky top-0 z-30 pointer-events-none">
                  {Array.from({ length: Math.ceil(totalDuration) + 2 }).map((_, i) => (
                      <div key={i} className="absolute bottom-0 border-l border-slate-700 pl-1 h-3 flex items-center" style={{ left: `${i * scale}px` }}>
                          {i % 5 === 0 && <span>{formatTime(i)}</span>}
@@ -605,7 +605,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                  )}
 
                  {/* Slides Track */}
-                 <div className="h-[64px] flex items-center z-10 border-b border-slate-800 relative bg-slate-900/30 flex-shrink-0">
+	                 <div className="h-[64px] flex items-center z-10 border-b border-white/10 relative bg-transparent flex-shrink-0">
                      {displaySlides.map((slide, index) => {
                          const width = slide.duration * scale;
                          const isDragging = draggingSlideIndex === index;
@@ -646,7 +646,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                                          <div className="w-0.5 h-4 rounded-full shadow-sm" style={{ backgroundColor: getTransitionColors(slide.transitionType).stripe }}></div>
                                      </div>
                                  )}
-                                 <div className="h-4 bg-slate-900/50 flex items-center justify-center text-[9px] text-slate-300 truncate px-1 border-t border-slate-800/50 pointer-events-none">{width > 25 ? `${slide.duration}s` : ''}</div>
+                                 <div className="h-4 bg-black/15 flex items-center justify-center text-[9px] text-slate-200 truncate px-1 border-t border-white/10 pointer-events-none">{width > 25 ? `${slide.duration}s` : ''}</div>
                                  <div className="absolute top-0 right-0 bottom-0 w-3 cursor-col-resize flex items-center justify-center hover:bg-emerald-500/30 z-40 opacity-0 group-hover:opacity-100 transition-opacity no-drag" onMouseDown={(e) => handleResizeStart(e, slide.id, slide.duration)}><div className="w-1 h-6 bg-white/50 rounded-full shadow-sm"></div></div>
                                  <div className="absolute top-0.5 left-0.5 bg-black/50 text-[8px] text-white px-1 rounded opacity-60 pointer-events-none">{index + 1}</div>
                              </div>
@@ -655,8 +655,8 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                  </div>
 
                  {/* Narration Track */}
-                 <div className="h-[48px] relative w-full bg-slate-900/50 border-t border-slate-800 flex overflow-hidden flex-shrink-0">
-                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-slate-900/50 px-1 rounded">Slide Audio</div>
+	                 <div className="h-[48px] relative w-full bg-transparent border-t border-white/10 flex overflow-hidden flex-shrink-0">
+	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">Slide Audio</div>
                      {displaySlides.map((slide) => {
                          const slideWidth = slide.duration * scale;
                          const offset = slide.audioOffset || 0;
@@ -678,15 +678,15 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                  </div>
 
                  {/* Global Narration Track */}
-                 <div className="h-[48px] relative w-full bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-slate-900/50 px-1 rounded">Global Audio</div>
+	                 <div className="h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">Global Audio</div>
                      <canvas ref={globalAudioCanvasRef} className="absolute top-0 left-0 h-full" />
                      {!globalAudioFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">全体音声なし</div>}
                  </div>
 
                  {/* BGM Waveform Track */}
-                 <div className="h-[48px] relative w-full bg-slate-900 border-t border-slate-800 flex-shrink-0">
-                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-slate-900/50 px-1 rounded">BGM</div>
+	                 <div className="h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">BGM</div>
                      <canvas ref={canvasRef} className="absolute top-0 left-0 h-full" />
                      {!bgmFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">BGMなし</div>}
                  </div>
