@@ -22,7 +22,7 @@ const ProcessingStep: React.FC<ProcessingStepProps> = ({ currentStatus, progress
     : 0;
 
   return (
-    <div className="w-full max-w-2xl mx-auto mt-8 p-6 bg-slate-800/50 rounded-2xl border border-slate-700 backdrop-blur-sm animate-fade-in">
+    <div className="w-full max-w-2xl mx-auto mt-8 p-6 rounded-3xl border border-black/10 glass-strong idle-sidebar-typography animate-fade-in">
       <div className="flex items-center justify-center gap-3 mb-6">
         {isAnalyzing ? (
            <svg className="animate-spin h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -44,7 +44,7 @@ const ProcessingStep: React.FC<ProcessingStepProps> = ({ currentStatus, progress
           <span>{percentage}%</span>
         </div>
         
-        <div className="w-full bg-slate-700 rounded-full h-2.5 overflow-hidden">
+        <div className="w-full bg-black/10 rounded-full h-2.5 overflow-hidden border border-black/10">
           <div 
             className={`h-2.5 rounded-full transition-all duration-300 ease-out ${isAnalyzing ? 'bg-blue-500' : 'bg-emerald-500'}`}
             style={{ width: `${percentage}%` }}

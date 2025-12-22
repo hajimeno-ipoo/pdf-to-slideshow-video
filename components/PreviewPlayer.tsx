@@ -1168,14 +1168,17 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm">
-      <div className="flex flex-col w-full h-full max-w-5xl mx-auto p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm preview-overlay">
+      <div className="flex flex-col w-full h-full max-w-5xl mx-auto p-4 bg-slate-900/80 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden preview-panel glass-strong idle-sidebar-typography">
           <div className="flex justify-between items-center mb-2">
-              <h3 className="text-white font-bold text-lg flex items-center gap-2">
+              <h3 className="text-slate-200 font-bold text-lg flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${isPlayingState ? 'bg-red-500 animate-pulse' : 'bg-slate-500'}`}></span>
                   プレビュー再生
               </h3>
-              <button onClick={handleClose} className="text-slate-400 hover:text-white p-2">
+              <button
+                onClick={handleClose}
+                className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors"
+              >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -1183,7 +1186,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
           </div>
           
           <div 
-            className="flex-1 flex items-center justify-center bg-slate-900 rounded-lg border border-slate-800 relative overflow-hidden" 
+            className="flex-1 flex items-center justify-center bg-slate-900 rounded-lg border border-slate-800 relative overflow-hidden preview-stage glass" 
             ref={containerRef}
           >
                {isLoading && (
@@ -1270,7 +1273,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
                )}
           </div>
           
-          <div className="mt-4 bg-slate-900 rounded-xl p-4 border border-slate-800 flex items-center gap-4">
+          <div className="mt-4 bg-slate-900 rounded-xl p-4 border border-slate-800 flex items-center gap-4 glass-thin">
               <button 
                 onClick={togglePlay}
                 disabled={isLoading}
@@ -1284,23 +1287,23 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
               </button>
               
               <div className="flex-1">
-	                  <input 
-	                      type="range" 
-	                      min="0" 
-	                      max={totalDuration} 
-	                      step="0.1" 
-	                      value={currentTime}
-	                      onChange={handleSeek}
-	                      onPointerDown={beginSeekScrub}
-	                      onPointerUp={endSeekScrub}
-	                      onPointerCancel={endSeekScrub}
-	                      disabled={isLoading}
-	                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 opacity-50"
-	                  />
-                  <div className="flex justify-between text-xs text-slate-500 mt-1 font-mono">
-                      <span>{Math.floor(currentTime)}s</span>
-                      <span>{Math.floor(totalDuration)}s</span>
-                  </div>
+		                  <input 
+		                      type="range" 
+		                      min="0" 
+		                      max={totalDuration} 
+		                      step="0.1" 
+		                      value={currentTime}
+		                      onChange={handleSeek}
+		                      onPointerDown={beginSeekScrub}
+		                      onPointerUp={endSeekScrub}
+		                      onPointerCancel={endSeekScrub}
+		                      disabled={isLoading}
+		                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 opacity-50 idle-range"
+		                  />
+	                  <div className="flex justify-between text-xs text-slate-500 mt-1 font-mono">
+	                      <span>{Math.floor(currentTime)}s</span>
+	                      <span>{Math.floor(totalDuration)}s</span>
+	                  </div>
               </div>
           </div>
       </div>

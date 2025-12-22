@@ -717,3 +717,19 @@
   color: rgba(255, 255, 255, 0.96) !important;
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
 }
+
+/* Preview Player（全画面プレビュー）（IDLE時だけガラス寄せ） */
+.screen-idle .preview-overlay {
+  /* 暗幕にしない（背景が暗くならないよう、白いスクラム＋blurだけにする） */
+  background: rgba(255, 255, 255, 0.06) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+}
+.screen-idle .preview-panel.border-slate-800,
+.screen-idle .preview-stage.border-slate-800 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+.screen-idle .preview-panel.glass-strong::after {
+  /* 端が“凹んで”見えるのを防ぐ（他モーダルと同じ対策） */
+  inset: -28px;
+}

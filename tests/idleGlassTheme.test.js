@@ -31,8 +31,8 @@ test('idle screen theme: index.html defines glass-distortion filter', () => {
 
 test('idle screen theme: App uses screen-idle and idle-surface', () => {
   const src = readUtf8('App.tsx');
-  assert.ok(src.includes("isIdle ? 'screen-idle'"));
-  assert.ok(src.includes("isIdle ? 'idle-surface' : ''"));
+  assert.ok(src.includes("(isIdle || isProcessing) ? 'screen-idle'"));
+  assert.ok(src.includes("(isIdle || isProcessing) ? 'idle-surface' : ''"));
 });
 
 test('idle screen theme: FileUpload uses glass + blue drag state', () => {

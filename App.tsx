@@ -855,11 +855,12 @@ const App: React.FC = () => {
 
 		  const isEditing = state.status === AppStatus.EDITING;
 		  const isIdle = state.status === AppStatus.IDLE;
-		  const useGlassTheme = isIdle || isEditing;
+		  const isProcessing = state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING;
+		  const useGlassTheme = isIdle || isEditing || isProcessing;
 		  const aiEnabled = apiStatus === 'connected';
 
   return (
-	    <div className={`h-screen flex flex-col overflow-hidden ${isIdle ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
+		    <div className={`h-screen flex flex-col overflow-hidden ${(isIdle || isProcessing) ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
       
       {/* Mobile Landscape Warning: 500px以下の高さかつ横画面の場合に表示 */}
       <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center p-8 text-center hidden [@media(max-height:500px)_and_(orientation:landscape)]:flex h-screen w-screen touch-none">
@@ -1088,7 +1089,7 @@ const App: React.FC = () => {
             </div>
         ) : (
             // Non-Editor Views (Landing, Processing, Result)
-            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${isIdle ? 'idle-surface' : ''}`}>
+	            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${(isIdle || isProcessing) ? 'idle-surface' : ''}`}>
                 {/* Hero Section */}
 	                {state.status === AppStatus.IDLE && (
 	                <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
