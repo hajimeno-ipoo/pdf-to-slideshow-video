@@ -17,6 +17,8 @@ test('idle screen theme: index.css defines scoped glass styles', () => {
   assert.ok(css.includes('.glass-thin'));
   assert.ok(css.includes('.glass-strong'));
   assert.ok(css.includes('.idle-range'));
+  assert.ok(css.includes('.idle-sidebar-typography'));
+  assert.ok(css.includes('--idle-text-primary'));
   assert.ok(css.includes('backdrop-filter'));
   assert.ok(css.includes('-webkit-backdrop-filter'));
   assert.ok(css.includes('glass-distortion'));
@@ -41,4 +43,17 @@ test('idle screen theme: FileUpload uses glass + blue drag state', () => {
   assert.ok(!src.includes('(ベータ版)'));
   assert.ok(!src.includes('Gemini 2.5'));
   assert.ok(src.includes('text-red-500'));
+});
+
+test('idle screen theme: sidebar panels opt-in to idle typography', () => {
+  const projectSettings = readUtf8('components/ProjectSettings.tsx');
+  const inspector = readUtf8('components/SlideInspector.tsx');
+
+  assert.ok(projectSettings.includes('idle-sidebar-typography'));
+  assert.ok(inspector.includes('idle-sidebar-typography'));
+});
+
+test('idle screen theme: editor cards opt-in to idle typography', () => {
+  const slideEditor = readUtf8('components/SlideEditor.tsx');
+  assert.ok(slideEditor.includes('idle-sidebar-typography'));
 });

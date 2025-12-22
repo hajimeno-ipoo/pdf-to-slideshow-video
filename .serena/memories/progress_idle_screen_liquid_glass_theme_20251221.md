@@ -240,3 +240,22 @@
 - `components/cropModal/AudioSettingsPanel.tsx` / `components/cropModal/ImageSettingsPanel.tsx` / `components/cropModal/OverlaySettingsPanel.tsx`:
   - 各rangeに `idle-range` を付与して、インスペクタ周りのスライダー見た目を統一。
 - 検証: `npm test` PASS
+
+
+### 追記（編集画面: サイドパネル文字階級/太さ統一）
+- `index.css`:
+  - `.screen-idle` に `--idle-text-primary/secondary/muted/faint` を追加。
+  - `idle-sidebar-typography` スコープで text-slate 系を階級（primary/secondary/muted/faint）へ寄せ、見出し（h3/h4）と `font-bold` を semibold(600) に統一。
+  - サイドパネル内の input/select/textarea と button（`idle-btn-primary` 以外）の文字色を dark 寄せ。
+- `components/ProjectSettings.tsx`: ルートに `idle-sidebar-typography` を付与。
+- `components/SlideInspector.tsx`: ルートに `idle-sidebar-typography` を付与。
+- `tests/idleGlassTheme.test.js`: `idle-sidebar-typography` と `--idle-text-primary` の存在、コンポーネントへの付与をチェック。
+- 検証: `npm test` PASS
+
+
+### 追記（編集画面: 左3カードにも文字階級/太さ統一を適用）
+- `components/SlideEditor.tsx`:
+  - 左カラムの3カード（上/グリッド/タイムライン）に `idle-sidebar-typography` を付与し、サイドパネルと同じ文字階級＆太さルールで統一。
+- `tests/idleGlassTheme.test.js`:
+  - `components/SlideEditor.tsx` が `idle-sidebar-typography` を含むことをチェック。
+- 検証: `npm test` PASS

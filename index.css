@@ -6,7 +6,12 @@
 .screen-idle {
   background: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png') center / cover no-repeat;
   background-color: #ffffff;
-  color: rgba(15, 23, 42, 0.92);
+  --idle-text-primary: rgba(15, 23, 42, 0.92);
+  --idle-text-secondary: rgba(15, 23, 42, 0.78);
+  --idle-text-muted: rgba(15, 23, 42, 0.62);
+  --idle-text-faint: rgba(15, 23, 42, 0.5);
+
+  color: var(--idle-text-primary);
 }
 
 /* 既存の dark palette override（index.html内）に負けないよう、IDLE範囲だけ文字色を戻す */
@@ -34,6 +39,66 @@
     0 1px 0 rgba(0, 0, 0, 0.22),
     0 8px 22px rgba(0, 0, 0, 0.38),
     0 20px 60px rgba(0, 0, 0, 0.24);
+}
+
+/* IDLE: サイドパネル（ProjectSettings / SlideInspector）文字の“階級”と太さを統一 */
+.screen-idle .idle-sidebar-typography {
+  color: var(--idle-text-secondary);
+  font-weight: 500;
+  text-rendering: optimizeLegibility;
+}
+.screen-idle .idle-sidebar-typography.text-slate-200,
+.screen-idle .idle-sidebar-typography .text-slate-200 {
+  color: var(--idle-text-primary) !important;
+}
+.screen-idle .idle-sidebar-typography.text-slate-300,
+.screen-idle .idle-sidebar-typography .text-slate-300 {
+  color: var(--idle-text-secondary) !important;
+}
+.screen-idle .idle-sidebar-typography.text-slate-400,
+.screen-idle .idle-sidebar-typography .text-slate-400 {
+  color: var(--idle-text-muted) !important;
+}
+.screen-idle .idle-sidebar-typography.text-slate-500,
+.screen-idle .idle-sidebar-typography .text-slate-500,
+.screen-idle .idle-sidebar-typography.text-slate-600,
+.screen-idle .idle-sidebar-typography .text-slate-600 {
+  color: var(--idle-text-faint) !important;
+}
+
+.screen-idle .idle-sidebar-typography h3,
+.screen-idle .idle-sidebar-typography h4 {
+  font-weight: 600 !important;
+  color: var(--idle-text-primary) !important;
+}
+.screen-idle .idle-sidebar-typography .font-bold {
+  font-weight: 600 !important;
+}
+.screen-idle .idle-sidebar-typography .font-medium {
+  font-weight: 500 !important;
+}
+
+/* “白文字”のうち、背景色を持たないラベル系だけは dark へ（色付きバッジ等は除外） */
+.screen-idle .idle-sidebar-typography span.text-white:not([class*='bg-']),
+.screen-idle .idle-sidebar-typography p.text-white:not([class*='bg-']) {
+  color: var(--idle-text-primary) !important;
+}
+
+/* サイドパネルのフォーム要素はガラス上でも読めるように dark へ */
+.screen-idle .idle-sidebar-typography input:not([type='range']):not([type='checkbox']),
+.screen-idle .idle-sidebar-typography select,
+.screen-idle .idle-sidebar-typography textarea {
+  color: var(--idle-text-primary) !important;
+}
+.screen-idle .idle-sidebar-typography input::placeholder,
+.screen-idle .idle-sidebar-typography textarea::placeholder {
+  color: var(--idle-text-muted) !important;
+}
+.screen-idle .idle-sidebar-typography button.text-white:not(.idle-btn-primary) {
+  color: var(--idle-text-primary) !important;
+}
+.screen-idle .idle-sidebar-typography button[class*='hover:text-white']:hover {
+  color: var(--idle-text-primary) !important;
 }
 
 /* EDITOR（スライド編集）: IDLEと同じ“ガラス素材”構造で当てる（レイアウトは触らない） */

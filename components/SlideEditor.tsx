@@ -219,7 +219,7 @@ const SlideEditorLayout: React.FC<{
 	        {/* Left Column: 3 cards (Top controls / Grid / Timeline) */}
 	        <div className="flex-1 flex flex-col min-w-0 h-full gap-3">
 	          {/* Card 1: Buttons + Global settings + Add slide */}
-	          <div className="editor-glass editor-glass--mid rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-none">
+	          <div className="editor-glass editor-glass--mid rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-none idle-sidebar-typography">
 	            <div className="editor-glass-pane editor-glass-pane--strong flex-none flex justify-between items-center p-3 border-b border-slate-800 bg-transparent overflow-x-auto gap-4 scrollbar-hide">
 	              <div className="flex items-center gap-2 flex-shrink-0">
 	                <input type="file" ref={projectInputRef} accept=".json" className="hidden" onChange={handleImportProject} />
@@ -277,14 +277,14 @@ const SlideEditorLayout: React.FC<{
 	          </div>
 
 	          {/* Card 2: Slide grid */}
-	          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-1 min-h-0">
+	          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-1 min-h-0 idle-sidebar-typography">
 	            <div className="flex-1 overflow-y-auto custom-scrollbar h-full">
 	              <SlideGrid onSelect={handleSlideSelect} selectedId={selectedSlideId} />
 	            </div>
 	          </div>
 
 	          {/* Card 3: Timeline */}
-	          <div className="editor-glass editor-glass--strong rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none h-[300px] relative">
+	          <div className="editor-glass editor-glass--strong rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none h-[300px] relative idle-sidebar-typography">
 	            <TimelineEditor 
 	              slides={slides} 
 	              onUpdateSlides={(updatedSlides) => updateSlides(updatedSlides, true)}

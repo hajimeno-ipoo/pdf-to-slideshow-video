@@ -62,7 +62,7 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-transparent text-slate-300">
+    <div className="flex flex-col h-full bg-transparent text-slate-300 idle-sidebar-typography">
        <div className="p-4 border-b border-white/10 bg-transparent sticky top-0 z-10 flex items-center gap-2">
            {onClose && (
                <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-sm font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">

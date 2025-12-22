@@ -928,7 +928,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   };
 
   return (
-    <div className="flex flex-col h-full bg-transparent border-l border-white/10">
+    <div className="flex flex-col h-full bg-transparent border-l border-white/10 idle-sidebar-typography">
       {/* 1. Header & Tabs */}
       <div className="flex-none p-3 border-b border-white/10 bg-transparent z-10 flex flex-col gap-3">
           <div className="flex justify-between items-center">

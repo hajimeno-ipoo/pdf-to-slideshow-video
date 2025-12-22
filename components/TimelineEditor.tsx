@@ -654,7 +654,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
 
                  {/* Narration Track */}
 	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex overflow-hidden flex-shrink-0">
-	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">Slide Audio</div>
+	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Slide Audio</div>
                      {displaySlides.map((slide) => {
                          const slideWidth = slide.duration * scale;
                          const offset = slide.audioOffset || 0;
@@ -677,14 +677,14 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
 
                  {/* Global Narration Track */}
 	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
-	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">Global Audio</div>
+	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Global Audio</div>
                      <canvas ref={globalAudioCanvasRef} className="absolute top-0 left-0 h-full" />
                      {!globalAudioFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">全体音声なし</div>}
                  </div>
 
                  {/* BGM Waveform Track */}
 	                 <div className="editor-glass-pane editor-glass-pane--strong h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
-	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none bg-black/15 px-1 rounded">BGM</div>
+	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">BGM</div>
                      <canvas ref={canvasRef} className="absolute top-0 left-0 h-full" />
                      {!bgmFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">BGMなし</div>}
                  </div>
