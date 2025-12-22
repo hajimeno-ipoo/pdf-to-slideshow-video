@@ -259,3 +259,13 @@
 - `tests/idleGlassTheme.test.js`:
   - `components/SlideEditor.tsx` が `idle-sidebar-typography` を含むことをチェック。
 - 検証: `npm test` PASS
+
+
+### 追記（白ガラスを共通変数化してIDLE/編集/ヘッダーの白さを統一）
+- `index.css`:
+  - `.screen-idle` に白ガラス共通変数を追加（`--idle-glass-bg(-thin/-strong)`、`--idle-glass-blur(-thin/-strong)`、`--idle-glass-sat`、`--idle-glass-shine`）。
+  - `glass-thin/glass/glass-strong` の `::before/::after` を共通変数参照に変更。
+  - `editor-glass`（thin/mid/strong）と `editor-glass-pane`（thin/mid/strong）も同じ共通変数に寄せ、IDLEカードと白さを揃えた。
+  - 編集内の `bg-slate-*` 上書き（ガラスを隠すベタ塗り）も白系の共通変数へ置き換え。
+  - `.screen-idle header.bg-slate-950` の背景も共通変数（`--idle-glass-bg`）参照に変更。
+- 検証: `npm test` PASS

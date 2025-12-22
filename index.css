@@ -10,6 +10,16 @@
   --idle-text-secondary: rgba(15, 23, 42, 0.78);
   --idle-text-muted: rgba(15, 23, 42, 0.62);
   --idle-text-faint: rgba(15, 23, 42, 0.5);
+  /* 共通ガラス（白系）: IDLE/編集で同じ値を使う */
+  --idle-glass-sat: 180%;
+  --idle-glass-bg-thin: rgba(255, 255, 255, 0.1);
+  --idle-glass-bg: rgba(255, 255, 255, 0.14);
+  --idle-glass-bg-strong: rgba(255, 255, 255, 0.18);
+  --idle-glass-blur-thin: 6px;
+  --idle-glass-blur: 8px;
+  --idle-glass-blur-strong: 10px;
+  --idle-glass-shine: rgba(255, 255, 255, 0.6);
+  --idle-glass-inner-glow: rgba(255, 255, 255, 1);
 
   color: var(--idle-text-primary);
 }
@@ -104,10 +114,9 @@
 /* EDITOR（スライド編集）: IDLEと同じ“ガラス素材”構造で当てる（レイアウトは触らない） */
 .screen-idle .editor-glass {
   /* 3段階：thin / mid / strong（中身が埋もれないように“濃さ”を変える） */
-  --editor-glass-bg: rgba(15, 23, 42, 0.14);
-  --editor-glass-blur: 10px;
-  --editor-glass-sat: 180%;
-  --editor-glass-shine: rgba(255, 255, 255, 0.22);
+  --editor-glass-bg: var(--idle-glass-bg);
+  --editor-glass-blur: var(--idle-glass-blur);
+  --editor-glass-sat: var(--idle-glass-sat);
 
   position: relative;
   isolation: isolate;
@@ -116,19 +125,16 @@
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
 }
 .screen-idle .editor-glass.editor-glass--thin {
-  --editor-glass-bg: rgba(15, 23, 42, 0.1);
-  --editor-glass-blur: 8px;
-  --editor-glass-shine: rgba(255, 255, 255, 0.18);
+  --editor-glass-bg: var(--idle-glass-bg-thin);
+  --editor-glass-blur: var(--idle-glass-blur-thin);
 }
 .screen-idle .editor-glass.editor-glass--mid {
-  --editor-glass-bg: rgba(15, 23, 42, 0.14);
-  --editor-glass-blur: 10px;
-  --editor-glass-shine: rgba(255, 255, 255, 0.22);
+  --editor-glass-bg: var(--idle-glass-bg);
+  --editor-glass-blur: var(--idle-glass-blur);
 }
 .screen-idle .editor-glass.editor-glass--strong {
-  --editor-glass-bg: rgba(15, 23, 42, 0.2);
-  --editor-glass-blur: 12px;
-  --editor-glass-shine: rgba(255, 255, 255, 0.26);
+  --editor-glass-bg: var(--idle-glass-bg-strong);
+  --editor-glass-blur: var(--idle-glass-blur-strong);
 }
 .screen-idle .editor-glass:focus {
   outline: none;
@@ -140,8 +146,8 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(180deg, var(--editor-glass-shine), rgba(255, 255, 255, 0) 55%);
-  box-shadow: inset 0 0 15px -5px rgba(255, 255, 255, 0.7);
+  background: linear-gradient(180deg, var(--idle-glass-shine), rgba(255, 255, 255, 0) 55%);
+  box-shadow: inset 0 0 15px -5px var(--idle-glass-inner-glow);
 }
 .screen-idle .editor-glass::after {
   content: '';
@@ -171,22 +177,22 @@
    - ここも3段階っぽくして、全部が同じ明るさにならないようにする */
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-900,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-900\/30 {
-  background: rgba(15, 23, 42, 0.16) !important;
+  background: var(--idle-glass-bg-strong) !important;
 }
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800\/30,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800\/50,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-800\/60,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-700\/60 {
-  background: rgba(15, 23, 42, 0.12) !important;
+  background: var(--idle-glass-bg) !important;
 }
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-700,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-700\/50,
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button).bg-slate-600 {
-  background: rgba(15, 23, 42, 0.08) !important;
+  background: var(--idle-glass-bg-thin) !important;
 }
 .screen-idle .editor-glass :not(input):not(select):not(textarea):not(canvas):not(button)[class*='hover:bg-slate-']:hover {
-  background: rgba(15, 23, 42, 0.16) !important;
+  background: var(--idle-glass-bg-strong) !important;
 }
 
 /* 区切り線っぽい “1px線” は少しだけ濃くして見えるように */
@@ -211,24 +217,24 @@
 
 /* EDITOR内の“中の面”用ガラス（3段階） */
 .screen-idle .editor-glass .editor-glass-pane {
-  --editor-pane-bg: rgba(15, 23, 42, 0.1);
-  --editor-pane-blur: 8px;
+  --editor-pane-bg: var(--idle-glass-bg-thin);
+  --editor-pane-blur: var(--idle-glass-blur-thin);
   background: var(--editor-pane-bg) !important;
-  -webkit-backdrop-filter: blur(var(--editor-pane-blur)) saturate(160%);
-  backdrop-filter: blur(var(--editor-pane-blur)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--editor-pane-blur)) saturate(var(--idle-glass-sat));
+  backdrop-filter: blur(var(--editor-pane-blur)) saturate(var(--idle-glass-sat));
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
 }
 .screen-idle .editor-glass .editor-glass-pane.editor-glass-pane--thin {
-  --editor-pane-bg: rgba(15, 23, 42, 0.08);
-  --editor-pane-blur: 6px;
+  --editor-pane-bg: var(--idle-glass-bg-thin);
+  --editor-pane-blur: var(--idle-glass-blur-thin);
 }
 .screen-idle .editor-glass .editor-glass-pane.editor-glass-pane--mid {
-  --editor-pane-bg: rgba(15, 23, 42, 0.1);
-  --editor-pane-blur: 8px;
+  --editor-pane-bg: var(--idle-glass-bg);
+  --editor-pane-blur: var(--idle-glass-blur);
 }
 .screen-idle .editor-glass .editor-glass-pane.editor-glass-pane--strong {
-  --editor-pane-bg: rgba(15, 23, 42, 0.16);
-  --editor-pane-blur: 10px;
+  --editor-pane-bg: var(--idle-glass-bg-strong);
+  --editor-pane-blur: var(--idle-glass-blur-strong);
 }
 
 /* Appleっぽい range（スライダー）: つまみ/トラックを統一（IDLEだけ） */
@@ -349,8 +355,8 @@
   border-radius: inherit;
   pointer-events: none;
   z-index: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 55%);
-  box-shadow: inset 0 0 15px -5px rgba(255, 255, 255, 1);
+  background: linear-gradient(180deg, var(--idle-glass-shine), rgba(255, 255, 255, 0) 55%);
+  box-shadow: inset 0 0 15px -5px var(--idle-glass-inner-glow);
 }
 
 /* after：背景をぼかして、ちょい“ゆがみ”を足す（ガラス感の要） */
@@ -369,19 +375,19 @@
 
 /* 厚み（透明度/ぼかし）は3段階で調整 */
 .screen-idle .glass-thin::after {
-  background: rgba(255, 255, 255, 0.1);
-  -webkit-backdrop-filter: blur(6px) saturate(180%);
-  backdrop-filter: blur(6px) saturate(180%);
+  background: var(--idle-glass-bg-thin);
+  -webkit-backdrop-filter: blur(var(--idle-glass-blur-thin)) saturate(var(--idle-glass-sat));
+  backdrop-filter: blur(var(--idle-glass-blur-thin)) saturate(var(--idle-glass-sat));
 }
 .screen-idle .glass::after {
-  background: rgba(255, 255, 255, 0.14);
-  -webkit-backdrop-filter: blur(8px) saturate(180%);
-  backdrop-filter: blur(8px) saturate(180%);
+  background: var(--idle-glass-bg);
+  -webkit-backdrop-filter: blur(var(--idle-glass-blur)) saturate(var(--idle-glass-sat));
+  backdrop-filter: blur(var(--idle-glass-blur)) saturate(var(--idle-glass-sat));
 }
 .screen-idle .glass-strong::after {
-  background: rgba(255, 255, 255, 0.18);
-  -webkit-backdrop-filter: blur(10px) saturate(180%);
-  backdrop-filter: blur(10px) saturate(180%);
+  background: var(--idle-glass-bg-strong);
+  -webkit-backdrop-filter: blur(var(--idle-glass-blur-strong)) saturate(var(--idle-glass-sat));
+  backdrop-filter: blur(var(--idle-glass-blur-strong)) saturate(var(--idle-glass-sat));
 }
 
 /* 中身はガラスの上に出す */
@@ -457,7 +463,7 @@
 
 /* Header (IDLEだけライトガラスに寄せる) */
 .screen-idle header.bg-slate-950 {
-  background: rgba(255, 255, 255, 0.14) !important;
+  background: var(--idle-glass-bg) !important;
   -webkit-backdrop-filter: blur(22px) saturate(160%);
   backdrop-filter: blur(22px) saturate(160%);
 }
