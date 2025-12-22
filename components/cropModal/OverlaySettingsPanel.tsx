@@ -118,7 +118,7 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                <button onClick={onDeleteOverlay} className="px-3 py-1 bg-red-900/20 hover:bg-red-900/40 text-red-400 border border-red-900/50 rounded text-xs transition-colors">削除</button>
           </div>
           {onReorderOverlay && (
-              <div className="flex items-center justify-between gap-2 bg-slate-800/40 border border-slate-700/50 rounded-lg p-2">
+              <div className="flex items-center justify-between gap-2 bg-slate-800/30 border border-slate-700/50 rounded-lg p-2">
                   <span className="text-[10px] text-slate-400 font-bold tracking-wider">重なり順</span>
                   <div className="flex items-center gap-1">
                       <button onClick={() => onReorderOverlay('back')} disabled={!canMoveBackward} className="px-2 py-1 text-[10px] rounded bg-slate-800 border border-slate-700 text-slate-200 disabled:opacity-40">最背面</button>
