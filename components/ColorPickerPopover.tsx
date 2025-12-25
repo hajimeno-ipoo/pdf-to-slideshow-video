@@ -183,11 +183,11 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
   return (
     <div
       ref={popoverRef}
-      className="rounded-xl bg-slate-900 border border-slate-800 shadow-2xl w-[320px] p-3 space-y-3 fixed"
+      className="rounded-2xl bg-white/20 border border-white/25 shadow-2xl w-[320px] p-3 space-y-3 fixed backdrop-blur-xl backdrop-saturate-150 text-slate-900"
       style={{ left: pos.x, top: pos.y }}
     >
         <div
-          className="cp-header flex items-center justify-between text-sm font-bold text-slate-100 select-none cursor-move"
+          className="cp-header flex items-center justify-between text-sm font-bold text-slate-900 select-none cursor-move"
           onMouseDown={startDrag}
         >
           <div className="flex items-center gap-2">
@@ -195,7 +195,7 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
             {supportEyeDropper && (
               <button
                 onClick={handleEyeDrop}
-                className="p-2 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200"
+                className="p-2 rounded bg-white/20 hover:bg-white/30 border border-white/25 text-slate-800"
                 title="スポイト"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
@@ -205,7 +205,7 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
             )}
           </div>
           {onClose && (
-            <button onClick={onClose} className="text-slate-400 hover:text-white">✕</button>
+            <button onClick={onClose} className="text-slate-500 hover:text-slate-900">✕</button>
           )}
         </div>
 
@@ -250,12 +250,12 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
         <Slider label="L" value={l} max={100} onChange={setL} gradient={`linear-gradient(90deg, black, hsl(${h},${s}%,50%), white)`} />
       </div>
 
-      <div className="flex gap-1 text-xs font-semibold text-slate-200">
+      <div className="flex gap-1 text-xs font-semibold text-slate-700">
         {(['hex', 'hsl', 'rgb'] as Mode[]).map(m => (
           <button
             key={m}
             onClick={() => setMode(m)}
-            className={`flex-1 py-1 rounded ${mode === m ? 'bg-slate-700 text-white' : 'bg-slate-800 text-slate-400 hover:text-white'}`}
+            className={`flex-1 py-1 rounded ${mode === m ? 'bg-white/75 text-slate-900 shadow-sm' : 'bg-white/20 text-slate-600 hover:text-slate-900 hover:bg-white/30'}`}
           >
             {m.toUpperCase()}
           </button>
@@ -264,9 +264,9 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
 
       {mode === 'hex' && (
         <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-full border border-slate-700 shadow-inner" style={{ backgroundColor: hexInput }} />
+          <div className="w-10 h-10 rounded-full border border-black/10 shadow-inner" style={{ backgroundColor: hexInput }} />
           <input
-            className="flex-1 bg-slate-800 border border-slate-700 rounded px-2 py-2 text-slate-100 uppercase"
+            className="flex-1 bg-white/20 border border-white/25 rounded px-2 py-2 text-slate-900 uppercase"
             value={hexInput.replace('#', '').toUpperCase()}
             onChange={(e) => handleHexChange(e.target.value)}
             maxLength={6}
@@ -275,7 +275,7 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
       )}
 
       {mode === 'hsl' && (
-        <div className="grid grid-cols-3 gap-2 text-slate-100 text-xs">
+        <div className="grid grid-cols-3 gap-2 text-slate-900 text-xs">
           <NumberInput label="H" value={h} min={0} max={360} onChange={(v) => setH(clamp(v, 0, 360))} />
           <NumberInput label="S" value={s} min={0} max={100} onChange={(v) => setS(clamp(v, 0, 100))} />
           <NumberInput label="L" value={l} min={0} max={100} onChange={(v) => setL(clamp(v, 0, 100))} />
@@ -285,7 +285,7 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
       {mode === 'rgb' && (() => {
         const { r, g, b } = hslToRgb(h, s, l);
         return (
-          <div className="grid grid-cols-3 gap-2 text-slate-100 text-xs">
+          <div className="grid grid-cols-3 gap-2 text-slate-900 text-xs">
             <NumberInput label="R" value={r} min={0} max={255} onChange={(v) => handleRgbChange(clamp(v, 0, 255), g, b)} />
             <NumberInput label="G" value={g} min={0} max={255} onChange={(v) => handleRgbChange(r, clamp(v, 0, 255), b)} />
             <NumberInput label="B" value={b} min={0} max={255} onChange={(v) => handleRgbChange(r, g, clamp(v, 0, 255))} />
@@ -298,7 +298,7 @@ const ColorPickerPopover: React.FC<Props> = ({ value, onChange, onClose }) => {
 
 const Slider = ({ label, value, max, onChange, gradient }: { label: string; value: number; max: number; onChange: (v: number) => void; gradient: string; }) => (
       <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-300 w-6 text-right">{label}</span>
+        <span className="text-xs text-slate-600 w-6 text-right">{label}</span>
         <div className="flex-1 h-3 rounded-full relative" style={{ background: gradient }}>
           <input
             type="range"
@@ -312,13 +312,13 @@ const Slider = ({ label, value, max, onChange, gradient }: { label: string; valu
           />
           <div className="absolute top-1/2 w-3 h-3 rounded-full bg-white shadow border border-slate-300" style={{ left: `${(value / max) * 100}%`, transform: 'translate(-50%, -50%)', pointerEvents: 'none' }} />
     </div>
-    <span className="text-xs text-slate-300 w-10 text-right">{Math.round(value)}</span>
+    <span className="text-xs text-slate-600 w-10 text-right">{Math.round(value)}</span>
   </div>
 );
 
 const NumberInput = ({ label, value, min, max, onChange }: { label: string; value: number; min: number; max: number; onChange: (v: number) => void; }) => (
-  <label className="flex flex-col gap-1 bg-slate-800 border border-slate-700 rounded px-2 py-1">
-    <span className="text-[10px] text-slate-400">{label}</span>
+  <label className="flex flex-col gap-1 bg-white/20 border border-white/25 rounded px-2 py-1">
+    <span className="text-[10px] text-slate-600">{label}</span>
     <input
       type="number"
       value={Number(value.toFixed(1))}
@@ -326,7 +326,7 @@ const NumberInput = ({ label, value, min, max, onChange }: { label: string; valu
       max={max}
       step={0.1}
       onChange={(e) => onChange(parseFloat(e.target.value))}
-      className="bg-transparent text-slate-100 text-sm focus:outline-none"
+      className="bg-transparent text-slate-900 text-sm focus:outline-none"
     />
   </label>
 );
