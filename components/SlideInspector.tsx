@@ -22,6 +22,8 @@ interface SlideInspectorProps {
 
 type ResizeHandleType = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
 type ToolType = 'move' | 'rotate' | ResizeHandleType;
+type CropDragMode = 'move' | 'nw' | 'ne' | 'sw' | 'se' | 'n' | 's' | 'e' | 'w';
+type CropAspectPreset = 'slide' | '16:9' | '4:3' | '1:1' | '9:16' | 'free';
 
 // --- Helper Functions ---
 const getCursorStyle = (handle: ResizeHandleType, rotation: number = 0): string => {
@@ -75,17 +77,19 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   // Selection state
   const [selectedOverlayId, setSelectedOverlayId] = useState<string | null>(null);
-  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null); // overlay id or '__SLIDE__'
+	  const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null); // overlay id or '__SLIDE__'
   const [draggingLayerOverlayId, setDraggingLayerOverlayId] = useState<string | null>(null);
   const [dragOverLayerOverlayId, setDragOverLayerOverlayId] = useState<string | null>(null);
-  const [isDraggingCrop, setIsDraggingCrop] = useState(false);
-  const [dragModeCrop, setDragModeCrop] = useState<'move' | 'nw' | 'ne' | 'sw' | 'se' | null>(null);
-  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
-  const [startCrop, setStartCrop] = useState(slide.crop);
-  const [isDraggingOverlay, setIsDraggingOverlay] = useState(false);
-  const [activeOverlayTool, setActiveOverlayTool] = useState<ToolType | null>(null);
-  const [startOverlayState, setStartOverlayState] = useState<{ x: number, y: number, w: number, h: number, rot: number, fontSize: number }>({ x: 0, y: 0, w: 0, h: 0, rot: 0, fontSize: 0 });
-  const [startMouseAngle, setStartMouseAngle] = useState(0);
+	  const [isDraggingCrop, setIsDraggingCrop] = useState(false);
+	  const [dragModeCrop, setDragModeCrop] = useState<CropDragMode | null>(null);
+	  const [startPos, setStartPos] = useState({ x: 0, y: 0 });
+	  const [startCrop, setStartCrop] = useState(slide.crop);
+	  const [cropGuidesEnabled, setCropGuidesEnabled] = useState(true);
+	  const [cropAspectPreset, setCropAspectPreset] = useState<CropAspectPreset>('slide');
+	  const [isDraggingOverlay, setIsDraggingOverlay] = useState(false);
+	  const [activeOverlayTool, setActiveOverlayTool] = useState<ToolType | null>(null);
+	  const [startOverlayState, setStartOverlayState] = useState<{ x: number, y: number, w: number, h: number, rot: number, fontSize: number }>({ x: 0, y: 0, w: 0, h: 0, rot: 0, fontSize: 0 });
+	  const [startMouseAngle, setStartMouseAngle] = useState(0);
   // Store the screen dimensions at the start of the drag to prevent skewing when moving outside/resizing
   const [startScreenRect, setStartScreenRect] = useState({ x: 0, y: 0, width: 0, height: 0 });
   const [isDraggingSlide, setIsDraggingSlide] = useState(false);
@@ -131,6 +135,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       setImageSize({ width: 0, height: 0 });
       setIsDraggingSlide(false);
       setSlideDragMode(null);
+      setCropAspectPreset('slide');
 
       // Load Overview Image
       const loadOverview = async () => {
@@ -481,32 +486,142 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       setPendingAddType(null); // Reset pending state
   };
 
-  const handleMouseDownCrop = (e: React.MouseEvent, mode: 'move' | 'nw' | 'ne' | 'sw' | 'se') => {
+  const handleMouseDownCrop = (e: React.MouseEvent, mode: CropDragMode) => {
     e.preventDefault(); e.stopPropagation();
     setIsDraggingCrop(true); setDragModeCrop(mode);
     setStartPos({ x: e.clientX, y: e.clientY });
     setStartCrop({ ...crop });
   };
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-      // Crop Dragging (No scale correction needed as transform is 'none')
-      if (activeTab === 'crop' && isDraggingCrop && dragModeCrop && imageRef.current) {
-          const dxScreen = e.clientX - startPos.x;
-          const dyScreen = e.clientY - startPos.y;
-          const scaleX = slide.originalWidth / imageRef.current.width;
-          const scaleY = slide.originalHeight / imageRef.current.height;
-          const dx = dxScreen * scaleX; const dy = dyScreen * scaleY;
-          let newCrop = { ...startCrop };
+	  const handleMouseMove = (e: React.MouseEvent) => {
+	      // Crop Dragging (No scale correction needed as transform is 'none')
+	      if (activeTab === 'crop' && isDraggingCrop && dragModeCrop && imageRef.current) {
+	          const minCropSize = 10;
+	          const dxScreen = e.clientX - startPos.x;
+	          const dyScreen = e.clientY - startPos.y;
+	          const scaleX = slide.originalWidth / imageRef.current.width;
+	          const scaleY = slide.originalHeight / imageRef.current.height;
+	          const dx = dxScreen * scaleX; const dy = dyScreen * scaleY;
+	          const aspectRatio = getCropAspectRatioValue(cropAspectPreset);
+	          const isAspectLockActive = aspectRatio !== null;
+	          let newCrop = { ...startCrop };
 
-          if (dragModeCrop === 'move') { newCrop.x = startCrop.x + dx; newCrop.y = startCrop.y + dy; }
-          else if (dragModeCrop === 'se') { newCrop.width = Math.max(10, startCrop.width + dx); newCrop.height = Math.max(10, startCrop.height + dy); }
-          else if (dragModeCrop === 'sw') { newCrop.x = Math.min(startCrop.x + startCrop.width - 10, startCrop.x + dx); newCrop.width = Math.max(10, startCrop.width - dx); newCrop.height = Math.max(10, startCrop.height + dy); }
-          else if (dragModeCrop === 'ne') { newCrop.y = Math.min(startCrop.y + startCrop.height - 10, startCrop.y + dy); newCrop.width = Math.max(10, startCrop.width + dx); newCrop.height = Math.max(10, startCrop.height - dy); }
-          else if (dragModeCrop === 'nw') { newCrop.x = Math.min(startCrop.x + startCrop.width - 10, startCrop.x + dx); newCrop.y = Math.min(startCrop.y + startCrop.height - 10, startCrop.y + dy); newCrop.width = Math.max(10, startCrop.width - dx); newCrop.height = Math.max(10, startCrop.height - dy); }
+	          if (dragModeCrop === 'move') { newCrop.x = startCrop.x + dx; newCrop.y = startCrop.y + dy; }
+	          else if (dragModeCrop === 'e') { newCrop.width = Math.max(minCropSize, startCrop.width + dx); }
+	          else if (dragModeCrop === 'w') { newCrop.x = Math.min(startCrop.x + startCrop.width - minCropSize, startCrop.x + dx); newCrop.width = Math.max(minCropSize, startCrop.width - dx); }
+	          else if (dragModeCrop === 's') { newCrop.height = Math.max(minCropSize, startCrop.height + dy); }
+	          else if (dragModeCrop === 'n') { newCrop.y = Math.min(startCrop.y + startCrop.height - minCropSize, startCrop.y + dy); newCrop.height = Math.max(minCropSize, startCrop.height - dy); }
+	          else if (dragModeCrop === 'se') { newCrop.width = Math.max(minCropSize, startCrop.width + dx); newCrop.height = Math.max(minCropSize, startCrop.height + dy); }
+	          else if (dragModeCrop === 'sw') { newCrop.x = Math.min(startCrop.x + startCrop.width - minCropSize, startCrop.x + dx); newCrop.width = Math.max(minCropSize, startCrop.width - dx); newCrop.height = Math.max(minCropSize, startCrop.height + dy); }
+	          else if (dragModeCrop === 'ne') { newCrop.y = Math.min(startCrop.y + startCrop.height - minCropSize, startCrop.y + dy); newCrop.width = Math.max(minCropSize, startCrop.width + dx); newCrop.height = Math.max(minCropSize, startCrop.height - dy); }
+	          else if (dragModeCrop === 'nw') { newCrop.x = Math.min(startCrop.x + startCrop.width - minCropSize, startCrop.x + dx); newCrop.y = Math.min(startCrop.y + startCrop.height - minCropSize, startCrop.y + dy); newCrop.width = Math.max(minCropSize, startCrop.width - dx); newCrop.height = Math.max(minCropSize, startCrop.height - dy); }
 
-          if (newCrop.x < 0) newCrop.x = 0; if (newCrop.y < 0) newCrop.y = 0;
-          const maxWidth = slide.originalWidth; const maxHeight = slide.originalHeight;
-          if (newCrop.x + newCrop.width > maxWidth) { if (dragModeCrop === 'move') newCrop.x = maxWidth - newCrop.width; else newCrop.width = maxWidth - newCrop.x; }
+	          if (isAspectLockActive && dragModeCrop !== 'move' && aspectRatio) {
+	              const ratio = aspectRatio;
+	              const maxWidth = slide.originalWidth;
+	              const maxHeight = slide.originalHeight;
+
+	              const getAnchor = () => {
+	                  switch (dragModeCrop) {
+	                      case 'e': return { x: startCrop.x, y: startCrop.y + (startCrop.height / 2) };
+	                      case 'w': return { x: startCrop.x + startCrop.width, y: startCrop.y + (startCrop.height / 2) };
+	                      case 's': return { x: startCrop.x + (startCrop.width / 2), y: startCrop.y };
+	                      case 'n': return { x: startCrop.x + (startCrop.width / 2), y: startCrop.y + startCrop.height };
+	                      case 'se': return { x: startCrop.x, y: startCrop.y };
+	                      case 'sw': return { x: startCrop.x + startCrop.width, y: startCrop.y };
+	                      case 'ne': return { x: startCrop.x, y: startCrop.y + startCrop.height };
+	                      case 'nw': return { x: startCrop.x + startCrop.width, y: startCrop.y + startCrop.height };
+	                  }
+	                  return { x: startCrop.x, y: startCrop.y };
+	              };
+
+	              const anchor = getAnchor();
+
+	              let desiredW = newCrop.width;
+	              let desiredH = newCrop.height;
+	              if (dragModeCrop === 'e' || dragModeCrop === 'w') {
+	                  desiredH = desiredW / ratio;
+	              } else if (dragModeCrop === 'n' || dragModeCrop === 's') {
+	                  desiredW = desiredH * ratio;
+	              } else if (Math.abs(dxScreen) >= Math.abs(dyScreen)) {
+	                  desiredH = desiredW / ratio;
+	              } else {
+	                  desiredW = desiredH * ratio;
+	              }
+
+	              desiredW = Math.max(minCropSize, desiredW);
+	              desiredH = Math.max(minCropSize, desiredW / ratio);
+
+	              let maxWAllowed = maxWidth;
+	              let maxHAllowed = maxHeight;
+	              if (dragModeCrop === 'se') { maxWAllowed = maxWidth - anchor.x; maxHAllowed = maxHeight - anchor.y; }
+	              else if (dragModeCrop === 'sw') { maxWAllowed = anchor.x; maxHAllowed = maxHeight - anchor.y; }
+	              else if (dragModeCrop === 'ne') { maxWAllowed = maxWidth - anchor.x; maxHAllowed = anchor.y; }
+	              else if (dragModeCrop === 'nw') { maxWAllowed = anchor.x; maxHAllowed = anchor.y; }
+	              else if (dragModeCrop === 'e') {
+	                  maxWAllowed = maxWidth - anchor.x;
+	                  maxHAllowed = Math.min(anchor.y, maxHeight - anchor.y) * 2;
+	              } else if (dragModeCrop === 'w') {
+	                  maxWAllowed = anchor.x;
+	                  maxHAllowed = Math.min(anchor.y, maxHeight - anchor.y) * 2;
+	              } else if (dragModeCrop === 's') {
+	                  maxHAllowed = maxHeight - anchor.y;
+	                  maxWAllowed = Math.min(anchor.x, maxWidth - anchor.x) * 2;
+	              } else if (dragModeCrop === 'n') {
+	                  maxHAllowed = anchor.y;
+	                  maxWAllowed = Math.min(anchor.x, maxWidth - anchor.x) * 2;
+	              }
+
+	              const maxWForRatio = Math.max(minCropSize, Math.min(maxWAllowed, maxHAllowed * ratio));
+	              desiredW = Math.min(desiredW, maxWForRatio);
+	              desiredH = desiredW / ratio;
+
+	              if (dragModeCrop === 'e') {
+	                  newCrop.x = anchor.x;
+	                  newCrop.y = anchor.y - (desiredH / 2);
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 'w') {
+	                  newCrop.x = anchor.x - desiredW;
+	                  newCrop.y = anchor.y - (desiredH / 2);
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 's') {
+	                  newCrop.x = anchor.x - (desiredW / 2);
+	                  newCrop.y = anchor.y;
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 'n') {
+	                  newCrop.x = anchor.x - (desiredW / 2);
+	                  newCrop.y = anchor.y - desiredH;
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 'se') {
+	                  newCrop.x = anchor.x;
+	                  newCrop.y = anchor.y;
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 'sw') {
+	                  newCrop.x = anchor.x - desiredW;
+	                  newCrop.y = anchor.y;
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 'ne') {
+	                  newCrop.x = anchor.x;
+	                  newCrop.y = anchor.y - desiredH;
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              } else if (dragModeCrop === 'nw') {
+	                  newCrop.x = anchor.x - desiredW;
+	                  newCrop.y = anchor.y - desiredH;
+	                  newCrop.width = desiredW;
+	                  newCrop.height = desiredH;
+	              }
+	          }
+
+	          if (newCrop.x < 0) newCrop.x = 0; if (newCrop.y < 0) newCrop.y = 0;
+	          const maxWidth = slide.originalWidth; const maxHeight = slide.originalHeight;
+	          if (newCrop.x + newCrop.width > maxWidth) { if (dragModeCrop === 'move') newCrop.x = maxWidth - newCrop.width; else newCrop.width = maxWidth - newCrop.x; }
           if (newCrop.y + newCrop.height > maxHeight) { if (dragModeCrop === 'move') newCrop.y = maxHeight - newCrop.height; else newCrop.height = maxHeight - newCrop.y; }
           setCrop(newCrop);
       }
@@ -806,6 +921,54 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   };
 
   const handleResetCrop = () => { setCrop({ x: 0, y: 0, width: slide.originalWidth, height: slide.originalHeight }); };
+
+  const getSlideNativeAspectRatio = () => {
+      const w = slide.originalWidth || slide.width;
+      const h = slide.originalHeight || slide.height;
+      if (w > 0 && h > 0) return w / h;
+      return 16 / 9;
+  };
+
+  const getCropAspectRatioValue = (preset: CropAspectPreset): number | null => {
+      switch (preset) {
+          case 'free': return null;
+          case 'slide': return getSlideNativeAspectRatio();
+          case '16:9': return 16 / 9;
+          case '4:3': return 4 / 3;
+          case '1:1': return 1;
+          case '9:16': return 9 / 16;
+      }
+  };
+
+  const applyCropAspectRatio = (ratio: number) => {
+      const maxW = slide.originalWidth || slide.width;
+      const maxH = slide.originalHeight || slide.height;
+      if (!(maxW > 0 && maxH > 0)) return;
+      if (!isFinite(ratio) || ratio <= 0) return;
+
+      const slideRatio = maxW / maxH;
+      let w = maxW;
+      let h = maxH;
+      if (slideRatio >= ratio) {
+          h = maxH;
+          w = h * ratio;
+      } else {
+          w = maxW;
+          h = w / ratio;
+      }
+
+      w = Math.min(maxW, Math.max(1, w));
+      h = Math.min(maxH, Math.max(1, h));
+
+      setCrop({ x: (maxW - w) / 2, y: (maxH - h) / 2, width: w, height: h });
+  };
+
+  const handleSelectCropAspectPreset = (preset: CropAspectPreset) => {
+      setCropAspectPreset(preset);
+      const ratio = getCropAspectRatioValue(preset);
+      if (!ratio) return;
+      applyCropAspectRatio(ratio);
+  };
 
   const screenRect = getScreenRect();
   const selectedOverlay = overlays.find(t => t.id === selectedOverlayId);
@@ -1164,19 +1327,30 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                       />
                   </div>
 
-                  {/* Crop Overlay */}
-                  {activeTab === 'crop' && (
-                    <>
-                      <div className="absolute inset-0 bg-black/50 pointer-events-none">
-                         <div className="w-full h-full" style={{ clipPath: `polygon(0% 0%, 0% 100%, ${screenRect.x}px 100%, ${screenRect.x}px ${screenRect.y}px, ${screenRect.x + screenRect.width}px ${screenRect.y}px, ${screenRect.x + screenRect.width}px ${screenRect.y + screenRect.height}px, ${screenRect.x}px ${screenRect.y + screenRect.height}px, ${screenRect.x}px 100%, 100% 100%, 100% 0%)` }} />
-                      </div>
-                      <div className="absolute border border-emerald-400 shadow-[0_0_0_1px_rgba(16,185,129,0.5)] touch-none" style={{ left: screenRect.x, top: screenRect.y, width: screenRect.width, height: screenRect.height, cursor: 'move' }} onMouseDown={(e) => handleMouseDownCrop(e, 'move')}>
-                        <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-20"><div className="border-r border-b border-white"></div><div className="border-r border-b border-white"></div><div className="border-b border-white"></div><div className="border-r border-b border-white"></div><div className="border-r border-b border-white"></div><div className="border-b border-white"></div><div className="border-r border-white"></div><div className="border-r border-white"></div></div>
-                        <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-nw-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'nw')} />
-                        <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-ne-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'ne')} />
-                        <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-sw-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'sw')} />
-                        <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-se-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'se')} />
-                      </div>
+	                  {/* Crop Overlay */}
+	                  {activeTab === 'crop' && (
+	                    <>
+	                      <div className="absolute inset-0 pointer-events-none">
+	                         <div className="w-full h-full bg-black/50" style={{ clipPath: `polygon(0% 0%, 0% 100%, ${screenRect.x}px 100%, ${screenRect.x}px ${screenRect.y}px, ${screenRect.x + screenRect.width}px ${screenRect.y}px, ${screenRect.x + screenRect.width}px ${screenRect.y + screenRect.height}px, ${screenRect.x}px ${screenRect.y + screenRect.height}px, ${screenRect.x}px 100%, 100% 100%, 100% 0%)` }} />
+	                      </div>
+	                      <div className="absolute border border-emerald-400 shadow-[0_0_0_1px_rgba(16,185,129,0.5)] touch-none" style={{ left: screenRect.x, top: screenRect.y, width: screenRect.width, height: screenRect.height, cursor: 'move' }} onMouseDown={(e) => handleMouseDownCrop(e, 'move')}>
+	                        {cropGuidesEnabled && (
+	                          <div
+	                            className={`absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none transition-opacity duration-150 ${isDraggingCrop ? 'opacity-40' : 'opacity-25'}`}
+	                            style={{ filter: 'drop-shadow(0 1px 0 rgba(0,0,0,0.35)) drop-shadow(0 -1px 0 rgba(0,0,0,0.35))' }}
+	                          >
+	                            <div className="border-r border-b border-emerald-400/70"></div><div className="border-r border-b border-emerald-400/70"></div><div className="border-b border-emerald-400/70"></div><div className="border-r border-b border-emerald-400/70"></div><div className="border-r border-b border-emerald-400/70"></div><div className="border-b border-emerald-400/70"></div><div className="border-r border-emerald-400/70"></div><div className="border-r border-emerald-400/70"></div>
+	                          </div>
+	                        )}
+	                        <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-nw-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'nw')} />
+	                        <div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-500 border border-white z-10" style={{ cursor: 'ns-resize' }} onMouseDown={(e) => handleMouseDownCrop(e, 'n')} />
+	                        <div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-ne-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'ne')} />
+	                        <div className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 bg-emerald-500 border border-white z-10" style={{ cursor: 'ew-resize' }} onMouseDown={(e) => handleMouseDownCrop(e, 'e')} />
+	                        <div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-sw-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'sw')} />
+	                        <div className="absolute top-1/2 -translate-y-1/2 -left-1.5 w-3 h-3 bg-emerald-500 border border-white z-10" style={{ cursor: 'ew-resize' }} onMouseDown={(e) => handleMouseDownCrop(e, 'w')} />
+	                        <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-emerald-500 border border-white z-10" style={{ cursor: 'ns-resize' }} onMouseDown={(e) => handleMouseDownCrop(e, 's')} />
+	                        <div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-emerald-500 border border-white cursor-se-resize z-10" onMouseDown={(e) => handleMouseDownCrop(e, 'se')} />
+	                      </div>
                     </>
                   )}
 
@@ -1500,12 +1674,80 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                       </div>
                   </div>
               )}
-              {activeTab === 'crop' && (
-                 <div className="p-4 space-y-4">
-                    <div className="text-xs text-slate-400">プレビューの枠をドラッグして、表示範囲を指定してください。</div>
-                    <button onClick={handleResetCrop} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs">範囲リセット</button>
-                 </div>
-              )}
+	              {activeTab === 'crop' && (
+	                 <div className="p-4 space-y-4">
+	                    <div className="text-xs text-slate-400">プレビューの枠をドラッグして、表示範囲を指定してください。</div>
+	                    <div className="space-y-2">
+	                      <div className="flex items-center gap-2">
+	                        <div className="flex-1 flex bg-slate-800 rounded p-0.5 border border-slate-600 idle-segment">
+	                          <button
+	                            type="button"
+	                            onClick={() => setCropGuidesEnabled(v => !v)}
+	                            className={`idle-segment-btn w-full px-2 py-1 text-[10px] rounded transition-colors ${cropGuidesEnabled ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title={cropGuidesEnabled ? 'ガイド線: ON' : 'ガイド線: OFF'}
+	                          >
+	                            ガイド線
+	                          </button>
+	                        </div>
+	                      </div>
+	                      <div className="space-y-1">
+	                        <div className="flex bg-slate-800 rounded p-0.5 border border-slate-600 idle-segment">
+	                          <button
+	                            type="button"
+	                            onClick={() => handleSelectCropAspectPreset('slide')}
+	                            className={`idle-segment-btn flex-1 px-2 py-1 text-[10px] rounded transition-colors ${cropAspectPreset === 'slide' ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title="比率: デフォルト（スライド）"
+	                          >
+	                            デフォルト
+	                          </button>
+	                          <button
+	                            type="button"
+	                            onClick={() => handleSelectCropAspectPreset('16:9')}
+	                            className={`idle-segment-btn flex-1 px-2 py-1 text-[10px] rounded transition-colors ${cropAspectPreset === '16:9' ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title="比率: 16:9"
+	                          >
+	                            16:9
+	                          </button>
+	                          <button
+	                            type="button"
+	                            onClick={() => handleSelectCropAspectPreset('4:3')}
+	                            className={`idle-segment-btn flex-1 px-2 py-1 text-[10px] rounded transition-colors ${cropAspectPreset === '4:3' ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title="比率: 4:3"
+	                          >
+	                            4:3
+	                          </button>
+	                        </div>
+	                        <div className="flex bg-slate-800 rounded p-0.5 border border-slate-600 idle-segment">
+	                          <button
+	                            type="button"
+	                            onClick={() => handleSelectCropAspectPreset('1:1')}
+	                            className={`idle-segment-btn flex-1 px-2 py-1 text-[10px] rounded transition-colors ${cropAspectPreset === '1:1' ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title="比率: 1:1"
+	                          >
+	                            1:1
+	                          </button>
+	                          <button
+	                            type="button"
+	                            onClick={() => handleSelectCropAspectPreset('9:16')}
+	                            className={`idle-segment-btn flex-1 px-2 py-1 text-[10px] rounded transition-colors ${cropAspectPreset === '9:16' ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title="比率: 9:16"
+	                          >
+	                            9:16
+	                          </button>
+	                          <button
+	                            type="button"
+	                            onClick={() => handleSelectCropAspectPreset('free')}
+	                            className={`idle-segment-btn flex-1 px-2 py-1 text-[10px] rounded transition-colors ${cropAspectPreset === 'free' ? 'is-selected' : 'text-slate-400 hover:text-white'}`}
+	                            title="比率: フリー"
+	                          >
+	                            フリー
+	                          </button>
+	                        </div>
+	                      </div>
+	                    </div>
+	                    <button onClick={handleResetCrop} className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs">範囲リセット</button>
+	                 </div>
+	              )}
 	              {activeTab === 'audio' && (
 	                  <AudioSettingsPanel 
 	                      audioFile={audioFile}
