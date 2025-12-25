@@ -20,6 +20,8 @@ declare const pdfjsLib: any;
 
 const LIFETIME_TOKENS_KEY = 'pdf_video_creator_lifetime_tokens';
 const RPD_KEY = 'pdf_video_creator_rpd_counter';
+const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_MS = 2000;
+const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS = 1000;
 
 const App: React.FC = () => {
   const [state, setState] = useState<ProcessingState>({
@@ -38,6 +40,8 @@ const App: React.FC = () => {
   const requestTimestampsRef = useRef<number[]>([]);
   const tokenTimestampsRef = useRef<{time: number, count: number}[]>([]);
   const completedVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [completedVideoControls, setCompletedVideoControls] = useState(false);
+  const completedVideoControlsHideTimerRef = useRef<number | null>(null);
   const [thumbnailDialogOpen, setThumbnailDialogOpen] = useState(false);
   const [thumbnailMode, setThumbnailMode] = useState<'single' | 'range'>('single');
   const [thumbnailSingleSeconds, setThumbnailSingleSeconds] = useState('0');
@@ -53,6 +57,34 @@ const App: React.FC = () => {
   const [apiKeyMode, setApiKeyMode] = useState<PersistMode>('session');
   const [projectManagerOpen, setProjectManagerOpen] = useState(true);
   const prevStatusRef = useRef<AppStatus | null>(null);
+
+  const resetCompletedVideoControlsHideTimer = (delayMs: number) => {
+    if (completedVideoControlsHideTimerRef.current !== null) {
+      window.clearTimeout(completedVideoControlsHideTimerRef.current);
+    }
+    completedVideoControlsHideTimerRef.current = window.setTimeout(() => {
+      setCompletedVideoControls(false);
+      completedVideoControlsHideTimerRef.current = null;
+    }, delayMs);
+  };
+
+  const handleCompletedVideoInteract = () => {
+    setCompletedVideoControls(true);
+    resetCompletedVideoControlsHideTimer(COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_MS);
+  };
+
+  const handleCompletedVideoFocusOrKeyInteract = () => {
+    setCompletedVideoControls(true);
+    resetCompletedVideoControlsHideTimer(COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS);
+  };
+
+  const hideCompletedVideoControlsNow = () => {
+    if (completedVideoControlsHideTimerRef.current !== null) {
+      window.clearTimeout(completedVideoControlsHideTimerRef.current);
+      completedVideoControlsHideTimerRef.current = null;
+    }
+    setCompletedVideoControls(false);
+  };
 
   // Cooldown State
   const [cooldown, setCooldown] = useState({ isActive: false, remainingMs: 0, reason: '' });
@@ -111,8 +143,26 @@ const App: React.FC = () => {
       if (isSafari) root.classList.add('browser-safari');
       else root.classList.remove('browser-safari');
 
-      return () => root.classList.remove('browser-safari');
-  }, []);
+	      return () => root.classList.remove('browser-safari');
+	  }, []);
+
+  // 書き出し完了画面の video controls は、触ってる間だけ出してすぐ消す（Safariの暗幕対策）
+  useEffect(() => {
+      if (state.status !== AppStatus.COMPLETED) {
+          if (completedVideoControlsHideTimerRef.current !== null) {
+              window.clearTimeout(completedVideoControlsHideTimerRef.current);
+              completedVideoControlsHideTimerRef.current = null;
+          }
+          setCompletedVideoControls(false);
+      }
+
+      return () => {
+          if (completedVideoControlsHideTimerRef.current !== null) {
+              window.clearTimeout(completedVideoControlsHideTimerRef.current);
+              completedVideoControlsHideTimerRef.current = null;
+          }
+      };
+  }, [state.status]);
 
   // Request Tracking Logic & Cooldown Listener
   useEffect(() => {
@@ -1163,16 +1213,22 @@ const App: React.FC = () => {
 		                    <div 
 		                    className="glass-strong rounded-3xl border border-black/10 p-2 w-full flex justify-center"
 		                    style={{ maxWidth: 'fit-content' }}
-		                    >
-		                        <video 
-		                        ref={completedVideoRef}
-		                        src={state.videoUrl} 
-	                        controls 
-	                        autoPlay 
-	                        className="rounded-2xl bg-black shadow-lg max-h-[70vh]"
-	                        style={getPlayerStyle(state.settings?.aspectRatio)}
-	                        />
-		                    </div>
+				                    >
+				                        <video 
+				                        ref={completedVideoRef}
+				                        src={state.videoUrl} 
+		                        controls={completedVideoControls}
+		                        autoPlay 
+                            tabIndex={0}
+		                            onPointerMove={handleCompletedVideoInteract}
+		                            onPointerDown={handleCompletedVideoInteract}
+                                onPointerLeave={hideCompletedVideoControlsNow}
+	                            onFocus={handleCompletedVideoFocusOrKeyInteract}
+	                            onKeyDown={handleCompletedVideoFocusOrKeyInteract}
+		                        className="rounded-2xl bg-black shadow-lg max-h-[70vh]"
+		                        style={getPlayerStyle(state.settings?.aspectRatio)}
+		                        />
+				                    </div>
 		                    
 		                    <div className="flex flex-col items-center justify-center gap-4 pt-4 max-w-2xl text-center w-full">
 		                    

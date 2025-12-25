@@ -6,6 +6,7 @@ import { fileToBase64 } from '../utils/fileUtils';
 import { buildDuckingIntervals } from '../utils/duckingSchedule';
 import { VIDEO_WORKER_CODE } from './videoWorkerScript';
 import { safeRandomUUID } from '../utils/uuid';
+import { patchMp4AvcColorToBt709TvInPlace } from '../utils/mp4AvcColorPatch';
 
 declare const pdfjsLib: PDFJSStatic;
 
@@ -914,6 +915,11 @@ export const generateVideoFromSlides = async (
                 } else if (type === 'done') {
                     let url: string;
                     const mimeType = extension === 'mov' ? 'video/quicktime' : 'video/mp4';
+                    if (extension === 'mp4') {
+                        try {
+                            patchMp4AvcColorToBt709TvInPlace(buffer);
+                        } catch (_) {}
+                    }
                     const blob = new Blob([buffer], { type: mimeType });
                     url = URL.createObjectURL(blob);
                     worker.terminate();
