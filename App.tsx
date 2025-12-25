@@ -134,22 +134,76 @@ const App: React.FC = () => {
   }, [state.status]);
 
   // Safariだけ “ガラスのゆがみ” を無効化するためのクラス付与（ちらつき対策）
-  useEffect(() => {
-      const ua = navigator.userAgent || '';
-      const vendor = (navigator as any).vendor || '';
-      const isSafari = vendor.includes('Apple') && !/Chrome|CriOS|FxiOS|Edg|OPR|SamsungBrowser/i.test(ua);
+	  useEffect(() => {
+	      const ua = navigator.userAgent || '';
+	      const vendor = (navigator as any).vendor || '';
+	      const isSafari = vendor.includes('Apple') && !/Chrome|CriOS|FxiOS|Edg|OPR|SamsungBrowser/i.test(ua);
 
       const root = document.documentElement;
       if (isSafari) root.classList.add('browser-safari');
       else root.classList.remove('browser-safari');
 
-	      return () => root.classList.remove('browser-safari');
+		      return () => root.classList.remove('browser-safari');
+		  }, []);
+
+	  // IDLE range の進捗色（WebKit用）: valueに合わせてCSS変数を更新
+	  useEffect(() => {
+	      const updateIdleRangeProgress = (range: HTMLInputElement) => {
+	          const min = Number(range.min || '0');
+	          const max = Number(range.max || '100');
+	          const value = Number(range.value);
+
+	          if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min || !Number.isFinite(value)) {
+	              range.style.setProperty('--idle-range-progress', '0%');
+	              return;
+	          }
+
+	          const clampedValue = Math.min(max, Math.max(min, value));
+	          const progressPercent = ((clampedValue - min) / (max - min)) * 100;
+	          range.style.setProperty('--idle-range-progress', `${progressPercent}%`);
+	      };
+
+	      const initIdleRanges = (root: ParentNode = document) => {
+	          root.querySelectorAll<HTMLInputElement>('input[type="range"].idle-range').forEach(updateIdleRangeProgress);
+	      };
+
+	      const handleIdleRangeInput = (event: Event) => {
+	          const target = event.target;
+	          if (target instanceof HTMLInputElement && target.type === 'range' && target.classList.contains('idle-range')) {
+	              updateIdleRangeProgress(target);
+	          }
+	      };
+
+	      initIdleRanges();
+	      document.addEventListener('input', handleIdleRangeInput, true);
+
+	      const observer = new MutationObserver((mutations) => {
+	          for (const mutation of mutations) {
+	              for (const node of Array.from(mutation.addedNodes)) {
+	                  if (!(node instanceof Element)) continue;
+	                  if (node instanceof HTMLInputElement && node.type === 'range' && node.classList.contains('idle-range')) {
+	                      updateIdleRangeProgress(node);
+	                      continue;
+	                  }
+	                  initIdleRanges(node);
+	              }
+	          }
+	      });
+
+	      if (document.body) {
+	          observer.observe(document.body, { childList: true, subtree: true });
+	      }
+
+	      return () => {
+	          document.removeEventListener('input', handleIdleRangeInput, true);
+	          observer.disconnect();
+	      };
 	  }, []);
 
-  // 書き出し完了画面の video controls は、触ってる間だけ出してすぐ消す（Safariの暗幕対策）
-  useEffect(() => {
-      if (state.status !== AppStatus.COMPLETED) {
-          if (completedVideoControlsHideTimerRef.current !== null) {
+	  // 書き出し完了画面の video controls は、触ってる間だけ出してすぐ消す（Safariの暗幕対策）
+	  useEffect(() => {
+	      if (state.status !== AppStatus.COMPLETED) {
+	          if (completedVideoControlsHideTimerRef.current !== null) {
               window.clearTimeout(completedVideoControlsHideTimerRef.current);
               completedVideoControlsHideTimerRef.current = null;
           }

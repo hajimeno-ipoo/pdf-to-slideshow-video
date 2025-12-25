@@ -93,9 +93,9 @@ export const SettingsPanel: React.FC = () => {
              </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-             <div className="space-y-1"><label className="text-xs text-slate-400">スライドサイズ ({videoSettings.slideScale}%)</label><input type="range" min="50" max="100" value={videoSettings.slideScale} onChange={(e) => setVideoSettings({ slideScale: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
-             <div className="space-y-1"><label className="text-xs text-slate-400">角丸の半径 ({videoSettings.slideBorderRadius}px)</label><input type="range" min="0" max="50" value={videoSettings.slideBorderRadius} onChange={(e) => setVideoSettings({ slideBorderRadius: parseInt(e.target.value) })} className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
-             <div className="space-y-1"><label className="text-xs text-slate-400">トランジション時間 ({videoSettings.transitionDuration.toFixed(1)}秒)</label><input type="range" min="0.1" max="3.0" step="0.1" value={videoSettings.transitionDuration} onChange={(e) => setVideoSettings({ transitionDuration: parseFloat(e.target.value) })} className="w-full accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
+	             <div className="space-y-1"><label className="text-xs text-slate-400">スライドサイズ ({videoSettings.slideScale}%)</label><input type="range" min="50" max="100" value={videoSettings.slideScale} onChange={(e) => setVideoSettings({ slideScale: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
+	             <div className="space-y-1"><label className="text-xs text-slate-400">角丸の半径 ({videoSettings.slideBorderRadius}px)</label><input type="range" min="0" max="50" value={videoSettings.slideBorderRadius} onChange={(e) => setVideoSettings({ slideBorderRadius: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
+	             <div className="space-y-1"><label className="text-xs text-slate-400">トランジション時間 ({videoSettings.transitionDuration.toFixed(1)}秒)</label><input type="range" min="0.1" max="3.0" step="0.1" value={videoSettings.transitionDuration} onChange={(e) => setVideoSettings({ transitionDuration: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" /></div>
           </div>
           {videoSettings.backgroundFill === 'custom_image' && (
             <div className="mt-2 p-3 bg-slate-800/50 rounded border border-slate-600 border-dashed flex items-center gap-3">
@@ -146,7 +146,7 @@ export const SettingsPanel: React.FC = () => {
                           {duckingOptions.enabled && (
                               <div className="flex items-center gap-2 pl-5">
                                   <span className="text-[10px] text-slate-400 whitespace-nowrap">下げる音量:</span>
-                                  <input type="range" min="0.05" max="0.8" step="0.05" value={duckingOptions.duckingVolume} onChange={(e) => setDuckingOptions({...duckingOptions, duckingVolume: parseFloat(e.target.value)})} className="w-24 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500" />
+	                                  <input type="range" min="0.05" max="0.8" step="0.05" value={duckingOptions.duckingVolume} onChange={(e) => setDuckingOptions({...duckingOptions, duckingVolume: parseFloat(e.target.value)})} className="w-24 idle-range h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-yellow-500" />
                                   <span className="text-[10px] text-yellow-400 w-8">{Math.round(duckingOptions.duckingVolume * 100)}%</span>
                               </div>
                           )}
