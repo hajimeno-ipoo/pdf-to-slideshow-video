@@ -186,20 +186,20 @@ export const Toolbar: React.FC = () => {
                         
                         <span className="text-xs text-slate-500">の</span>
 
-                        <div className="flex bg-slate-800 rounded p-0.5 border border-slate-600">
-                            <button 
-                                onClick={() => setInsertPosition('before')} 
-                                className={`px-2 py-0.5 text-[10px] rounded transition-colors ${insertPosition === 'before' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                            >
-                                前
-                            </button>
-                            <button 
-                                onClick={() => setInsertPosition('after')} 
-                                className={`px-2 py-0.5 text-[10px] rounded transition-colors ${insertPosition === 'after' ? 'bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
-                            >
-                                後
-                            </button>
-                        </div>
+	                        <div className="flex bg-slate-800 rounded p-0.5 border border-slate-600 idle-segment">
+	                            <button 
+	                                onClick={() => setInsertPosition('before')} 
+	                                className={`idle-segment-btn px-2 py-0.5 text-[10px] rounded transition-colors ${insertPosition === 'before' ? 'is-selected bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+	                            >
+	                                前
+	                            </button>
+	                            <button 
+	                                onClick={() => setInsertPosition('after')} 
+	                                className={`idle-segment-btn px-2 py-0.5 text-[10px] rounded transition-colors ${insertPosition === 'after' ? 'is-selected bg-emerald-600 text-white' : 'text-slate-400 hover:text-white'}`}
+	                            >
+	                                後
+	                            </button>
+	                        </div>
                         <span className="text-xs text-slate-500 mr-1">に追加</span>
                      </div>
 
