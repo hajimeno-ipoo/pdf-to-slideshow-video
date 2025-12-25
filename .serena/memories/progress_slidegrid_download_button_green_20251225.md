@@ -1,0 +1,3 @@
+- スライド一覧の各カード右上「⤓」画像保存ボタンを緑（emerald）トーンに変更。
+- 変更箇所: components/slideEditor/SlideGrid.tsx（button className）。
+- 目的: 目立つ/一貫したアクセント色にしつつガラス感（backdrop-blur）は維持。

@@ -3,6 +3,9 @@ import React, { useState } from 'react';
 import { useEditor } from './SlideEditorContext';
 import { TransitionType, Slide } from '../../types';
 import { safeRandomUUID } from '../../utils/uuid';
+import { drawSlideFrame, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground, renderSlideToImage } from '../../services/pdfVideoService';
+
+declare const pdfjsLib: any;
 
 interface SlideGridProps {
   onSelect: (id: string | null) => void;
@@ -10,8 +13,13 @@ interface SlideGridProps {
 }
 
 export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) => {
-  const { slides, updateSlides, videoSettings } = useEditor();
+  const { slides, updateSlides, videoSettings, sourceFile } = useEditor();
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [downloadingSlideId, setDownloadingSlideId] = useState<string | null>(null);
+  const pdfDocRef = React.useRef<any | null>(null);
+  const pdfFileRef = React.useRef<File | null>(null);
+  const bgBitmapRef = React.useRef<ImageBitmap | null>(null);
+  const bgFileRef = React.useRef<File | undefined>(undefined);
 
   const getTransitionIcon = (type: TransitionType) => {
     switch (type) {
@@ -72,6 +80,141 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
     if (selectedId === id) onSelect(null);
   };
 
+  const decodeDataUrlToBytes = (dataUrl: string) => {
+    const match = dataUrl.match(/^data:([^;,]+)(;base64)?,(.*)$/);
+    if (!match) throw new Error('画像データが読み取れなかったよ。');
+
+    const mimeType = match[1] || 'application/octet-stream';
+    const isBase64 = !!match[2];
+    const data = match[3] || '';
+
+    if (isBase64) {
+      const binary = atob(data);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return { mimeType, bytes };
+    }
+
+    const text = decodeURIComponent(data);
+    const bytes = new TextEncoder().encode(text);
+    return { mimeType, bytes };
+  };
+
+  const mimeTypeToExtension = (mimeType: string) => {
+    if (mimeType === 'image/jpeg') return 'jpg';
+    if (mimeType === 'image/png') return 'png';
+    if (mimeType === 'image/gif') return 'gif';
+    if (mimeType === 'image/webp') return 'webp';
+    if (mimeType === 'image/svg+xml') return 'svg';
+    const m = mimeType.match(/\/([a-z0-9.+-]+)$/i)?.[1];
+    return (m || 'png').replace('jpeg', 'jpg').replace('+xml', '');
+  };
+
+  const downloadDataUrl = (dataUrl: string, filename: string) => {
+    const { mimeType, bytes } = decodeDataUrlToBytes(dataUrl);
+    const blob = new Blob([bytes], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
+  const resolvePdfDoc = async () => {
+    if (!sourceFile) return null;
+    if (pdfDocRef.current && pdfFileRef.current === sourceFile) return pdfDocRef.current;
+    initPdfJs();
+    if (typeof pdfjsLib === 'undefined') return null;
+    try { pdfDocRef.current?.destroy?.(); } catch (_) {}
+    const arrayBuffer = await sourceFile.arrayBuffer();
+    const doc = await pdfjsLib.getDocument(arrayBuffer).promise;
+    pdfDocRef.current = doc;
+    pdfFileRef.current = sourceFile;
+    return doc;
+  };
+
+  const resolveBackgroundBitmap = async () => {
+    if (videoSettings.backgroundFill !== 'custom_image') return null;
+    const file = videoSettings.backgroundImageFile;
+    if (!file) return null;
+    if (bgBitmapRef.current && bgFileRef.current === file) return bgBitmapRef.current;
+    bgBitmapRef.current?.close?.();
+    bgBitmapRef.current = null;
+    bgFileRef.current = file;
+    try {
+      bgBitmapRef.current = await createImageBitmap(file);
+      return bgBitmapRef.current;
+    } catch (_) {
+      bgBitmapRef.current = null;
+      return null;
+    }
+  };
+
+  const handleDownloadSlideImage = async (e: React.MouseEvent, slide: Slide, index: number) => {
+    e.stopPropagation();
+    if (downloadingSlideId) return;
+    setDownloadingSlideId(slide.id);
+    try {
+      const { width, height } = getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution);
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Canvas が作れなかったよ。');
+
+      const fill = videoSettings.backgroundFill === 'white' ? '#ffffff' : '#000000';
+      const bgBitmap = await resolveBackgroundBitmap();
+      renderBackground(ctx, width, height, fill, bgBitmap);
+
+      const pdfDoc = slide.pageIndex > 0 ? await resolvePdfDoc() : null;
+      const slideImage = await renderSlideToImage(pdfDoc, slide, width, height, videoSettings);
+      await drawSlideFrame(
+        ctx,
+        slideImage,
+        width,
+        height,
+        slide.effectType,
+        slide.effectType === 'kenburns' ? getKenBurnsParams(slide.id) : null,
+        0,
+        slide,
+        videoSettings,
+        0,
+        new Map(),
+        false
+      );
+      slideImage.close?.();
+
+      const pngBlob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNGが作れなかったよ。'))), 'image/png');
+      });
+
+      const url = URL.createObjectURL(pngBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `slide_${String(index + 1).padStart(3, '0')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (err) {
+      console.error(err);
+      try {
+        if (slide.thumbnailUrl) {
+          const { mimeType } = decodeDataUrlToBytes(slide.thumbnailUrl);
+          const ext = mimeTypeToExtension(mimeType);
+          downloadDataUrl(slide.thumbnailUrl, `slide_${String(index + 1).padStart(3, '0')}.${ext}`);
+          return;
+        }
+      } catch (_) {}
+      alert('画像の保存に失敗しちゃった…！');
+    } finally {
+      setDownloadingSlideId(null);
+    }
+  };
+
   const handleTransitionChange = (id: string, type: TransitionType) => {
       const updated = slides.map(s => s.id === id ? { ...s, transitionType: type } : s);
       updateSlides(updated, true);
@@ -128,22 +271,34 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
         });
         const canvasBgUrl = canvasBgId ? (getOverlayById(canvasBgId)?.imageData || '') : '';
 
-        return (
-        <div 
-            key={slide.id} 
-            onClick={() => onSelect(slide.id)}
-            onDragOver={(e) => onDragOver(e, index)} 
-            onDrop={(e) => onDrop(e, index)} 
-	            className={`relative group rounded-lg overflow-hidden border transition-all flex flex-col cursor-pointer ${isSelected ? 'ring-2 ring-emerald-500 border-emerald-500' : (draggedItemIndex === index ? 'opacity-50 border-emerald-500' : 'border-slate-700 hover:border-slate-500 bg-transparent')}`}
-        >
-          <div className="absolute top-1 left-1 z-20 flex gap-1 pointer-events-none">
-             <div className="bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-[8px] text-white font-mono">{index + 1}</div>
-             {slide.audioFile && <div className="bg-indigo-500/80 px-1 py-0.5 rounded text-[8px] text-white">♫</div>}
-          </div>
-          
-	          <div 
-	            draggable={true} 
-	            onDragStart={(e) => onDragStart(e, index)} 
+	        return (
+	        <div 
+	            key={slide.id} 
+	            onClick={() => onSelect(slide.id)}
+	            onDragOver={(e) => onDragOver(e, index)} 
+	            onDrop={(e) => onDrop(e, index)} 
+		            className={`relative group rounded-lg overflow-hidden border transition-all flex flex-col cursor-pointer ${isSelected ? 'ring-2 ring-emerald-500 border-emerald-500' : (draggedItemIndex === index ? 'opacity-50 border-emerald-500' : 'border-slate-700 hover:border-slate-500 bg-transparent')}`}
+	        >
+	          <div className="absolute top-1 left-1 z-20 flex gap-1 pointer-events-none">
+	             <div className="bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-[8px] text-white font-mono">{index + 1}</div>
+	             {slide.audioFile && <div className="bg-indigo-500/80 px-1 py-0.5 rounded text-[8px] text-white">♫</div>}
+	          </div>
+	          <div className="absolute top-1 right-1 z-20 opacity-0 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100 transition-opacity">
+		            <button
+		              onClick={(e) => handleDownloadSlideImage(e, slide, index)}
+		              className={`h-6 w-6 rounded bg-emerald-500/30 backdrop-blur border border-emerald-300/50 text-emerald-50 hover:text-white hover:border-emerald-200/70 hover:bg-emerald-500/40 flex items-center justify-center text-[12px] ${
+		                downloadingSlideId === slide.id ? 'opacity-60 cursor-wait' : ''
+		              }`}
+		              title="画像を保存（高画質）"
+		              aria-label="画像を保存（高画質）"
+		            >
+	              ⤓
+	            </button>
+	          </div>
+	          
+		          <div 
+		            draggable={true} 
+		            onDragStart={(e) => onDragStart(e, index)} 
 	            className="aspect-video w-full flex items-center justify-center overflow-hidden relative"
 	            style={{ backgroundColor: getBackgroundColor() }}
 	          >
@@ -210,16 +365,16 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
                           className="w-10 bg-transparent text-right text-xs font-mono font-bold text-slate-300 focus:text-emerald-400 outline-none appearance-none [&::-webkit-inner-spin-button]:appearance-none hover:text-white transition-colors"
                        />
                        <span className="text-[10px] text-slate-500 font-mono">s</span>
-                  </div>
-                  <div className="flex items-center bg-slate-800 rounded border border-slate-700">
-                      <button onClick={(e) => handleDuplicate(e, slide.id)} className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-700 transition-colors border-r border-slate-700" title="複製">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /></svg>
-                      </button>
-                      <button onClick={(e) => handleDelete(e, slide.id)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="削除">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
-                      </button>
-                  </div>
-              </div>
+	                  </div>
+	                  <div className="flex items-center bg-slate-800 rounded border border-slate-700">
+	                      <button onClick={(e) => handleDuplicate(e, slide.id)} className="p-1.5 text-slate-400 hover:text-blue-400 hover:bg-slate-700 transition-colors border-r border-slate-700" title="複製">
+	                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M7 3.5A1.5 1.5 0 018.5 2h3.879a1.5 1.5 0 011.06.44l3.122 3.12A1.5 1.5 0 0117 6.622V12.5a1.5 1.5 0 01-1.5 1.5h-1v-3.379a3 3 0 00-.879-2.121L10.5 5.379A3 3 0 008.379 4.5H7v-1z" /></svg>
+	                      </button>
+	                      <button onClick={(e) => handleDelete(e, slide.id)} className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-700 transition-colors" title="削除">
+	                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z" /></svg>
+	                      </button>
+	                  </div>
+	              </div>
           </div>
         </div>
         );
