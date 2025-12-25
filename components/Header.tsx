@@ -11,6 +11,7 @@ interface HeaderProps {
   lastSavedTime?: Date | null;
   hasApiKey?: boolean;
   onOpenApiKey?: () => void;
+  onOpenGlassSettings?: () => void;
   idleTheme?: boolean;
 }
 
@@ -20,16 +21,17 @@ const TPM_LIMIT = 1000000;
 const RPD_LIMIT = 1500;
 
 const Header: React.FC<HeaderProps> = ({ 
-    apiStatus = 'checking', 
-    tokenUsage = { totalTokens: 0 }, 
-    lifetimeUsage = 0,
-    requestStats = { rpm: 0, tpm: 0, rpd: 0 },
-    saveStatus = 'idle',
-    lastSavedTime = null,
-    hasApiKey = false,
-    onOpenApiKey,
-    idleTheme = false
-}) => {
+	    apiStatus = 'checking', 
+	    tokenUsage = { totalTokens: 0 }, 
+	    lifetimeUsage = 0,
+	    requestStats = { rpm: 0, tpm: 0, rpd: 0 },
+	    saveStatus = 'idle',
+	    lastSavedTime = null,
+	    hasApiKey = false,
+	    onOpenApiKey,
+	    onOpenGlassSettings,
+	    idleTheme = false
+	}) => {
   const [showDevMode, setShowDevMode] = useState(false);
 
   // Calculate percentages
@@ -150,14 +152,27 @@ const Header: React.FC<HeaderProps> = ({
                         </div>
                     </div>
                 </div>
-            )}
+	            )}
 
-            {/* API Key Button (icon) */}
-            <button
-              onClick={onOpenApiKey}
-              aria-label="APIキー"
-              className={`p-2 rounded-full border transition-colors idle-header-apikey ${hasApiKey ? 'idle-header-apikey--set border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
-            >
+	            {onOpenGlassSettings && (
+	              <button
+	                onClick={onOpenGlassSettings}
+	                aria-label="ガラス設定"
+	                title="ガラス設定"
+	                className="p-2 rounded-full border transition-colors idle-header-apikey border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700"
+	              >
+	                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+	                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.5 6h9M10.5 18h9M4.5 6h.01M4.5 18h.01M7.5 6v12" />
+	                </svg>
+	              </button>
+	            )}
+
+	            {/* API Key Button (icon) */}
+	            <button
+	              onClick={onOpenApiKey}
+	              aria-label="APIキー"
+	              className={`p-2 rounded-full border transition-colors idle-header-apikey ${hasApiKey ? 'idle-header-apikey--set border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
+	            >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path
                   strokeLinecap="round"

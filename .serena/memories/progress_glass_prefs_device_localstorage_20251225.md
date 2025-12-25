@@ -1,0 +1,9 @@
+- 端末ごと（localStorage）でガラスの「色」と「透明度」をユーザーがカスタムできるように追加。
+- 保存: localStorage `pdfVideo_glassPrefs_v1`（tintHex / opacity(0-30)）。
+- 反映: Appルート（`.screen-idle` が付くdiv）にCSS変数 `--idle-glass-bg-thin/bg/bg-strong` を inline style で上書き（ガラス表現の仕組みは維持）。
+- UI: ヘッダーに「ガラス設定」ボタン追加 → `GlassSettingsModal` で色（ColorPickerPopover）と透明度スライダーを操作。変更は即反映＆自動保存。
+- 見た目: IDLE時に暗幕にならないよう `.glass-settings-overlay/.glass-settings-panel` を index.css で他モーダルと同じ方針で調整。
+- 追加/変更ファイル:
+  - 追加: `utils/glassPrefs.ts`, `components/GlassSettingsModal.tsx`, `tests/glassPrefs.test.js`
+  - 変更: `App.tsx`, `components/Header.tsx`, `index.css`
+- 検証: `npm test` PASS（118 tests）。

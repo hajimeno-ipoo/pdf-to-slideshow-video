@@ -767,6 +767,20 @@
   box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.18) !important;
 }
 
+/* Glass Settings Modal（IDLE時だけガラス寄せ） */
+.screen-idle .glass-settings-overlay {
+  /* 暗幕にしない（背景が暗くならないよう、白いスクラム＋blurだけにする） */
+  background: rgba(255, 255, 255, 0.06) !important;
+  -webkit-backdrop-filter: blur(10px) saturate(160%);
+  backdrop-filter: blur(10px) saturate(160%);
+}
+.screen-idle .glass-settings-panel.border-slate-800 {
+  border-color: rgba(15, 23, 42, 0.08) !important;
+}
+.screen-idle .glass-settings-panel.glass-strong::after {
+  inset: -28px;
+}
+
 /* Restore Modal（IDLE時だけガラス寄せ） */
 .screen-idle .restore-modal-overlay {
   /* 暗幕にしない（背景が暗くならないよう、白いスクラム＋blurだけにする） */

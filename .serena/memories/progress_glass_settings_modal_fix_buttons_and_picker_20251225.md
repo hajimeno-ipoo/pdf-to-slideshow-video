@@ -1,0 +1,6 @@
+- ガラス設定モーダルのボタンが黒く見えて分かりにくい問題を修正。
+  - `components/GlassSettingsModal.tsx` の下部ボタンを `idle-btn-glass` / `idle-btn-primary` に変更して、IDLE白ガラス上で見えるように。
+- カラーピッカーをドラッグ/操作するとガラス設定モーダルが閉じる問題を修正。
+  - 原因: React Portal のイベントが親(モーダル背景)にバブルし、背景の close ハンドラが発火していた。
+  - 対策: 背景の閉じ処理を `onPointerDown` + `e.target === e.currentTarget` に変更し「背景そのものを押した時だけ」閉じる。
+- 検証: `npm test` PASS（118 tests）。

@@ -8,12 +8,14 @@ import SlideEditor from './components/SlideEditor';
 import RestoreModal from './components/RestoreModal';
 import CooldownNotification from './components/CooldownNotification';
 import ApiKeyModal from './components/ApiKeyModal';
+import GlassSettingsModal from './components/GlassSettingsModal';
 import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions } from './types';
 import { analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
 import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey, hasEncryptedStored, PersistMode } from './utils/apiKeyStore';
 import { getExportSupportError } from './utils/exportSupport';
+import { DEFAULT_GLASS_PREFS, loadGlassPrefsFromLocalStorage, saveGlassPrefsToLocalStorage, GlassPrefs, computeIdleGlassCssVars } from './utils/glassPrefs';
 import { buildThumbnailCaptureTimes, clampSeconds, formatSecondsForFilename } from './utils/thumbnailExport';
 
 declare const pdfjsLib: any;
@@ -29,6 +31,8 @@ const App: React.FC = () => {
   });
   const [slides, setSlides] = useState<Slide[]>([]);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
+
+  const [glassPrefs, setGlassPrefs] = useState<GlassPrefs>(() => loadGlassPrefsFromLocalStorage() ?? DEFAULT_GLASS_PREFS);
   
   // API Status & Usage State
   const [apiStatus, setApiStatus] = useState<ApiConnectionStatus>('checking');
@@ -51,12 +55,17 @@ const App: React.FC = () => {
   const [thumbnailProgressText, setThumbnailProgressText] = useState('');
   const [thumbnailErrorText, setThumbnailErrorText] = useState('');
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
+  const [glassSettingsOpen, setGlassSettingsOpen] = useState(false);
   const [apiKeyRemember, setApiKeyRemember] = useState<boolean>(hasStoredApiKey());
   const [apiKeyEncrypted, setApiKeyEncrypted] = useState<boolean>(hasEncryptedStored());
   const [apiKeyValue, setApiKeyValue] = useState<string>('');
   const [apiKeyMode, setApiKeyMode] = useState<PersistMode>('session');
   const [projectManagerOpen, setProjectManagerOpen] = useState(true);
   const prevStatusRef = useRef<AppStatus | null>(null);
+
+  useEffect(() => {
+    saveGlassPrefsToLocalStorage(glassPrefs);
+  }, [glassPrefs]);
 
   const resetCompletedVideoControlsHideTimer = (delayMs: number) => {
     if (completedVideoControlsHideTimerRef.current !== null) {
@@ -970,15 +979,16 @@ const App: React.FC = () => {
     }
   };
 
-		  const isEditing = state.status === AppStatus.EDITING;
-		  const isIdle = state.status === AppStatus.IDLE;
-		  const isProcessing = state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING;
-		  const isCompleted = state.status === AppStatus.COMPLETED;
-		  const useGlassTheme = isIdle || isEditing || isProcessing || isCompleted;
-		  const aiEnabled = apiStatus === 'connected';
+			  const isEditing = state.status === AppStatus.EDITING;
+			  const isIdle = state.status === AppStatus.IDLE;
+			  const isProcessing = state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING;
+			  const isCompleted = state.status === AppStatus.COMPLETED;
+			  const useGlassTheme = isIdle || isEditing || isProcessing || isCompleted;
+			  const aiEnabled = apiStatus === 'connected';
+			  const idleGlassCssVars = useGlassTheme ? computeIdleGlassCssVars(glassPrefs) : {};
 
   return (
-		    <div className={`h-screen flex flex-col overflow-hidden ${(isIdle || isProcessing || isCompleted) ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
+			    <div style={idleGlassCssVars as React.CSSProperties} className={`h-screen flex flex-col overflow-hidden ${(isIdle || isProcessing || isCompleted) ? 'screen-idle' : (isEditing ? 'screen-idle text-slate-200 selection:bg-emerald-500/30' : 'bg-gradient-to-b from-slate-900 via-slate-900 to-emerald-950/20 text-slate-200 selection:bg-emerald-500/30')}`}>
       
       {/* Mobile Landscape Warning: 500px以下の高さかつ横画面の場合に表示 */}
       <div className="fixed inset-0 z-[9999] bg-slate-950 flex flex-col items-center justify-center p-8 text-center hidden [@media(max-height:500px)_and_(orientation:landscape)]:flex h-screen w-screen touch-none">
@@ -992,22 +1002,23 @@ const App: React.FC = () => {
           </div>
       </div>
 
-		      <Header 
-		        apiStatus={apiStatus} 
-		        tokenUsage={totalUsage} 
-		        lifetimeUsage={lifetimeUsage}
-		        requestStats={reqStats}
-		        saveStatus={saveStatus}
-		        lastSavedTime={lastSavedTime}
-		        hasApiKey={!!apiKeyValue}
-		        idleTheme={useGlassTheme}
-		        onOpenApiKey={() => setApiKeyModalOpen(true)}
-		      />
+			      <Header 
+			        apiStatus={apiStatus} 
+			        tokenUsage={totalUsage} 
+			        lifetimeUsage={lifetimeUsage}
+			        requestStats={reqStats}
+			        saveStatus={saveStatus}
+			        lastSavedTime={lastSavedTime}
+			        hasApiKey={!!apiKeyValue}
+			        idleTheme={useGlassTheme}
+			        onOpenApiKey={() => setApiKeyModalOpen(true)}
+			        onOpenGlassSettings={() => setGlassSettingsOpen(true)}
+			      />
 
-	      <ApiKeyModal
-	        open={apiKeyModalOpen}
-	        initialKey={apiKeyValue}
-	        initialRemember={apiKeyRemember}
+		      <ApiKeyModal
+		        open={apiKeyModalOpen}
+		        initialKey={apiKeyValue}
+		        initialRemember={apiKeyRemember}
         onClose={() => setApiKeyModalOpen(false)}
         onClear={() => {
           if (window.confirm('保存されたAPIキーを削除しますか？')) {
@@ -1036,11 +1047,19 @@ const App: React.FC = () => {
             setApiStatus('error');
           }
 	        }}
-	      />
+		      />
 
-        <ProjectManagerModal
-          isOpen={projectManagerOpen}
-          onClose={() => setProjectManagerOpen(false)}
+		      <GlassSettingsModal
+		        open={glassSettingsOpen}
+		        prefs={glassPrefs}
+		        onChange={setGlassPrefs}
+		        onReset={() => setGlassPrefs(DEFAULT_GLASS_PREFS)}
+		        onClose={() => setGlassSettingsOpen(false)}
+		      />
+
+	        <ProjectManagerModal
+	          isOpen={projectManagerOpen}
+	          onClose={() => setProjectManagerOpen(false)}
           onLoadProject={(data) => {
             setProjectManagerOpen(false);
             handleProjectLoad(data);
