@@ -695,12 +695,16 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 		            setActiveTab('image'); 
 		        }; 
         img.src = imageData; 
-    } else { 
-        setPendingAddType(type);
-        setSelectedOverlayId(null); 
-        setSelectedLayerId(null);
-    }
-  };
+	    } else { 
+	        if (pendingAddType === type) {
+	            setPendingAddType(null);
+	            return;
+	        }
+	        setPendingAddType(type);
+	        setSelectedOverlayId(null); 
+	        setSelectedLayerId(null);
+	    }
+	  };
 
   const handleMouseDownSlide = (e: React.MouseEvent, mode: 'move' | 'se') => {
       e.preventDefault();
