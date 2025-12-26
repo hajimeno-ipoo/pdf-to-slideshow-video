@@ -590,6 +590,13 @@ export const createSolidColorSlide = async (color: string, duration: number, tra
     };
 };
 
+let thumbnailPdfFile: File | null = null;
+let thumbnailPdfDoc: PDFDocumentProxy | null = null;
+let thumbnailPdfDocPromise: Promise<PDFDocumentProxy> | null = null;
+
+const THUMBNAIL_PAGE_BITMAP_CACHE_LIMIT = 8;
+const thumbnailPageBitmapCache = new Map<string, ImageBitmap>();
+
 export const updateThumbnail = async (sourceFile: File | null, slide: Slide, settings?: VideoSettings): Promise<string> => {
     // サムネ生成を本番描画パイプラインに寄せて、装飾反映漏れを防ぐ
     const canvas = document.createElement('canvas');
@@ -601,16 +608,40 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
 
     // 背景画像または solid を bitmap にする
     let slideImage: ImageBitmap | null = null;
+    let shouldCloseSlideImage = false;
     try {
         if (slide.customImageFile) {
             slideImage = await createImageBitmap(slide.customImageFile);
+            shouldCloseSlideImage = true;
         } else if (sourceFile && slide.pageIndex > 0) {
             initPdfJs();
-            const arrayBuffer = await sourceFile.arrayBuffer();
-            const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
-            const page = await pdf.getPage(slide.pageIndex);
+            if (thumbnailPdfFile !== sourceFile) {
+                try { thumbnailPdfDoc?.destroy?.(); } catch (_) {}
+                thumbnailPdfFile = sourceFile;
+                thumbnailPdfDoc = null;
+                thumbnailPdfDocPromise = null;
+                for (const bmp of thumbnailPageBitmapCache.values()) {
+                    try { bmp.close?.(); } catch (_) {}
+                }
+                thumbnailPageBitmapCache.clear();
+            }
+            if (!thumbnailPdfDoc) {
+                if (!thumbnailPdfDocPromise) {
+                    thumbnailPdfDocPromise = sourceFile.arrayBuffer().then((ab) => pdfjsLib.getDocument(ab).promise);
+                }
+                thumbnailPdfDoc = await thumbnailPdfDocPromise;
+            }
+            const page = await thumbnailPdfDoc.getPage(slide.pageIndex);
             const targetW = 640; // サムネ用
             const scale = Math.min(3.0, targetW / slide.crop.width);
+            const cacheKey = `${slide.pageIndex}:${Math.round(scale * 1000)}:${slide.crop.x},${slide.crop.y},${slide.crop.width},${slide.crop.height}`;
+            const cached = thumbnailPageBitmapCache.get(cacheKey);
+            if (cached) {
+                // LRU bump
+                thumbnailPageBitmapCache.delete(cacheKey);
+                thumbnailPageBitmapCache.set(cacheKey, cached);
+                slideImage = cached;
+            } else {
             const viewport = page.getViewport({ scale });
             const tmp = document.createElement('canvas');
             tmp.width = slide.crop.width * scale;
@@ -626,7 +657,19 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
                 };
                 await page.render(renderContext).promise;
             }
-            slideImage = await createImageBitmap(tmp);
+                const bmp = await createImageBitmap(tmp);
+                thumbnailPageBitmapCache.set(cacheKey, bmp);
+                while (thumbnailPageBitmapCache.size > THUMBNAIL_PAGE_BITMAP_CACHE_LIMIT) {
+                    const oldestKey = thumbnailPageBitmapCache.keys().next().value as string | undefined;
+                    if (!oldestKey) break;
+                    const oldest = thumbnailPageBitmapCache.get(oldestKey);
+                    if (oldest) {
+                        try { oldest.close?.(); } catch (_) {}
+                    }
+                    thumbnailPageBitmapCache.delete(oldestKey);
+                }
+                slideImage = bmp;
+            }
         } else {
             // solid 色スライド
             const tmp = document.createElement('canvas');
@@ -634,6 +677,7 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
             const tctx = tmp.getContext('2d');
             if (tctx) { tctx.fillStyle = slide.backgroundColor || '#000'; tctx.fillRect(0,0,tmp.width,tmp.height); }
             slideImage = await createImageBitmap(tmp);
+            shouldCloseSlideImage = true;
         }
     } catch (e) {
         console.error('updateThumbnail: slide bitmap failed', e);
@@ -683,7 +727,9 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
         try { await drawOverlays(ctx, slide.overlays || [], canvas.width, canvas.height); } catch (_) {}
     }
 
-    slideImage?.close?.();
+    if (shouldCloseSlideImage) {
+        try { slideImage?.close?.(); } catch (_) {}
+    }
     // JPEG だと透明部分が黒に潰れて「黒帯が焼き込み」されるので、PNG で透明を保持する
     return canvas.toDataURL('image/png');
 };

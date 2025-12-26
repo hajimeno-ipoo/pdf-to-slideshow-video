@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Slide, Overlay, OverlayType, TokenUsage } from '../types';
 import { renderPageOverview, updateThumbnail } from '../services/pdfVideoService';
 import { useEditor } from './slideEditor/SlideEditorContext';
@@ -13,7 +13,7 @@ import { getCroppedImageLayoutPx } from '../utils/cropPreviewUtils';
 
 interface SlideInspectorProps {
   slide: Slide;
-  onUpdate: (updatedSlide: Slide) => void;
+  onUpdate: (updatedSlide: Slide, addToHistory?: boolean) => void;
   onUsageUpdate?: (usage: TokenUsage) => void;
   aiEnabled: boolean;
   sourceFile: File | null;
@@ -100,6 +100,43 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   // Placement Mode State
   const [pendingAddType, setPendingAddType] = useState<OverlayType | null>(null);
 
+  const prevSlideIdRef = useRef(slide.id);
+  const ignoreNextPropSyncRef = useRef(false);
+  const skipNextAutoApplyRef = useRef(true);
+  const skipNextThumbnailRef = useRef(true);
+  const editSessionActiveRef = useRef(false);
+  const editSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoApplyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const thumbnailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const thumbnailJobIdRef = useRef(0);
+  const thumbnailInFlightRef = useRef(false);
+  const thumbnailPendingRef = useRef(false);
+
+  const slideRef = useRef(slide);
+  slideRef.current = slide;
+
+  const onUpdateRef = useRef(onUpdate);
+  onUpdateRef.current = onUpdate;
+
+  const lastAutoApplyInputsRef = useRef<{
+      crop: typeof crop;
+      overlays: typeof overlays;
+      layerOrder: typeof layerOrder;
+      slideLayout: typeof slideLayout;
+      solidColor: typeof solidColor;
+      audioFile: typeof audioFile;
+      audioVolume: typeof audioVolume;
+      localDuration: typeof localDuration;
+  } | null>(null);
+
+  const lastThumbnailInputsRef = useRef<{
+      crop: typeof crop;
+      overlays: typeof overlays;
+      layerOrder: typeof layerOrder;
+      slideLayout: typeof slideLayout;
+      solidColor: typeof solidColor;
+  } | null>(null);
+
   const isCanvasMode = activeTab !== 'crop';
   const isSolidSlide = !!slide.backgroundColor;
   const hasCanvasLayout =
@@ -119,25 +156,215 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       return videoSettings.slideBorderRadius * ratio;
   };
 
+	  useEffect(() => {
+	      return () => {
+	          if (editSessionTimerRef.current) {
+	              clearTimeout(editSessionTimerRef.current);
+	              editSessionTimerRef.current = null;
+	          }
+	          if (autoApplyTimerRef.current) {
+	              clearTimeout(autoApplyTimerRef.current);
+	              autoApplyTimerRef.current = null;
+	          }
+	          if (thumbnailTimerRef.current) {
+	              clearTimeout(thumbnailTimerRef.current);
+	              thumbnailTimerRef.current = null;
+	          }
+	      };
+	  }, []);
+
+  const buildUpdatedSlide = useCallback((): Slide => {
+      const base = slideRef.current;
+      return {
+          ...base,
+          crop,
+          overlays,
+          layout: slideLayout || undefined,
+          layerOrder: layerOrder || undefined,
+          backgroundColor: isSolidSlide ? solidColor : undefined,
+          audioFile,
+          audioVolume,
+          duration: localDuration,
+          // IMPORTANT: Keep customImageFile to ensure we can re-render clean background later
+          customImageFile: base.customImageFile
+      };
+  }, [audioFile, audioVolume, crop, isSolidSlide, layerOrder, localDuration, overlays, slideLayout, solidColor]);
+
+  const buildUpdatedSlideForThumbnail = useCallback((): Slide => {
+      const base = slideRef.current;
+      return {
+          ...base,
+          crop,
+          overlays,
+          layout: slideLayout || undefined,
+          layerOrder: layerOrder || undefined,
+          backgroundColor: isSolidSlide ? solidColor : undefined,
+          // IMPORTANT: Keep customImageFile to ensure we can re-render clean background later
+          customImageFile: base.customImageFile
+      };
+  }, [crop, isSolidSlide, layerOrder, overlays, slideLayout, solidColor]);
+
+  const resetEditSession = useCallback(() => {
+      editSessionActiveRef.current = false;
+      if (editSessionTimerRef.current) {
+          clearTimeout(editSessionTimerRef.current);
+          editSessionTimerRef.current = null;
+      }
+  }, []);
+
+  const emitAutoApplyUpdate = useCallback(() => {
+      const updatedSlide = buildUpdatedSlide();
+      const addToHistory = !editSessionActiveRef.current;
+      ignoreNextPropSyncRef.current = true;
+      onUpdateRef.current(updatedSlide, addToHistory);
+      editSessionActiveRef.current = true;
+      if (editSessionTimerRef.current) clearTimeout(editSessionTimerRef.current);
+      editSessionTimerRef.current = setTimeout(() => {
+          editSessionActiveRef.current = false;
+          editSessionTimerRef.current = null;
+      }, 300);
+  }, [buildUpdatedSlide]);
+
+  const scheduleAutoApplyUpdate = useCallback((delayMs: number = 60) => {
+      if (autoApplyTimerRef.current) clearTimeout(autoApplyTimerRef.current);
+      autoApplyTimerRef.current = setTimeout(() => {
+          autoApplyTimerRef.current = null;
+          emitAutoApplyUpdate();
+      }, delayMs);
+  }, [emitAutoApplyUpdate]);
+
+  const scheduleThumbnailUpdate = useCallback((delayMs: number = 0) => {
+      thumbnailPendingRef.current = true;
+      if (thumbnailInFlightRef.current) return;
+      if (thumbnailTimerRef.current) clearTimeout(thumbnailTimerRef.current);
+      const jobId = ++thumbnailJobIdRef.current;
+      const slideId = slideRef.current.id;
+      thumbnailTimerRef.current = setTimeout(async () => {
+          thumbnailTimerRef.current = null;
+          if (!thumbnailPendingRef.current) return;
+          thumbnailPendingRef.current = false;
+          thumbnailInFlightRef.current = true;
+          try {
+              const updatedSlide = buildUpdatedSlideForThumbnail();
+              const newThumb = await updateThumbnail(sourceFile, updatedSlide, videoSettings);
+              if (jobId !== thumbnailJobIdRef.current) return;
+              if (slideRef.current.id !== slideId) return;
+              updatedSlide.thumbnailUrl = newThumb;
+              ignoreNextPropSyncRef.current = true;
+              onUpdateRef.current(updatedSlide, false);
+          } catch (e) {
+              console.error('Auto thumbnail update failed', e);
+          } finally {
+              thumbnailInFlightRef.current = false;
+              if (thumbnailPendingRef.current) scheduleThumbnailUpdate(0);
+          }
+      }, delayMs);
+  }, [buildUpdatedSlideForThumbnail, sourceFile, videoSettings]);
+
   // Sync with prop changes
   useEffect(() => {
+      if (ignoreNextPropSyncRef.current) {
+          ignoreNextPropSyncRef.current = false;
+          return;
+      }
+
+      resetEditSession();
+      skipNextAutoApplyRef.current = true;
+      skipNextThumbnailRef.current = true;
+
+      const idChanged = prevSlideIdRef.current !== slide.id;
+      prevSlideIdRef.current = slide.id;
+
+      const nextOverlays = slide.overlays || [];
+
       setCrop(slide.crop);
-      setOverlays(slide.overlays || []);
-      setLayerOrder(slide.layerOrder || [SLIDE_TOKEN, ...(slide.overlays || []).map(o => o.id)]);
+      setStartCrop(slide.crop);
+      setOverlays(nextOverlays);
+      setLayerOrder(slide.layerOrder || [SLIDE_TOKEN, ...nextOverlays.map(o => o.id)]);
       setSlideLayout(slide.layout || null);
       setSolidColor(slide.backgroundColor || '#000000');
       setAudioFile(slide.audioFile);
       setAudioVolume(slide.audioVolume ?? 1.0);
       setLocalDuration(slide.duration);
-      setSelectedOverlayId(null);
-      setSelectedLayerId(null);
-      setPendingAddType(null);
-      setImageSize({ width: 0, height: 0 });
+
+      setIsDraggingCrop(false);
+      setDragModeCrop(null);
+      setIsDraggingOverlay(false);
+      setActiveOverlayTool(null);
       setIsDraggingSlide(false);
       setSlideDragMode(null);
-      setCropAspectPreset('slide');
 
-      // Load Overview Image
+      if (idChanged) {
+          setSelectedOverlayId(null);
+          setSelectedLayerId(null);
+          setPendingAddType(null);
+          setImageSize({ width: 0, height: 0 });
+          setCropAspectPreset('slide');
+      } else {
+          setSelectedOverlayId(prev => (prev && nextOverlays.some(o => o.id === prev) ? prev : null));
+          setSelectedLayerId(prev => {
+              if (!prev) return null;
+              if (prev === SLIDE_TOKEN) return prev;
+              return nextOverlays.some(o => o.id === prev) ? prev : null;
+          });
+      }
+  }, [SLIDE_TOKEN, resetEditSession, slide]);
+
+  // Auto apply (Apple-like): reflect inspector edits immediately, grouped into one Undo step
+  useEffect(() => {
+      if (skipNextAutoApplyRef.current) {
+          skipNextAutoApplyRef.current = false;
+          lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
+          return;
+      }
+      const prev = lastAutoApplyInputsRef.current;
+      const didChange =
+          !prev ||
+          prev.crop !== crop ||
+          prev.overlays !== overlays ||
+          prev.layerOrder !== layerOrder ||
+          prev.slideLayout !== slideLayout ||
+          prev.solidColor !== solidColor ||
+          prev.audioFile !== audioFile ||
+          prev.audioVolume !== audioVolume ||
+          prev.localDuration !== localDuration;
+      if (!didChange) return;
+      if (isDraggingCrop || isDraggingOverlay || isDraggingSlide) return;
+      if (isUpdating) {
+          lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
+          return;
+      }
+      scheduleAutoApplyUpdate();
+      lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
+  }, [audioFile, audioVolume, crop, isDraggingCrop, isDraggingOverlay, isDraggingSlide, isUpdating, layerOrder, localDuration, overlays, scheduleAutoApplyUpdate, slideLayout, solidColor]);
+
+  // Auto thumbnail update (grid reflection): only when visual parts change
+  useEffect(() => {
+      if (skipNextThumbnailRef.current) {
+          skipNextThumbnailRef.current = false;
+          lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
+          return;
+      }
+      const prev = lastThumbnailInputsRef.current;
+      const didChange =
+          !prev ||
+          prev.crop !== crop ||
+          prev.overlays !== overlays ||
+          prev.layerOrder !== layerOrder ||
+          prev.slideLayout !== slideLayout ||
+          prev.solidColor !== solidColor;
+      if (!didChange) return;
+      if (isDraggingCrop || isDraggingOverlay || isDraggingSlide) return;
+      if (isUpdating) {
+          lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
+          return;
+      }
+      scheduleThumbnailUpdate(0);
+      lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
+  }, [crop, isDraggingCrop, isDraggingOverlay, isDraggingSlide, isUpdating, layerOrder, overlays, scheduleThumbnailUpdate, slideLayout, solidColor]);
+
+  // Load Overview Image
+  useEffect(() => {
       const loadOverview = async () => {
           try {
               const url = await renderPageOverview(sourceFile, slide);
@@ -145,7 +372,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           } catch(e) { console.error(e); }
       };
       loadOverview();
-  }, [slide, sourceFile]); // Depend on full slide object to sync Undo/Redo/External changes
+  }, [slide.id, sourceFile]);
 
   // Stage size tracking (canvas mode)
   useEffect(() => {
@@ -270,26 +497,28 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   // Apply Changes Logic
   const handleApplyChanges = async () => {
       setIsUpdating(true);
-      const updatedSlide = {
-          ...slide,
-          crop,
-          overlays,
-          layout: slideLayout || undefined,
-          layerOrder: layerOrder || undefined,
-          backgroundColor: isSolidSlide ? solidColor : undefined,
-          audioFile,
-          audioVolume,
-          duration: localDuration,
-          // IMPORTANT: Keep customImageFile to ensure we can re-render clean background later
-          customImageFile: slide.customImageFile 
-      };
+      const hadPendingAutoApply = !!autoApplyTimerRef.current;
+      if (autoApplyTimerRef.current) {
+          clearTimeout(autoApplyTimerRef.current);
+          autoApplyTimerRef.current = null;
+      }
+      if (thumbnailTimerRef.current) {
+          clearTimeout(thumbnailTimerRef.current);
+          thumbnailTimerRef.current = null;
+      }
+      thumbnailJobIdRef.current += 1;
+      if (hadPendingAutoApply) emitAutoApplyUpdate();
+      const updatedSlide = buildUpdatedSlide();
       
       try {
           // Generate thumbnail with baked-in overlays for grid view
           const newThumb = await updateThumbnail(sourceFile, updatedSlide, videoSettings);
           updatedSlide.thumbnailUrl = newThumb;
-          onUpdate(updatedSlide);
+          ignoreNextPropSyncRef.current = true;
+          onUpdateRef.current(updatedSlide, false);
       } catch(e) { console.error("Update failed", e); }
+      lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
+      lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
       setIsUpdating(false);
   };
 

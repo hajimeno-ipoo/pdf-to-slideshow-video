@@ -244,13 +244,12 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 p-1 pb-20">
-      {slides.map((slide, index) => {
-        const isSelected = slide.id === selectedId;
-        const isSolid = slide.pageIndex <= 0 && !!slide.backgroundColor && !slide.customImageFile;
-        const SLIDE_TOKEN = '__SLIDE__';
-        const overlays = Array.isArray(slide.overlays) ? slide.overlays : [];
-        const overlayIds = overlays.map(o => o.id);
-        let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
+	      {slides.map((slide, index) => {
+	        const isSelected = slide.id === selectedId;
+	        const SLIDE_TOKEN = '__SLIDE__';
+	        const overlays = Array.isArray(slide.overlays) ? slide.overlays : [];
+	        const overlayIds = overlays.map(o => o.id);
+	        let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
         if (!layerOrder.includes(SLIDE_TOKEN)) layerOrder.unshift(SLIDE_TOKEN);
         for (const id of overlayIds) if (!layerOrder.includes(id)) layerOrder.push(id);
         layerOrder = layerOrder.filter(id => id === SLIDE_TOKEN || overlayIds.includes(id));
@@ -323,7 +322,6 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
 	                    src={slide.thumbnailUrl} 
 	                    alt={`Slide ${index + 1}`} 
 	                    className="object-contain pointer-events-none w-full h-full" 
-	                    style={{ backgroundColor: isSolid ? slide.backgroundColor : undefined }}
 	                />
 	            </div>
 	          </div>

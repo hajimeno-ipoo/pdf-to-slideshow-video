@@ -81,12 +81,12 @@ const SlideEditorLayout: React.FC<{
       }
   }, [selectedSlideId]);
 
-  const handleUpdateSlide = (updatedSlide: Slide) => {
+  const handleUpdateSlide = (updatedSlide: Slide, addToHistory: boolean = true) => {
       const index = slides.findIndex(s => s.id === updatedSlide.id);
       if (index !== -1) {
           const newSlides = [...slides];
           newSlides[index] = updatedSlide;
-          updateSlides(newSlides, true);
+          updateSlides(newSlides, addToHistory);
       }
   };
 
