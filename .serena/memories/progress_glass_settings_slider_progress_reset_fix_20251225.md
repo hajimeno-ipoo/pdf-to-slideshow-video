@@ -1,0 +1,4 @@
+- ガラス設定モーダルで「デフォルトに戻す」後に、スライダーの進捗色（左側の青）が戻らない不具合を修正。
+- 原因: WebKit用の進捗色は input要素のCSS変数 `--idle-range-progress` で表現しており、Reactのstate更新（valueがプログラム変更）では `input` イベントが発火せずCSS変数が更新されなかった。
+- 対策: `components/GlassSettingsModal.tsx` で range要素をrefで保持し、`prefs.opacity/prefs.blur` 変更時に `--idle-range-progress` を再計算して style.setProperty する。
+- 検証: `npm test` PASS。

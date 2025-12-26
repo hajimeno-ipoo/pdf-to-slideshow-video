@@ -1,6 +1,7 @@
 export interface GlassPrefs {
   tintHex: string; // '#RRGGBB'
   opacity: number; // 0-30 (%), 14 = alpha 0.14
+  blur: number; // 0-30 (px), 8 = 8px
 }
 
 export const GLASS_PREFS_STORAGE_KEY = 'pdfVideo_glassPrefs_v1';
@@ -8,6 +9,7 @@ export const GLASS_PREFS_STORAGE_KEY = 'pdfVideo_glassPrefs_v1';
 export const DEFAULT_GLASS_PREFS: GlassPrefs = {
   tintHex: '#ffffff',
   opacity: 14,
+  blur: 8,
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -36,7 +38,10 @@ export const normalizeGlassPrefs = (input: unknown): GlassPrefs => {
   const opacityRaw = typeof obj.opacity === 'number' ? obj.opacity : Number(obj.opacity);
   const opacity = Number.isFinite(opacityRaw) ? clamp(opacityRaw, 0, 30) : DEFAULT_GLASS_PREFS.opacity;
 
-  return { tintHex, opacity };
+  const blurRaw = typeof obj.blur === 'number' ? obj.blur : Number(obj.blur);
+  const blur = Number.isFinite(blurRaw) ? clamp(blurRaw, 0, 30) : DEFAULT_GLASS_PREFS.blur;
+
+  return { tintHex, opacity, blur };
 };
 
 export const loadGlassPrefsFromLocalStorage = (): GlassPrefs | null => {
@@ -69,12 +74,18 @@ export const computeIdleGlassCssVars = (prefs: GlassPrefs): Record<string, strin
   const thin = clamp(base * 0.7, 0, 0.95);
   const strong = clamp(base * 1.3, 0, 0.95);
 
+  const blurBase = clamp(prefs.blur, 0, 30);
+  const blurThin = clamp(Math.round(blurBase * 0.75), 0, 60);
+  const blurStrong = clamp(Math.round(blurBase * 1.25), 0, 60);
+
   const rgba = (a: number) => `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${roundAlpha(a)})`;
 
   return {
     '--idle-glass-bg-thin': rgba(thin),
     '--idle-glass-bg': rgba(base),
     '--idle-glass-bg-strong': rgba(strong),
+    '--idle-glass-blur-thin': `${blurThin}px`,
+    '--idle-glass-blur': `${Math.round(blurBase)}px`,
+    '--idle-glass-blur-strong': `${blurStrong}px`,
   };
 };
-

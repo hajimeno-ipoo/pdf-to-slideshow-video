@@ -14,10 +14,35 @@ interface Props {
 const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, onClose }) => {
   const [showColorPicker, setShowColorPicker] = useState(false);
   const colorBtnRef = useRef<HTMLButtonElement>(null);
+  const opacityRangeRef = useRef<HTMLInputElement>(null);
+  const blurRangeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) setShowColorPicker(false);
   }, [open]);
+
+  const updateIdleRangeProgress = (range: HTMLInputElement | null) => {
+    if (!range) return;
+    const min = Number(range.min || '0');
+    const max = Number(range.max || '100');
+    const value = Number(range.value);
+
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min || !Number.isFinite(value)) {
+      range.style.setProperty('--idle-range-progress', '0%');
+      return;
+    }
+
+    const clampedValue = Math.min(max, Math.max(min, value));
+    const progressPercent = ((clampedValue - min) / (max - min)) * 100;
+    range.style.setProperty('--idle-range-progress', `${progressPercent}%`);
+  };
+
+  useEffect(() => {
+    // Reactのstate更新（例: デフォルトへ戻す）だと "input" イベントが発火しないので、
+    // ここで明示的に進捗色を更新しておくよ。
+    updateIdleRangeProgress(opacityRangeRef.current);
+    updateIdleRangeProgress(blurRangeRef.current);
+  }, [open, prefs.opacity, prefs.blur]);
 
   const handleBackdropPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // ポータル（カラーピッカー）内の操作でも React 的にはバブルしてくるので、
@@ -84,6 +109,7 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
             <div className="text-[11px] text-slate-300 font-mono">{prefs.opacity}%</div>
           </div>
           <input
+            ref={opacityRangeRef}
             type="range"
             min="0"
             max="30"
@@ -94,6 +120,25 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
             aria-label="透明度"
           />
           <div className="text-[10px] text-slate-400">0%でほぼ透明、30%でしっかり白ガラスくらい。</div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-slate-200 font-bold">ぼかし（ブラー）</div>
+            <div className="text-[11px] text-slate-300 font-mono">{prefs.blur}px</div>
+          </div>
+          <input
+            ref={blurRangeRef}
+            type="range"
+            min="0"
+            max="30"
+            step="1"
+            value={prefs.blur}
+            onChange={(e) => onChange({ ...prefs, blur: parseInt(e.target.value, 10) })}
+            className="w-full idle-range h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            aria-label="ぼかし"
+          />
+          <div className="text-[10px] text-slate-400">0pxでぼかし無し、30pxでかなりぼけるよ（重くなるかも）。</div>
         </div>
 
         <div className="flex justify-between items-center">

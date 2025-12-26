@@ -17,6 +17,8 @@ test('glass prefs: util defines storage key and defaults', () => {
   assert.ok(src.includes('DEFAULT_GLASS_PREFS'));
   assert.ok(src.includes("tintHex"));
   assert.ok(src.includes("opacity"));
+  assert.ok(src.includes("blur"));
+  assert.ok(src.includes("--idle-glass-blur"));
 });
 
 test('glass prefs: App applies idle glass css vars and mounts modal', () => {
@@ -38,4 +40,3 @@ test('glass prefs: idle overlay styles exist', () => {
   assert.ok(css.includes('.glass-settings-overlay'));
   assert.ok(css.includes('.glass-settings-panel'));
 });
-

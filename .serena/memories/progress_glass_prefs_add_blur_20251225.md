@@ -1,0 +1,6 @@
+- ガラス設定（端末ごと）に「ぼかし（ブラー）」を追加。
+- 追加項目: `utils/glassPrefs.ts` に `blur`（0-30px, default 8px）。
+- 反映: `computeIdleGlassCssVars` が `--idle-glass-blur-thin / --idle-glass-blur / --idle-glass-blur-strong` を返し、`App.tsx` のルートstyleに載る。
+- UI: `components/GlassSettingsModal.tsx` にブラーのスライダーを追加（0〜30px）。
+- 保存: 同じ localStorage キー `pdfVideo_glassPrefs_v1` に blur を追加（既存データはデフォルト補完）。
+- テスト: `tests/glassPrefs.test.js` 更新、`npm test` PASS。
