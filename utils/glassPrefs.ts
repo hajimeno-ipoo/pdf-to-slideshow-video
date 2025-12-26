@@ -2,14 +2,21 @@ export interface GlassPrefs {
   tintHex: string; // '#RRGGBB'
   opacity: number; // 0-30 (%), 14 = alpha 0.14
   blur: number; // 0-30 (px), 8 = 8px
+  backgroundMode: 'default' | 'color' | 'image';
+  backgroundColorHex: string; // '#RRGGBB'
+  backgroundImageDataUrl: string | null; // data:image/*
 }
 
 export const GLASS_PREFS_STORAGE_KEY = 'pdfVideo_glassPrefs_v1';
+const DEFAULT_IDLE_BG_IMAGE_URL = '/Doc/f570240bf2b14647823c4a9489fb410d_3.png';
 
 export const DEFAULT_GLASS_PREFS: GlassPrefs = {
   tintHex: '#ffffff',
   opacity: 14,
   blur: 8,
+  backgroundMode: 'default',
+  backgroundColorHex: '#ffffff',
+  backgroundImageDataUrl: null,
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -41,7 +48,18 @@ export const normalizeGlassPrefs = (input: unknown): GlassPrefs => {
   const blurRaw = typeof obj.blur === 'number' ? obj.blur : Number(obj.blur);
   const blur = Number.isFinite(blurRaw) ? clamp(blurRaw, 0, 30) : DEFAULT_GLASS_PREFS.blur;
 
-  return { tintHex, opacity, blur };
+  const modeRaw = typeof obj.backgroundMode === 'string' ? obj.backgroundMode : '';
+  const backgroundMode: GlassPrefs['backgroundMode'] =
+    modeRaw === 'default' || modeRaw === 'color' || modeRaw === 'image'
+      ? modeRaw
+      : DEFAULT_GLASS_PREFS.backgroundMode;
+
+  const backgroundColorHex = normalizeHex(obj.backgroundColorHex) ?? DEFAULT_GLASS_PREFS.backgroundColorHex;
+
+  const bgUrlRaw = typeof obj.backgroundImageDataUrl === 'string' ? obj.backgroundImageDataUrl : null;
+  const backgroundImageDataUrl = bgUrlRaw && bgUrlRaw.startsWith('data:image/') ? bgUrlRaw : null;
+
+  return { tintHex, opacity, blur, backgroundMode, backgroundColorHex, backgroundImageDataUrl };
 };
 
 export const loadGlassPrefsFromLocalStorage = (): GlassPrefs | null => {
@@ -87,5 +105,12 @@ export const computeIdleGlassCssVars = (prefs: GlassPrefs): Record<string, strin
     '--idle-glass-blur-thin': `${blurThin}px`,
     '--idle-glass-blur': `${Math.round(blurBase)}px`,
     '--idle-glass-blur-strong': `${blurStrong}px`,
+    '--idle-bg-color': prefs.backgroundColorHex,
+    '--idle-bg-image':
+      prefs.backgroundMode === 'default'
+        ? `url("${DEFAULT_IDLE_BG_IMAGE_URL}")`
+        : (prefs.backgroundMode === 'image' && prefs.backgroundImageDataUrl)
+          ? `url("${prefs.backgroundImageDataUrl}")`
+          : 'none',
   };
 };

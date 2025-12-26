@@ -13,8 +13,13 @@
 }
 
 .screen-idle {
-  background: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png') center / cover no-repeat;
-  background-color: #ffffff;
+  --idle-bg-color: #ffffff;
+  --idle-bg-image: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png');
+  background-color: var(--idle-bg-color);
+  background-image: var(--idle-bg-image);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
   --idle-text-primary: rgba(15, 23, 42, 0.92);
   --idle-text-secondary: rgba(15, 23, 42, 0.78);
   --idle-text-muted: rgba(15, 23, 42, 0.62);

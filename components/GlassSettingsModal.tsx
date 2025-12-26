@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ColorPickerPopover from './ColorPickerPopover';
-import { GlassPrefs } from '../utils/glassPrefs';
+import { GlassPrefs, GLASS_PREFS_STORAGE_KEY } from '../utils/glassPrefs';
 
 interface Props {
   open: boolean;
@@ -11,14 +11,24 @@ interface Props {
   onClose: () => void;
 }
 
+const MAX_BG_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
+
 const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, onClose }) => {
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const colorBtnRef = useRef<HTMLButtonElement>(null);
+  const [showTintPicker, setShowTintPicker] = useState(false);
+  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
+  const tintBtnRef = useRef<HTMLButtonElement>(null);
+  const bgColorBtnRef = useRef<HTMLButtonElement>(null);
+  const bgImageInputRef = useRef<HTMLInputElement>(null);
+  const [bgImageErrorText, setBgImageErrorText] = useState('');
   const opacityRangeRef = useRef<HTMLInputElement>(null);
   const blurRangeRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!open) setShowColorPicker(false);
+    if (!open) {
+      setShowTintPicker(false);
+      setShowBgColorPicker(false);
+      setBgImageErrorText('');
+    }
   }, [open]);
 
   const updateIdleRangeProgress = (range: HTMLInputElement | null) => {
@@ -51,14 +61,76 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
     onClose();
   };
 
-  const portalPos = useMemo(() => {
-    if (!colorBtnRef.current) return { top: 40, left: 40 };
-    const rect = colorBtnRef.current.getBoundingClientRect();
+  const tintPortalPos = useMemo(() => {
+    if (!tintBtnRef.current) return { top: 40, left: 40 };
+    const rect = tintBtnRef.current.getBoundingClientRect();
     const width = 340;
     const left = Math.min(window.innerWidth - width - 8, Math.max(8, rect.left));
     const top = rect.bottom + 8;
     return { top, left };
-  }, [showColorPicker]);
+  }, [showTintPicker]);
+
+  const bgColorPortalPos = useMemo(() => {
+    if (!bgColorBtnRef.current) return { top: 40, left: 40 };
+    const rect = bgColorBtnRef.current.getBoundingClientRect();
+    const width = 340;
+    const left = Math.min(window.innerWidth - width - 8, Math.max(8, rect.left));
+    const top = rect.bottom + 8;
+    return { top, left };
+  }, [showBgColorPicker]);
+
+  const handleBgModeChange = (mode: GlassPrefs['backgroundMode']) => {
+    setBgImageErrorText('');
+    onChange({ ...prefs, backgroundMode: mode });
+  };
+
+  const handleBgImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBgImageErrorText('');
+    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setBgImageErrorText('画像ファイルを選んでね。');
+      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+      return;
+    }
+    if (file.size > MAX_BG_IMAGE_BYTES) {
+      setBgImageErrorText('画像が大きすぎるよ。2MBまでにしてね。');
+      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+      if (!dataUrl.startsWith('data:image/')) {
+        setBgImageErrorText('画像の読み込みに失敗したかも…もう一回やってみて！');
+        if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+        return;
+      }
+
+      const nextPrefs: GlassPrefs = { ...prefs, backgroundMode: 'image', backgroundImageDataUrl: dataUrl };
+      try {
+        localStorage.setItem(GLASS_PREFS_STORAGE_KEY, JSON.stringify(nextPrefs));
+      } catch {
+        setBgImageErrorText('保存できなかったかも…容量がいっぱいっぽい！小さめ画像で試してね。');
+        if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+        return;
+      }
+      onChange(nextPrefs);
+      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+    };
+    reader.onerror = () => {
+      setBgImageErrorText('画像の読み込みに失敗したかも…もう一回やってみて！');
+      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleBgImageClear = () => {
+    setBgImageErrorText('');
+    if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+    onChange({ ...prefs, backgroundMode: 'color', backgroundImageDataUrl: null });
+  };
 
   if (!open) return null;
 
@@ -87,17 +159,17 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
           この端末だけに保存されるよ。変えたらすぐ反映するよ。
         </div>
 
-        <div className="space-y-2">
-          <div className="text-xs text-slate-200 font-bold">ガラスの色</div>
-          <div className="flex items-center gap-3">
-            <button
-              ref={colorBtnRef}
-              onClick={() => setShowColorPicker((v) => !v)}
-              className="w-12 h-10 rounded-md border border-slate-700 bg-slate-800/50 shadow-inner overflow-hidden"
-              title="ガラスの色"
-              aria-label="ガラスの色"
-            >
-              <span className="block w-full h-full" style={{ backgroundColor: prefs.tintHex || '#ffffff' }} />
+	        <div className="space-y-2">
+	          <div className="text-xs text-slate-200 font-bold">ガラスの色</div>
+	          <div className="flex items-center gap-3">
+	            <button
+	              ref={tintBtnRef}
+	              onClick={() => setShowTintPicker((v) => !v)}
+	              className="w-12 h-10 rounded-md border border-slate-700 bg-slate-800/50 shadow-inner overflow-hidden"
+	              title="ガラスの色"
+	              aria-label="ガラスの色"
+	            >
+	              <span className="block w-full h-full" style={{ backgroundColor: prefs.tintHex || '#ffffff' }} />
             </button>
             <div className="text-xs font-mono text-slate-200">{(prefs.tintHex || '#ffffff').toUpperCase()}</div>
           </div>
@@ -138,13 +210,97 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
             className="w-full idle-range h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
             aria-label="ぼかし"
           />
-          <div className="text-[10px] text-slate-400">0pxでぼかし無し、30pxでかなりぼけるよ（重くなるかも）。</div>
-        </div>
+	          <div className="text-[10px] text-slate-400">0pxでぼかし無し、30pxでかなりぼけるよ（重くなるかも）。</div>
+	        </div>
 
-        <div className="flex justify-between items-center">
-          <button
-            onClick={onReset}
-            className="px-3 py-2 text-sm rounded border transition-colors idle-btn-glass"
+	        <div className="space-y-2 pt-1">
+	          <div className="text-xs text-slate-200 font-bold">背景</div>
+	          <div className="grid grid-cols-3 gap-2 text-[11px]">
+	            <button
+	              onClick={() => handleBgModeChange('default')}
+	              className={`py-2 rounded border transition-colors ${prefs.backgroundMode === 'default' ? 'idle-btn-primary' : 'idle-btn-glass'}`}
+	            >
+	              デフォルト
+	            </button>
+	            <button
+	              onClick={() => handleBgModeChange('color')}
+	              className={`py-2 rounded border transition-colors ${prefs.backgroundMode === 'color' ? 'idle-btn-primary' : 'idle-btn-glass'}`}
+	            >
+	              色
+	            </button>
+	            <button
+	              onClick={() => handleBgModeChange('image')}
+	              className={`py-2 rounded border transition-colors ${prefs.backgroundMode === 'image' ? 'idle-btn-primary' : 'idle-btn-glass'}`}
+	            >
+	              画像
+	            </button>
+	          </div>
+
+	          {prefs.backgroundMode === 'default' ? (
+	            <div className="text-[10px] text-slate-400">
+	              いまの背景画像（固定）を使うよ。
+	            </div>
+	          ) : (
+	            <div className="space-y-2">
+	              <div className="text-[11px] text-slate-300">背景の色</div>
+	              <div className="flex items-center gap-3">
+	                <button
+	                  ref={bgColorBtnRef}
+	                  onClick={() => setShowBgColorPicker((v) => !v)}
+	                  className="w-12 h-10 rounded-md border border-slate-700 bg-slate-800/50 shadow-inner overflow-hidden"
+	                  title="背景の色"
+	                  aria-label="背景の色"
+	                >
+	                  <span className="block w-full h-full" style={{ backgroundColor: prefs.backgroundColorHex || '#ffffff' }} />
+	                </button>
+	                <div className="text-xs font-mono text-slate-200">{(prefs.backgroundColorHex || '#ffffff').toUpperCase()}</div>
+	              </div>
+	            </div>
+	          )}
+
+	          {prefs.backgroundMode === 'image' && (
+	            <div className="space-y-2">
+	              <div className="flex items-center justify-between">
+	                <div className="text-[11px] text-slate-300">背景の画像</div>
+	                {prefs.backgroundImageDataUrl && (
+	                  <button onClick={handleBgImageClear} className="text-[10px] text-red-300 hover:text-red-200 hover:underline">
+	                    削除
+	                  </button>
+	                )}
+	              </div>
+	              <input type="file" accept="image/*" ref={bgImageInputRef} onChange={handleBgImageSelect} className="hidden" />
+	              <div className="flex items-center gap-3">
+	                <button
+	                  onClick={() => bgImageInputRef.current?.click()}
+	                  className="px-3 py-2 text-sm rounded border transition-colors idle-btn-glass"
+	                >
+	                  画像を選ぶ
+	                </button>
+	                <div className="flex items-center gap-2">
+	                  <div
+	                    className="w-10 h-7 rounded border border-white/20 bg-white/10 overflow-hidden"
+	                    style={{
+	                      backgroundImage: prefs.backgroundImageDataUrl ? `url(${prefs.backgroundImageDataUrl})` : 'none',
+	                      backgroundSize: 'cover',
+	                      backgroundPosition: 'center',
+	                    }}
+	                  />
+	                  <div className="text-[10px] text-slate-400">
+	                    {prefs.backgroundImageDataUrl ? '設定済み' : '未設定'}
+	                  </div>
+	                </div>
+	              </div>
+	              {bgImageErrorText && (
+	                <div className="text-[10px] text-red-300">{bgImageErrorText}</div>
+	              )}
+	            </div>
+	          )}
+	        </div>
+
+	        <div className="flex justify-between items-center">
+	          <button
+	            onClick={onReset}
+	            className="px-3 py-2 text-sm rounded border transition-colors idle-btn-glass"
           >
             デフォルトに戻す
           </button>
@@ -155,20 +311,31 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
             閉じる
           </button>
         </div>
-      </div>
+	      </div>
 
-      {showColorPicker && colorBtnRef.current && ReactDOM.createPortal(
-        <div style={{ position: 'fixed', top: portalPos.top, left: portalPos.left, zIndex: 9999 }}>
-          <ColorPickerPopover
-            value={prefs.tintHex}
-            onChange={(hex) => onChange({ ...prefs, tintHex: hex })}
-            onClose={() => setShowColorPicker(false)}
-          />
-        </div>,
-        document.body
-      )}
-    </div>
-  );
+	      {showTintPicker && tintBtnRef.current && ReactDOM.createPortal(
+	        <div style={{ position: 'fixed', top: tintPortalPos.top, left: tintPortalPos.left, zIndex: 9999 }}>
+	          <ColorPickerPopover
+	            value={prefs.tintHex}
+	            onChange={(hex) => onChange({ ...prefs, tintHex: hex })}
+	            onClose={() => setShowTintPicker(false)}
+	          />
+	        </div>,
+	        document.body
+	      )}
+
+	      {showBgColorPicker && bgColorBtnRef.current && ReactDOM.createPortal(
+	        <div style={{ position: 'fixed', top: bgColorPortalPos.top, left: bgColorPortalPos.left, zIndex: 9999 }}>
+	          <ColorPickerPopover
+	            value={prefs.backgroundColorHex}
+	            onChange={(hex) => onChange({ ...prefs, backgroundColorHex: hex })}
+	            onClose={() => setShowBgColorPicker(false)}
+	          />
+	        </div>,
+	        document.body
+	      )}
+	    </div>
+	  );
 };
 
 export default GlassSettingsModal;

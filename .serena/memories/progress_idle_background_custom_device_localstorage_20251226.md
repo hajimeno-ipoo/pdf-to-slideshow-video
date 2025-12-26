@@ -1,0 +1,7 @@
+- 端末ごと（localStorage）で、アプリ背景（IDLE/編集系の `.screen-idle`）を「デフォルト画像 / 色 / 画像」でカスタムできるように追加。
+- 保存: 既存の `pdfVideo_glassPrefs_v1` に同居（backgroundMode/backgroundColorHex/backgroundImageDataUrl）。
+- 反映: `computeIdleGlassCssVars` が `--idle-bg-color` / `--idle-bg-image` を返し、`App.tsx` ルートの inline style から CSS変数で上書き。
+- CSS: `index.css` の `.screen-idle` を固定 `background: url(...)` から、`background-color: var(--idle-bg-color)` / `background-image: var(--idle-bg-image)` に変更。
+- UI: `GlassSettingsModal` に「背景」セクション（デフォルト/色/画像、背景色ピッカー、画像選択/削除）を追加。
+- 安全策: 画像は 2MB までに制限し、読み込み失敗/保存失敗（容量不足の可能性）をモーダル内にエラーテキスト表示。
+- テスト: `tests/glassPrefs.test.js` を更新し、`npm test` PASS（120 tests）。

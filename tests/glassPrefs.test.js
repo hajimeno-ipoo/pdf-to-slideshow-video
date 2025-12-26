@@ -18,7 +18,12 @@ test('glass prefs: util defines storage key and defaults', () => {
   assert.ok(src.includes("tintHex"));
   assert.ok(src.includes("opacity"));
   assert.ok(src.includes("blur"));
+  assert.ok(src.includes("backgroundMode"));
+  assert.ok(src.includes("backgroundColorHex"));
+  assert.ok(src.includes("backgroundImageDataUrl"));
   assert.ok(src.includes("--idle-glass-blur"));
+  assert.ok(src.includes("--idle-bg-color"));
+  assert.ok(src.includes("--idle-bg-image"));
 });
 
 test('glass prefs: App applies idle glass css vars and mounts modal', () => {
@@ -39,4 +44,19 @@ test('glass prefs: idle overlay styles exist', () => {
   const css = readUtf8('index.css');
   assert.ok(css.includes('.glass-settings-overlay'));
   assert.ok(css.includes('.glass-settings-panel'));
+});
+
+test('idle background: css variables and background binding exist', () => {
+  const css = readUtf8('index.css');
+  assert.ok(css.includes('--idle-bg-color'));
+  assert.ok(css.includes('--idle-bg-image'));
+  assert.ok(css.includes('background-color: var(--idle-bg-color)'));
+  assert.ok(css.includes('background-image: var(--idle-bg-image)'));
+});
+
+test('glass settings modal: background controls exist', () => {
+  const src = readUtf8('components/GlassSettingsModal.tsx');
+  assert.ok(src.includes('backgroundMode'));
+  assert.ok(src.includes('背景の色'));
+  assert.ok(src.includes('画像を選ぶ'));
 });
