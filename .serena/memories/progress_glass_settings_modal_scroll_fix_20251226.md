@@ -1,0 +1,4 @@
+- ガラス設定モーダルが上下に切れる問題を修正。
+- `.screen-idle .glass-settings-panel` に `max-height: calc(100vh - 48px)` と `overflow-y: auto` を追加して、内容が多い時はパネル内でスクロールできるようにした（ガラス表現は維持）。
+- iOS系の表示崩れ対策で `100svh` 対応も追加。
+- 検証: `npm test` PASS（120 tests）。

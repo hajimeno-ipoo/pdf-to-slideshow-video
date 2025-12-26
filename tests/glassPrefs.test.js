@@ -21,9 +21,16 @@ test('glass prefs: util defines storage key and defaults', () => {
   assert.ok(src.includes("backgroundMode"));
   assert.ok(src.includes("backgroundColorHex"));
   assert.ok(src.includes("backgroundImageDataUrl"));
+  assert.ok(src.includes("backgroundImageDisplay"));
+  assert.ok(src.includes("backgroundImageScale"));
+  assert.ok(src.includes("backgroundImagePositionX"));
+  assert.ok(src.includes("backgroundImagePositionY"));
   assert.ok(src.includes("--idle-glass-blur"));
   assert.ok(src.includes("--idle-bg-color"));
   assert.ok(src.includes("--idle-bg-image"));
+  assert.ok(src.includes("--idle-bg-size"));
+  assert.ok(src.includes("--idle-bg-position"));
+  assert.ok(src.includes("--idle-bg-repeat"));
 });
 
 test('glass prefs: App applies idle glass css vars and mounts modal', () => {
@@ -50,8 +57,14 @@ test('idle background: css variables and background binding exist', () => {
   const css = readUtf8('index.css');
   assert.ok(css.includes('--idle-bg-color'));
   assert.ok(css.includes('--idle-bg-image'));
+  assert.ok(css.includes('--idle-bg-position'));
+  assert.ok(css.includes('--idle-bg-size'));
+  assert.ok(css.includes('--idle-bg-repeat'));
   assert.ok(css.includes('background-color: var(--idle-bg-color)'));
   assert.ok(css.includes('background-image: var(--idle-bg-image)'));
+  assert.ok(css.includes('background-position: var(--idle-bg-position)'));
+  assert.ok(css.includes('background-size: var(--idle-bg-size)'));
+  assert.ok(css.includes('background-repeat: var(--idle-bg-repeat)'));
 });
 
 test('glass settings modal: background controls exist', () => {
@@ -59,4 +72,9 @@ test('glass settings modal: background controls exist', () => {
   assert.ok(src.includes('backgroundMode'));
   assert.ok(src.includes('背景の色'));
   assert.ok(src.includes('画像を選ぶ'));
+  assert.ok(src.includes('画像の大きさ'));
+  assert.ok(src.includes('画面フィット'));
+  assert.ok(src.includes('タイル'));
+  assert.ok(src.includes('位置（左右）'));
+  assert.ok(src.includes('位置（上下）'));
 });

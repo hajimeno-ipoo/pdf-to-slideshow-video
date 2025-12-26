@@ -1,0 +1,5 @@
+- ガラス設定モーダルを「左: 背景 / 右: ガラス」の2カラムに変更（画面が広い時だけ）。
+- `components/GlassSettingsModal.tsx` を `grid grid-cols-1 md:grid-cols-2` にして、背景とガラス設定を分離。
+- パネル幅は `max-w-md` → `max-w-2xl` に拡張。
+- 既存のスクロール（max-height/overflow-y）は保険として維持。
+- 検証: `npm test` PASS（120 tests）。

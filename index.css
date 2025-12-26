@@ -15,11 +15,14 @@
 .screen-idle {
   --idle-bg-color: #ffffff;
   --idle-bg-image: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png');
+  --idle-bg-position: center;
+  --idle-bg-size: cover;
+  --idle-bg-repeat: no-repeat;
   background-color: var(--idle-bg-color);
   background-image: var(--idle-bg-image);
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
+  background-position: var(--idle-bg-position);
+  background-size: var(--idle-bg-size);
+  background-repeat: var(--idle-bg-repeat);
   --idle-text-primary: rgba(15, 23, 42, 0.92);
   --idle-text-secondary: rgba(15, 23, 42, 0.78);
   --idle-text-muted: rgba(15, 23, 42, 0.62);
@@ -778,6 +781,17 @@
   background: rgba(255, 255, 255, 0.06) !important;
   -webkit-backdrop-filter: blur(10px) saturate(160%);
   backdrop-filter: blur(10px) saturate(160%);
+}
+.screen-idle .glass-settings-panel {
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+@supports (height: 100svh) {
+  .screen-idle .glass-settings-panel {
+    max-height: calc(100svh - 48px);
+  }
 }
 .screen-idle .glass-settings-panel.border-slate-800 {
   border-color: rgba(15, 23, 42, 0.08) !important;

@@ -5,6 +5,10 @@ export interface GlassPrefs {
   backgroundMode: 'default' | 'color' | 'image';
   backgroundColorHex: string; // '#RRGGBB'
   backgroundImageDataUrl: string | null; // data:image/*
+  backgroundImageDisplay: 'custom' | 'fit' | 'tile';
+  backgroundImageScale: number; // 50-200 (%)
+  backgroundImagePositionX: number; // 0-100 (%)
+  backgroundImagePositionY: number; // 0-100 (%)
 }
 
 export const GLASS_PREFS_STORAGE_KEY = 'pdfVideo_glassPrefs_v1';
@@ -17,6 +21,10 @@ export const DEFAULT_GLASS_PREFS: GlassPrefs = {
   backgroundMode: 'default',
   backgroundColorHex: '#ffffff',
   backgroundImageDataUrl: null,
+  backgroundImageDisplay: 'custom',
+  backgroundImageScale: 120,
+  backgroundImagePositionX: 50,
+  backgroundImagePositionY: 50,
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -59,7 +67,50 @@ export const normalizeGlassPrefs = (input: unknown): GlassPrefs => {
   const bgUrlRaw = typeof obj.backgroundImageDataUrl === 'string' ? obj.backgroundImageDataUrl : null;
   const backgroundImageDataUrl = bgUrlRaw && bgUrlRaw.startsWith('data:image/') ? bgUrlRaw : null;
 
-  return { tintHex, opacity, blur, backgroundMode, backgroundColorHex, backgroundImageDataUrl };
+  const displayRaw = typeof obj.backgroundImageDisplay === 'string' ? obj.backgroundImageDisplay : '';
+  const backgroundImageDisplay: GlassPrefs['backgroundImageDisplay'] =
+    displayRaw === 'custom' || displayRaw === 'fit' || displayRaw === 'tile'
+      ? displayRaw
+      : DEFAULT_GLASS_PREFS.backgroundImageDisplay;
+
+  const legacyFitRaw = typeof obj.backgroundImageFit === 'string' ? obj.backgroundImageFit : '';
+  const legacyScaleFromFit = legacyFitRaw === 'cover' ? 120 : legacyFitRaw === 'contain' ? 100 : null;
+
+  const scaleRaw = typeof obj.backgroundImageScale === 'number' ? obj.backgroundImageScale : Number(obj.backgroundImageScale);
+  const backgroundImageScale = Number.isFinite(scaleRaw)
+    ? clamp(scaleRaw, 50, 200)
+    : (legacyScaleFromFit ?? DEFAULT_GLASS_PREFS.backgroundImageScale);
+
+  const posXRawNum = typeof obj.backgroundImagePositionX === 'number'
+    ? obj.backgroundImagePositionX
+    : Number(obj.backgroundImagePositionX);
+  const posXRawStr = typeof obj.backgroundImagePositionX === 'string' ? obj.backgroundImagePositionX : '';
+  const legacyPosXNum = posXRawStr === 'left' ? 0 : posXRawStr === 'center' ? 50 : posXRawStr === 'right' ? 100 : null;
+  const backgroundImagePositionX = Number.isFinite(posXRawNum)
+    ? clamp(posXRawNum, 0, 100)
+    : (legacyPosXNum ?? DEFAULT_GLASS_PREFS.backgroundImagePositionX);
+
+  const posYRawNum = typeof obj.backgroundImagePositionY === 'number'
+    ? obj.backgroundImagePositionY
+    : Number(obj.backgroundImagePositionY);
+  const posYRawStr = typeof obj.backgroundImagePositionY === 'string' ? obj.backgroundImagePositionY : '';
+  const legacyPosYNum = posYRawStr === 'top' ? 0 : posYRawStr === 'center' ? 50 : posYRawStr === 'bottom' ? 100 : null;
+  const backgroundImagePositionY = Number.isFinite(posYRawNum)
+    ? clamp(posYRawNum, 0, 100)
+    : (legacyPosYNum ?? DEFAULT_GLASS_PREFS.backgroundImagePositionY);
+
+  return {
+    tintHex,
+    opacity,
+    blur,
+    backgroundMode,
+    backgroundColorHex,
+    backgroundImageDataUrl,
+    backgroundImageDisplay,
+    backgroundImageScale,
+    backgroundImagePositionX,
+    backgroundImagePositionY,
+  };
 };
 
 export const loadGlassPrefsFromLocalStorage = (): GlassPrefs | null => {
@@ -112,5 +163,21 @@ export const computeIdleGlassCssVars = (prefs: GlassPrefs): Record<string, strin
         : (prefs.backgroundMode === 'image' && prefs.backgroundImageDataUrl)
           ? `url("${prefs.backgroundImageDataUrl}")`
           : 'none',
+    '--idle-bg-size':
+      prefs.backgroundMode === 'image'
+        ? (prefs.backgroundImageDisplay === 'fit'
+          ? 'contain'
+          : `${clamp(prefs.backgroundImageScale, 50, 200)}% auto`)
+        : 'cover',
+    '--idle-bg-position':
+      prefs.backgroundMode === 'image'
+        ? (prefs.backgroundImageDisplay === 'fit'
+          ? 'center'
+          : `${clamp(prefs.backgroundImagePositionX, 0, 100)}% ${clamp(prefs.backgroundImagePositionY, 0, 100)}%`)
+        : 'center',
+    '--idle-bg-repeat':
+      (prefs.backgroundMode === 'image' && prefs.backgroundImageDisplay === 'tile')
+        ? 'repeat'
+        : 'no-repeat',
   };
 };

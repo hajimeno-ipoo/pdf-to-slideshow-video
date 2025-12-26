@@ -1,0 +1,5 @@
+- 背景画像の「配置/大きさ」をボタン選択ではなくスライダーで自由に調整できるように変更。
+- Prefs: `utils/glassPrefs.ts` に `backgroundImageScale(50-200)` / `backgroundImagePositionX(0-100)` / `backgroundImagePositionY(0-100)` を追加（既存の `backgroundImageFit` や left/center/right 等は読み込み時に数値へ移行）。
+- 反映: `computeIdleGlassCssVars` が `--idle-bg-size` を `${scale}% auto`、`--idle-bg-position` を `${x}% ${y}%` で返す（default/color は cover/center）。
+- UI: `components/GlassSettingsModal.tsx` の背景(画像)モードに「画像の大きさ」「位置（左右/上下）」の range を追加し、即反映＆保存。
+- テスト: `tests/glassPrefs.test.js` 更新、`npm test` PASS（120 tests）。

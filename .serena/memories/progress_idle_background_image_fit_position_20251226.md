@@ -1,0 +1,5 @@
+- 背景画像カスタムに「大きさ（cover/contain）」と「位置（左右/上下）」を追加。
+- 保存: 既存 `pdfVideo_glassPrefs_v1` に `backgroundImageFit/backgroundImagePositionX/backgroundImagePositionY` を同居。
+- 反映: `computeIdleGlassCssVars` が `--idle-bg-size` / `--idle-bg-position` を返し、`index.css` の `.screen-idle` が `background-size/position` をCSS変数参照に。
+- UI: `GlassSettingsModal` の背景(画像)モードに「画像の大きさ」「画像の位置（左右/上下）」ボタンを追加。
+- テスト: `tests/glassPrefs.test.js` 更新、`npm test` PASS（120 tests）。
