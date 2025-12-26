@@ -70,6 +70,7 @@ test('idle background: css variables and background binding exist', () => {
 test('glass settings modal: background controls exist', () => {
   const src = readUtf8('components/GlassSettingsModal.tsx');
   assert.ok(src.includes('backgroundMode'));
+  assert.ok(src.includes('プレビュー'));
   assert.ok(src.includes('背景の色'));
   assert.ok(src.includes('画像を選ぶ'));
   assert.ok(src.includes('画像の大きさ'));

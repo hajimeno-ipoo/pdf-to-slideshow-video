@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import ColorPickerPopover from './ColorPickerPopover';
-import { GlassPrefs, GLASS_PREFS_STORAGE_KEY } from '../utils/glassPrefs';
+import { GlassPrefs, GLASS_PREFS_STORAGE_KEY, DEFAULT_GLASS_PREFS } from '../utils/glassPrefs';
 
 interface Props {
   open: boolean;
@@ -13,12 +13,25 @@ interface Props {
 
 const MAX_BG_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
 
+const clampNumber = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+
+type Point = { x: number; y: number };
+
+type PreviewGesture =
+  | { mode: 'none' }
+  | { mode: 'drag'; startX: number; startY: number; startPosX: number; startPosY: number }
+  | { mode: 'pinch'; startCenterX: number; startCenterY: number; startPosX: number; startPosY: number; startScale: number; startDistance: number };
+
 const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, onClose }) => {
   const [showTintPicker, setShowTintPicker] = useState(false);
   const [showBgColorPicker, setShowBgColorPicker] = useState(false);
+  const [previewInteracting, setPreviewInteracting] = useState(false);
   const tintBtnRef = useRef<HTMLButtonElement>(null);
   const bgColorBtnRef = useRef<HTMLButtonElement>(null);
   const bgImageInputRef = useRef<HTMLInputElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
+  const previewPointersRef = useRef<Map<number, Point>>(new Map());
+  const previewGestureRef = useRef<PreviewGesture>({ mode: 'none' });
   const [bgImageErrorText, setBgImageErrorText] = useState('');
   const opacityRangeRef = useRef<HTMLInputElement>(null);
   const blurRangeRef = useRef<HTMLInputElement>(null);
@@ -30,6 +43,9 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
     if (!open) {
       setShowTintPicker(false);
       setShowBgColorPicker(false);
+      setPreviewInteracting(false);
+      previewPointersRef.current.clear();
+      previewGestureRef.current = { mode: 'none' };
       setBgImageErrorText('');
     }
   }, [open]);
@@ -138,6 +154,193 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
     onChange({ ...prefs, backgroundMode: 'color', backgroundImageDataUrl: null });
   };
 
+  const canTransformBgImage =
+    prefs.backgroundMode === 'image' &&
+    !!prefs.backgroundImageDataUrl &&
+    prefs.backgroundImageDisplay !== 'fit';
+
+  const getPreviewSize = () => {
+    const rect = previewRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+    if (!Number.isFinite(rect.width) || !Number.isFinite(rect.height) || rect.width <= 0 || rect.height <= 0) return null;
+    return { width: rect.width, height: rect.height };
+  };
+
+  const getFirstTwoPointers = (pointers: Map<number, Point>) => {
+    const it = pointers.values();
+    const a = it.next().value as Point | undefined;
+    const b = it.next().value as Point | undefined;
+    if (!a || !b) return null;
+    return { a, b };
+  };
+
+  const handlePreviewPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!canTransformBgImage) return;
+    if (e.button !== 0) return;
+    e.preventDefault();
+
+    const el = e.currentTarget;
+    try {
+      el.setPointerCapture(e.pointerId);
+    } catch {
+      // ignore
+    }
+
+    previewPointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const pointers = previewPointersRef.current;
+
+    if (pointers.size === 1) {
+      previewGestureRef.current = {
+        mode: 'drag',
+        startX: e.clientX,
+        startY: e.clientY,
+        startPosX: prefs.backgroundImagePositionX,
+        startPosY: prefs.backgroundImagePositionY,
+      };
+      setPreviewInteracting(true);
+      return;
+    }
+
+    if (pointers.size === 2) {
+      const pair = getFirstTwoPointers(pointers);
+      if (!pair) return;
+      const centerX = (pair.a.x + pair.b.x) / 2;
+      const centerY = (pair.a.y + pair.b.y) / 2;
+      const dist = Math.hypot(pair.a.x - pair.b.x, pair.a.y - pair.b.y);
+      previewGestureRef.current = {
+        mode: 'pinch',
+        startCenterX: centerX,
+        startCenterY: centerY,
+        startPosX: prefs.backgroundImagePositionX,
+        startPosY: prefs.backgroundImagePositionY,
+        startScale: prefs.backgroundImageScale,
+        startDistance: Math.max(1, dist),
+      };
+      setPreviewInteracting(true);
+    }
+  };
+
+  const handlePreviewPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!canTransformBgImage) return;
+    if (!previewPointersRef.current.has(e.pointerId)) return;
+    e.preventDefault();
+
+    previewPointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    const size = getPreviewSize();
+    if (!size) return;
+
+    const pointers = previewPointersRef.current;
+    const gesture = previewGestureRef.current;
+
+    if (gesture.mode === 'drag' && pointers.size === 1) {
+      const dx = e.clientX - gesture.startX;
+      const dy = e.clientY - gesture.startY;
+      const nextX = clampNumber(gesture.startPosX - (dx / size.width) * 100, 0, 100);
+      const nextY = clampNumber(gesture.startPosY - (dy / size.height) * 100, 0, 100);
+      onChange({ ...prefs, backgroundImagePositionX: Math.round(nextX), backgroundImagePositionY: Math.round(nextY) });
+      return;
+    }
+
+    if (gesture.mode === 'pinch' && pointers.size >= 2) {
+      const pair = getFirstTwoPointers(pointers);
+      if (!pair) return;
+      const centerX = (pair.a.x + pair.b.x) / 2;
+      const centerY = (pair.a.y + pair.b.y) / 2;
+      const dist = Math.hypot(pair.a.x - pair.b.x, pair.a.y - pair.b.y);
+      const ratio = dist / Math.max(1, gesture.startDistance);
+      const nextScale = clampNumber(Math.round(gesture.startScale * ratio), 50, 200);
+
+      const dx = centerX - gesture.startCenterX;
+      const dy = centerY - gesture.startCenterY;
+      const nextX = clampNumber(gesture.startPosX - (dx / size.width) * 100, 0, 100);
+      const nextY = clampNumber(gesture.startPosY - (dy / size.height) * 100, 0, 100);
+
+      onChange({
+        ...prefs,
+        backgroundImageScale: nextScale,
+        backgroundImagePositionX: Math.round(nextX),
+        backgroundImagePositionY: Math.round(nextY),
+      });
+    }
+  };
+
+  const endPreviewGestureIfNeeded = () => {
+    if (previewPointersRef.current.size === 0) {
+      previewGestureRef.current = { mode: 'none' };
+      setPreviewInteracting(false);
+    }
+  };
+
+  const handlePreviewPointerUpOrCancel = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!previewPointersRef.current.has(e.pointerId)) return;
+    previewPointersRef.current.delete(e.pointerId);
+
+    const pointers = previewPointersRef.current;
+    if (pointers.size === 1) {
+      const remaining = pointers.values().next().value as Point | undefined;
+      if (remaining) {
+        previewGestureRef.current = {
+          mode: 'drag',
+          startX: remaining.x,
+          startY: remaining.y,
+          startPosX: prefs.backgroundImagePositionX,
+          startPosY: prefs.backgroundImagePositionY,
+        };
+        setPreviewInteracting(true);
+        return;
+      }
+    }
+
+    endPreviewGestureIfNeeded();
+  };
+
+  const handlePreviewWheel = (e: React.WheelEvent<HTMLDivElement>) => {
+    if (!canTransformBgImage) return;
+    e.preventDefault();
+
+    const delta = e.deltaY;
+    if (!Number.isFinite(delta) || delta === 0) return;
+    const zoom = Math.exp(-delta * 0.002);
+    const nextScale = clampNumber(Math.round(prefs.backgroundImageScale * zoom), 50, 200);
+    if (nextScale === prefs.backgroundImageScale) return;
+    onChange({ ...prefs, backgroundImageScale: nextScale });
+  };
+
+  const handlePreviewDoubleClick = () => {
+    if (prefs.backgroundMode !== 'image') return;
+    onChange({
+      ...prefs,
+      backgroundImageScale: DEFAULT_GLASS_PREFS.backgroundImageScale,
+      backgroundImagePositionX: DEFAULT_GLASS_PREFS.backgroundImagePositionX,
+      backgroundImagePositionY: DEFAULT_GLASS_PREFS.backgroundImagePositionY,
+    });
+  };
+
+  const handleResetBackgroundSection = () => {
+    setBgImageErrorText('');
+    setShowBgColorPicker(false);
+    onChange({
+      ...prefs,
+      backgroundMode: DEFAULT_GLASS_PREFS.backgroundMode,
+      backgroundColorHex: DEFAULT_GLASS_PREFS.backgroundColorHex,
+      backgroundImageDisplay: DEFAULT_GLASS_PREFS.backgroundImageDisplay,
+      backgroundImageScale: DEFAULT_GLASS_PREFS.backgroundImageScale,
+      backgroundImagePositionX: DEFAULT_GLASS_PREFS.backgroundImagePositionX,
+      backgroundImagePositionY: DEFAULT_GLASS_PREFS.backgroundImagePositionY,
+    });
+  };
+
+  const handleResetGlassSection = () => {
+    setShowTintPicker(false);
+    onChange({
+      ...prefs,
+      tintHex: DEFAULT_GLASS_PREFS.tintHex,
+      opacity: DEFAULT_GLASS_PREFS.opacity,
+      blur: DEFAULT_GLASS_PREFS.blur,
+    });
+  };
+
   if (!open) return null;
 
 	  return (
@@ -165,15 +368,68 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	          この端末だけに保存されるよ。変えたらすぐ反映するよ。
 	        </div>
 
-	        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-	          {/* 左：背景 */}
-	          <div className="space-y-2">
-	            <div className="text-xs text-slate-200 font-bold">背景</div>
-	            <div className="grid grid-cols-3 gap-2 text-[11px]">
-	              <button
-	                onClick={() => handleBgModeChange('default')}
-	                className={`py-2 rounded border transition-colors ${prefs.backgroundMode === 'default' ? 'idle-btn-primary' : 'idle-btn-glass'}`}
-	              >
+		        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+		          {/* 左：背景 */}
+		          <div className="space-y-4">
+		            <div className="space-y-2 md:sticky md:top-0 md:z-10">
+		              <div className="flex items-center justify-between">
+		                <div className="text-xs text-slate-200 font-bold">プレビュー</div>
+		                {prefs.backgroundMode === 'image' && (
+		                  <div className="text-[10px] text-slate-400">
+		                    ダブルクリックでリセット
+		                  </div>
+		                )}
+		              </div>
+		              <div
+		                ref={previewRef}
+		                className={`relative w-full aspect-video rounded-xl border border-white/15 overflow-hidden select-none ${canTransformBgImage ? (previewInteracting ? 'cursor-grabbing' : 'cursor-grab') : 'cursor-default'}`}
+		                style={{
+		                  backgroundColor: 'var(--idle-bg-color)',
+		                  backgroundImage: 'var(--idle-bg-image)',
+		                  backgroundPosition: 'var(--idle-bg-position)',
+		                  backgroundSize: 'var(--idle-bg-size)',
+		                  backgroundRepeat: 'var(--idle-bg-repeat)',
+		                  touchAction: 'none',
+		                }}
+		                onPointerDown={handlePreviewPointerDown}
+		                onPointerMove={handlePreviewPointerMove}
+		                onPointerUp={handlePreviewPointerUpOrCancel}
+		                onPointerCancel={handlePreviewPointerUpOrCancel}
+		                onWheel={handlePreviewWheel}
+		                onDoubleClick={handlePreviewDoubleClick}
+		              >
+		                <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/10 via-transparent to-black/10" />
+		                <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
+		                  <div className="glass rounded-xl px-4 py-3 w-full max-w-[260px]">
+		                    <div className="text-sm font-bold text-slate-200">ガラス</div>
+		                    <div className="text-[10px] text-slate-400">ここで見え方を確認できるよ。</div>
+		                  </div>
+		                </div>
+		              </div>
+		              <div className="text-[10px] text-slate-400 leading-relaxed">
+		                {canTransformBgImage
+		                  ? (prefs.backgroundImageDisplay === 'tile'
+		                    ? 'ドラッグでタイルをずらす／ホイール・ピンチで大きさ／ダブルクリックでリセット。'
+		                    : 'ドラッグで移動／ホイール・ピンチでズーム／ダブルクリックでリセット。')
+		                  : '画像モード（自由/タイル）でドラッグやズームが使えるよ。'}
+		              </div>
+		            </div>
+
+		            <div className="space-y-2">
+		              <div className="flex items-center justify-between">
+		                <div className="text-xs text-slate-200 font-bold">背景</div>
+		                <button
+		                  onClick={handleResetBackgroundSection}
+		                  className="px-2 py-1 text-[11px] rounded border transition-colors idle-btn-glass"
+		                >
+		                  リセット
+		                </button>
+		              </div>
+		            <div className="grid grid-cols-3 gap-2 text-[11px]">
+		              <button
+		                onClick={() => handleBgModeChange('default')}
+		                className={`py-2 rounded border transition-colors ${prefs.backgroundMode === 'default' ? 'idle-btn-primary' : 'idle-btn-glass'}`}
+		              >
 	                デフォルト
 	              </button>
 	              <button
@@ -212,11 +468,11 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	              </div>
 	            )}
 
-	            {prefs.backgroundMode === 'image' && (
-	              <div className="space-y-3">
-	                <div className="space-y-2">
-	                  <div className="text-[11px] text-slate-300">表示</div>
-	                  <div className="grid grid-cols-3 gap-2 text-[11px]">
+		            {prefs.backgroundMode === 'image' && (
+		              <div className="space-y-3">
+		                <div className="space-y-2">
+		                  <div className="text-[11px] text-slate-300">表示</div>
+		                  <div className="grid grid-cols-3 gap-2 text-[11px]">
 	                    <button
 	                      onClick={() => onChange({ ...prefs, backgroundImageDisplay: 'custom' })}
 	                      className={`py-2 rounded border transition-colors ${prefs.backgroundImageDisplay === 'custom' ? 'idle-btn-primary' : 'idle-btn-glass'}`}
@@ -238,15 +494,15 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	                  </div>
 	                </div>
 
-	                {prefs.backgroundImageDisplay === 'fit' ? (
-	                  <div className="text-[10px] text-slate-400">画面フィットは、画像がぜんぶ見えるよ。</div>
-	                ) : (
-	                  <>
-	                    <div className="space-y-2">
-	                      <div className="flex items-center justify-between">
-	                        <div className="text-xs text-slate-200 font-bold">{prefs.backgroundImageDisplay === 'tile' ? 'タイルの大きさ' : '画像の大きさ'}</div>
-	                        <div className="text-[11px] text-slate-300 font-mono">{prefs.backgroundImageScale}%</div>
-	                      </div>
+		                {prefs.backgroundImageDisplay === 'fit' ? (
+		                  <div className="text-[10px] text-slate-400">画面フィットは、画像がぜんぶ見えるよ。</div>
+		                ) : (
+		                  <>
+		                    <div className="space-y-2">
+		                      <div className="flex items-center justify-between">
+		                        <div className="text-xs text-slate-200 font-bold">{prefs.backgroundImageDisplay === 'tile' ? 'タイルの大きさ' : '画像の大きさ'}</div>
+		                        <div className="text-[11px] text-slate-300 font-mono">{prefs.backgroundImageScale}%</div>
+		                      </div>
 	                      <input
 	                        ref={bgScaleRangeRef}
 	                        type="range"
@@ -263,15 +519,15 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	                          ? 'タイルが大きく/小さくなるよ。'
 	                          : '大きくするとズーム、小さくすると全体が見えるよ。'}
 	                      </div>
-	                    </div>
+		                    </div>
 
-	                    <div className="space-y-2">
-	                      <div className="flex items-center justify-between">
-	                        <div className="text-xs text-slate-200 font-bold">位置（左右）</div>
-	                        <div className="text-[11px] text-slate-300 font-mono">{prefs.backgroundImagePositionX}%</div>
-	                      </div>
-	                      <input
-	                        ref={bgPosXRangeRef}
+		                    <div className="space-y-2">
+		                      <div className="flex items-center justify-between">
+		                        <div className="text-xs text-slate-200 font-bold">{prefs.backgroundImageDisplay === 'tile' ? 'タイルのずれ（左右）' : '位置（左右）'}</div>
+		                        <div className="text-[11px] text-slate-300 font-mono">{prefs.backgroundImagePositionX}%</div>
+		                      </div>
+		                      <input
+		                        ref={bgPosXRangeRef}
 	                        type="range"
 	                        min="0"
 	                        max="100"
@@ -279,17 +535,17 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	                        value={prefs.backgroundImagePositionX}
 	                        onChange={(e) => onChange({ ...prefs, backgroundImagePositionX: parseInt(e.target.value, 10) })}
 	                        className="w-full idle-range h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-	                        aria-label="画像の位置（左右）"
-	                      />
-	                    </div>
+		                        aria-label={prefs.backgroundImageDisplay === 'tile' ? 'タイルのずれ（左右）' : '画像の位置（左右）'}
+		                      />
+		                    </div>
 
-	                    <div className="space-y-2">
-	                      <div className="flex items-center justify-between">
-	                        <div className="text-xs text-slate-200 font-bold">位置（上下）</div>
-	                        <div className="text-[11px] text-slate-300 font-mono">{prefs.backgroundImagePositionY}%</div>
-	                      </div>
-	                      <input
-	                        ref={bgPosYRangeRef}
+		                    <div className="space-y-2">
+		                      <div className="flex items-center justify-between">
+		                        <div className="text-xs text-slate-200 font-bold">{prefs.backgroundImageDisplay === 'tile' ? 'タイルのずれ（上下）' : '位置（上下）'}</div>
+		                        <div className="text-[11px] text-slate-300 font-mono">{prefs.backgroundImagePositionY}%</div>
+		                      </div>
+		                      <input
+		                        ref={bgPosYRangeRef}
 	                        type="range"
 	                        min="0"
 	                        max="100"
@@ -297,11 +553,11 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	                        value={prefs.backgroundImagePositionY}
 	                        onChange={(e) => onChange({ ...prefs, backgroundImagePositionY: parseInt(e.target.value, 10) })}
 	                        className="w-full idle-range h-1 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
-	                        aria-label="画像の位置（上下）"
-	                      />
-	                    </div>
-	                  </>
-	                )}
+		                        aria-label={prefs.backgroundImageDisplay === 'tile' ? 'タイルのずれ（上下）' : '画像の位置（上下）'}
+		                      />
+		                    </div>
+		                  </>
+		                )}
 
 	                <div className="flex items-center justify-between">
 	                  <div className="text-[11px] text-slate-300">背景の画像</div>
@@ -337,14 +593,24 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	                  <div className="text-[10px] text-red-300">{bgImageErrorText}</div>
 	                )}
 	              </div>
-	            )}
-	          </div>
+		            )}
+		            </div>
+		          </div>
 
-	          {/* 右：ガラス */}
-	          <div className="space-y-3">
-	            <div className="space-y-2">
-	              <div className="text-xs text-slate-200 font-bold">ガラスの色</div>
-	              <div className="flex items-center gap-3">
+		          {/* 右：ガラス */}
+		          <div className="space-y-3">
+		            <div className="flex items-center justify-between">
+		              <div className="text-xs text-slate-200 font-bold">ガラス</div>
+		              <button
+		                onClick={handleResetGlassSection}
+		                className="px-2 py-1 text-[11px] rounded border transition-colors idle-btn-glass"
+		              >
+		                リセット
+		              </button>
+		            </div>
+		            <div className="space-y-2">
+		              <div className="text-xs text-slate-200 font-bold">ガラスの色</div>
+		              <div className="flex items-center gap-3">
 	                <button
 	                  ref={tintBtnRef}
 	                  onClick={() => setShowTintPicker((v) => !v)}
