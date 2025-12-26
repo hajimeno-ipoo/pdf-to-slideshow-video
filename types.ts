@@ -98,6 +98,8 @@ export interface Overlay {
   width?: number;
   height?: number;
   rotation: number;
+  flipX?: boolean; // 左右反転
+  flipY?: boolean; // 上下反転
   opacity?: number;
   space?: OverlaySpace;
   hidden?: boolean;

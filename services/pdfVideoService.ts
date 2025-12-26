@@ -171,12 +171,15 @@ export const drawOverlays = async (ctx: CanvasRenderingContext2D, overlays: Over
         }
     }
 
-    const x = overlay.x * canvasWidth + offsetX;
-    const y = overlay.y * canvasHeight + offsetY;
-    ctx.translate(x, y);
-    if (scale !== 1) ctx.scale(scale, scale);
-    if (rotation !== 0) ctx.rotate((rotation * Math.PI) / 180);
-    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+	    const x = overlay.x * canvasWidth + offsetX;
+	    const y = overlay.y * canvasHeight + offsetY;
+	    ctx.translate(x, y);
+	    if (scale !== 1) ctx.scale(scale, scale);
+	    if (rotation !== 0) ctx.rotate((rotation * Math.PI) / 180);
+	    const flipX = overlay.flipX ? -1 : 1;
+	    const flipY = overlay.flipY ? -1 : 1;
+	    if (flipX !== 1 || flipY !== 1) ctx.scale(flipX, flipY);
+	    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
 
     let textInfo = null;
     if (overlay.type === 'text' && overlay.text) {
@@ -204,18 +207,24 @@ export const drawOverlays = async (ctx: CanvasRenderingContext2D, overlays: Over
         textInfo = { lines, fontSizePx, lineHeight, maxLineWidth, fontFamily, fontWeight, fontStyle };
     }
 
-    if (clipDirection) {
-        let w = 0, h = 0; let cx = 0, cy = 0;
-        if (overlay.type === 'text' && textInfo) {
-            const padPx = (overlay.backgroundPadding || 0) * (textInfo.fontSizePx / 5);
-            w = textInfo.maxLineWidth + padPx * 2; h = textInfo.lines.length * textInfo.lineHeight + padPx * 2; cx = -w/2; cy = -h/2;
-        } else {
-            w = (overlay.width || 0.2) * canvasWidth; h = (overlay.height || 0.2) * canvasHeight; cx = -w/2; cy = -h/2;
-        }
-        ctx.beginPath();
-        if (clipDirection === 'right') ctx.rect(cx, cy, w * clipProgress, h); else ctx.rect(cx, cy, w, h * clipProgress);
-        ctx.clip();
-    }
+	    if (clipDirection) {
+	        let w = 0, h = 0; let cx = 0, cy = 0;
+	        if (overlay.type === 'text' && textInfo) {
+	            const padPx = (overlay.backgroundPadding || 0) * (textInfo.fontSizePx / 5);
+	            w = textInfo.maxLineWidth + padPx * 2; h = textInfo.lines.length * textInfo.lineHeight + padPx * 2; cx = -w/2; cy = -h/2;
+	        } else {
+	            w = (overlay.width || 0.2) * canvasWidth; h = (overlay.height || 0.2) * canvasHeight; cx = -w/2; cy = -h/2;
+	        }
+	        ctx.beginPath();
+	        if (clipDirection === 'right') {
+	            const startX = overlay.flipX ? (cx + w * (1 - clipProgress)) : cx;
+	            ctx.rect(startX, cy, w * clipProgress, h);
+	        } else {
+	            const startY = overlay.flipY ? (cy + h * (1 - clipProgress)) : cy;
+	            ctx.rect(cx, startY, w, h * clipProgress);
+	        }
+	        ctx.clip();
+	    }
 
     if (overlay.type === 'text' && textInfo) {
         const { lines, fontSizePx, lineHeight, maxLineWidth } = textInfo;

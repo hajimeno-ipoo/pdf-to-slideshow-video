@@ -1,0 +1,15 @@
+## 2025-12-26
+- 追記: 最初の要望を「回転プリセット」と勘違いして実装してたけど、正しくは **反転（左右/上下）** でした。
+- 対応（最終）:
+  - インスペクターの「装飾」「画像」パネルに **反転UI（左右/上下）** を追加。
+  - `Overlay` に `flipX?: boolean` / `flipY?: boolean` を追加し、プレビュー描画と書き出し描画の両方で反転を反映。
+  - 回転は既存のスライダーで調整（↑→↓←プリセットUIは削除）。
+- 変更ファイル:
+  - `types.ts`
+  - `components/SlideInspector.tsx`
+  - `components/cropModal/OverlaySettingsPanel.tsx`
+  - `components/cropModal/ImageSettingsPanel.tsx`
+  - `services/pdfVideoService.ts`
+  - `services/videoWorkerScript.ts`
+- 検証:
+  - `npm test` / `npm run build` OK。

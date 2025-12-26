@@ -1223,18 +1223,18 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       return '#0f172a'; 
   };
 
-  const renderOverlayForCanvas = (ov: Overlay, baseW: number, baseH: number) => {
-      const isSelected = ov.id === selectedOverlayId;
-      const interactive = isCanvasMode && activeTab !== 'crop';
-      const baseStyle: React.CSSProperties = {
-          position: 'absolute',
-          left: `${ov.x * 100}%`,
-          top: `${ov.y * 100}%`,
-          transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`,
-          cursor: interactive ? 'move' : 'default',
-          opacity: ov.opacity ?? 1,
-          userSelect: 'none',
-          pointerEvents: interactive ? 'auto' : 'none'
+	  const renderOverlayForCanvas = (ov: Overlay, baseW: number, baseH: number) => {
+	      const isSelected = ov.id === selectedOverlayId;
+	      const interactive = isCanvasMode && activeTab !== 'crop';
+	      const baseStyle: React.CSSProperties = {
+	          position: 'absolute',
+	          left: `${ov.x * 100}%`,
+	          top: `${ov.y * 100}%`,
+	          transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg) scale(${ov.flipX ? -1 : 1}, ${ov.flipY ? -1 : 1})`,
+	          cursor: interactive ? 'move' : 'default',
+	          opacity: ov.opacity ?? 1,
+	          userSelect: 'none',
+	          pointerEvents: interactive ? 'auto' : 'none'
       };
       const strokeWidthPx = (ov.strokeWidth || 0) * (baseH / 500);
       const shadowScale = baseH / 500;
@@ -1590,11 +1590,11 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                         style={{ left: screenRect.x, top: screenRect.y, width: screenRect.width, height: screenRect.height, border: '1px dashed rgba(255,255,255,0.2)' }} 
                         onMouseDown={handleContainerMouseDown}
                       >
-                        {visibleOverlays.map(ov => {
-                          const isSelected = ov.id === selectedOverlayId;
-                          const baseStyle: React.CSSProperties = { position: 'absolute', left: `${ov.x * 100}%`, top: `${ov.y * 100}%`, transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`, cursor: 'move', opacity: ov.opacity ?? 1, userSelect: 'none', pointerEvents: 'auto' };
-                          const strokeWidthPx = (ov.strokeWidth || 0) * (screenRect.height / 500);
-                          const shadowScale = screenRect.height / 500;
+	                        {visibleOverlays.map(ov => {
+	                          const isSelected = ov.id === selectedOverlayId;
+	                          const baseStyle: React.CSSProperties = { position: 'absolute', left: `${ov.x * 100}%`, top: `${ov.y * 100}%`, transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg) scale(${ov.flipX ? -1 : 1}, ${ov.flipY ? -1 : 1})`, cursor: 'move', opacity: ov.opacity ?? 1, userSelect: 'none', pointerEvents: 'auto' };
+	                          const strokeWidthPx = (ov.strokeWidth || 0) * (screenRect.height / 500);
+	                          const shadowScale = screenRect.height / 500;
 
                           return (
                             <div key={ov.id} id={`overlay-${ov.id}`} style={baseStyle} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'move')}>

@@ -257,8 +257,15 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                     </>
                   )}
                   <div className="space-y-1 pt-2 border-t border-slate-800">
-                      <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
+                      <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button type="button" onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
                       <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
+                  </div>
+                  <div className="space-y-1 pt-2 border-t border-slate-800">
+                      <div className="flex justify-between"><label className="text-xs text-slate-400">反転</label><button type="button" onClick={() => onUpdateOverlay({ flipX: false, flipY: false })} className="text-[10px] text-slate-500">リセット</button></div>
+                      <div className="flex bg-slate-800 rounded p-0.5 border border-slate-600 idle-segment">
+                          <button type="button" onClick={() => onUpdateOverlay({ flipX: !selectedOverlay.flipX })} className={`idle-segment-btn flex-1 py-1 text-[10px] rounded transition-colors ${selectedOverlay.flipX ? 'is-selected' : 'text-slate-400 hover:text-white'}`} title="左右反転">左右</button>
+                          <button type="button" onClick={() => onUpdateOverlay({ flipY: !selectedOverlay.flipY })} className={`idle-segment-btn flex-1 py-1 text-[10px] rounded transition-colors ${selectedOverlay.flipY ? 'is-selected' : 'text-slate-400 hover:text-white'}`} title="上下反転">上下</button>
+                      </div>
                   </div>
               </div>
           )}

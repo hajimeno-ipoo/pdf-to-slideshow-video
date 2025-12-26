@@ -32,13 +32,13 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 }) => {
   const [imageMode, setImageMode] = useState<'upload' | 'gen'>('upload');
   const [imgGenPrompt, setImgGenPrompt] = useState('');
-  const [isGeneratingImg, setIsGeneratingImg] = useState(false);
-  const imageUploadRef = useRef<HTMLInputElement>(null);
-  const isAiLocked = !aiEnabled;
+	const [isGeneratingImg, setIsGeneratingImg] = useState(false);
+	const imageUploadRef = useRef<HTMLInputElement>(null);
+	const isAiLocked = !aiEnabled;
 
-  useEffect(() => {
-    if (isAiLocked) setImageMode('upload');
-  }, [isAiLocked]);
+	useEffect(() => {
+	  if (isAiLocked) setImageMode('upload');
+	}, [isAiLocked]);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { 
       if (e.target.files && e.target.files.length > 0) { 
@@ -190,12 +190,19 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                           </select>
                       </div>
                   </div>
-                  <div className="space-y-1 pt-2 border-t border-slate-800">
-                      <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
-                      <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
-                  </div>
-                  <div className="space-y-3 pt-2 border-t border-slate-800">
-                      <h5 className="text-xs text-slate-400 font-bold">影 (ドロップシャドウ)</h5>
+		                  <div className="space-y-1 pt-2 border-t border-slate-800">
+		                      <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button type="button" onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
+		                      <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />
+		                  </div>
+	                  <div className="space-y-1 pt-2 border-t border-slate-800">
+	                      <div className="flex justify-between"><label className="text-xs text-slate-400">反転</label><button type="button" onClick={() => onUpdateOverlay({ flipX: false, flipY: false })} className="text-[10px] text-slate-500">リセット</button></div>
+	                      <div className="flex bg-slate-800 rounded p-0.5 border border-slate-600 idle-segment">
+	                          <button type="button" onClick={() => onUpdateOverlay({ flipX: !selectedOverlay.flipX })} className={`idle-segment-btn flex-1 py-1 text-[10px] rounded transition-colors ${selectedOverlay.flipX ? 'is-selected' : 'text-slate-400 hover:text-white'}`} title="左右反転">左右</button>
+	                          <button type="button" onClick={() => onUpdateOverlay({ flipY: !selectedOverlay.flipY })} className={`idle-segment-btn flex-1 py-1 text-[10px] rounded transition-colors ${selectedOverlay.flipY ? 'is-selected' : 'text-slate-400 hover:text-white'}`} title="上下反転">上下</button>
+	                      </div>
+	                  </div>
+	                  <div className="space-y-3 pt-2 border-t border-slate-800">
+	                      <h5 className="text-xs text-slate-400 font-bold">影 (ドロップシャドウ)</h5>
                       <div className="space-y-1">
                         <label className="text-xs text-slate-400">影の色</label>
                         <InlineColorPicker value={selectedOverlay.shadowColor || '#000000'} onChange={(hex) => onUpdateOverlay({ shadowColor: hex })} />

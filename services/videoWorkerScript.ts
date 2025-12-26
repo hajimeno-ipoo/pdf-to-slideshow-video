@@ -210,10 +210,13 @@ const drawOverlays = async (ctx, overlays, canvasWidth, canvasHeight, currentTim
     const x = overlay.x * canvasWidth + offsetX;
     const y = overlay.y * canvasHeight + offsetY;
     
-    ctx.translate(x, y);
-    if (scale !== 1) ctx.scale(scale, scale);
-    if (rotation !== 0) ctx.rotate((rotation * Math.PI) / 180);
-    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
+	    ctx.translate(x, y);
+	    if (scale !== 1) ctx.scale(scale, scale);
+	    if (rotation !== 0) ctx.rotate((rotation * Math.PI) / 180);
+	    const flipX = overlay.flipX ? -1 : 1;
+	    const flipY = overlay.flipY ? -1 : 1;
+	    if (flipX !== 1 || flipY !== 1) ctx.scale(flipX, flipY);
+	    ctx.globalAlpha = Math.max(0, Math.min(1, alpha));
 
     // Text & Shapes rendering
     if (overlay.type === 'text' && overlay.text) {
