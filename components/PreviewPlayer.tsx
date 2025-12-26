@@ -215,10 +215,10 @@ const OverlayLayer = React.memo(({
         let clipPath: string | undefined = undefined;
         let displayText = ov.text;
 
-        if (ov.animationIn && ov.animationIn !== 'none') {
-            const p = Math.min(1, Math.max(0, timeInOverlay / animDuration));
-            const easeOut = 1 - Math.pow(1 - p, 3);
-            switch (ov.animationIn) {
+	        if (ov.animationIn && ov.animationIn !== 'none') {
+	            const p = Math.min(1, Math.max(0, timeInOverlay / animDuration));
+	            const easeOut = 1 - Math.pow(1 - p, 3);
+	            switch (ov.animationIn) {
                 case 'fade': alpha *= easeOut; break;
                 case 'pop': scale = easeOutBack(p); alpha *= Math.min(1, p * 2); break;
                 case 'slide-up': offsetY += (1 - easeOut) * (baseH * 0.2); alpha *= easeOut; break;
@@ -228,12 +228,12 @@ const OverlayLayer = React.memo(({
                 case 'zoom': scale = easeOut; alpha *= easeOut; break;
                 case 'rotate-cw': rotation += (1 - easeOut) * -180; alpha *= easeOut; break;
                 case 'rotate-ccw': rotation += (1 - easeOut) * 180; alpha *= easeOut; break;
-                case 'wipe-right': clipPath = `inset(0 ${100 - (easeOut * 100)}% 0 0)`; break;
-                case 'wipe-down': clipPath = `inset(0 0 ${100 - (easeOut * 100)}% 0)`; break;
-                case 'typewriter':
-                    if (ov.type === 'text' && ov.text) {
-                        const len = Math.floor(ov.text.length * p);
-                        displayText = ov.text.substring(0, len);
+	                case 'wipe-right': clipPath = ov.flipX ? `inset(0 0 0 ${100 - (easeOut * 100)}%)` : `inset(0 ${100 - (easeOut * 100)}% 0 0)`; break;
+	                case 'wipe-down': clipPath = ov.flipY ? `inset(${100 - (easeOut * 100)}% 0 0 0)` : `inset(0 0 ${100 - (easeOut * 100)}% 0)`; break;
+	                case 'typewriter':
+	                    if (ov.type === 'text' && ov.text) {
+	                        const len = Math.floor(ov.text.length * p);
+	                        displayText = ov.text.substring(0, len);
                     }
                     break;
             }
@@ -243,8 +243,8 @@ const OverlayLayer = React.memo(({
             const outStartTime = duration - animDuration;
             if (timeInOverlay > outStartTime) {
                 const p = Math.min(1, Math.max(0, (timeInOverlay - outStartTime) / animDuration));
-                const easeIn = Math.pow(p, 3);
-                switch (ov.animationOut) {
+	                const easeIn = Math.pow(p, 3);
+	                switch (ov.animationOut) {
                     case 'fade': alpha *= (1 - easeIn); break;
                     case 'pop': scale = easeInBack(1 - p); alpha *= (1 - p); break;
                     case 'slide-up': offsetY -= easeIn * (baseH * 0.2); alpha *= (1 - easeIn); break;
@@ -254,21 +254,26 @@ const OverlayLayer = React.memo(({
                     case 'zoom': scale = 1 + easeIn * 0.5; alpha *= (1 - easeIn); break;
                     case 'rotate-cw': rotation += easeIn * 180; alpha *= (1 - easeIn); break;
                     case 'rotate-ccw': rotation += easeIn * -180; alpha *= (1 - easeIn); break;
-                    case 'wipe-right': clipPath = `inset(0 0 0 ${easeIn * 100}%)`; break;
-                    case 'wipe-down': clipPath = `inset(${easeIn * 100}% 0 0 0)`; break;
-                }
-            }
-        }
+	                    case 'wipe-right': clipPath = ov.flipX ? `inset(0 ${easeIn * 100}% 0 0)` : `inset(0 0 0 ${easeIn * 100}%)`; break;
+	                    case 'wipe-down': clipPath = ov.flipY ? `inset(0 0 ${easeIn * 100}% 0)` : `inset(${easeIn * 100}% 0 0 0)`; break;
+	                }
+	            }
+	        }
+	        
+	        const flipX = ov.flipX ? -1 : 1;
+	        const flipY = ov.flipY ? -1 : 1;
+	        const scaleX = scale * flipX;
+	        const scaleY = scale * flipY;
 
-        const baseStyle: React.CSSProperties = {
-            position: 'absolute',
-            left: `${ov.x * 100}%`,
-            top: `${ov.y * 100}%`,
-            transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scale})`,
-            opacity: alpha,
-            clipPath,
-            pointerEvents: 'none',
-        };
+	        const baseStyle: React.CSSProperties = {
+	            position: 'absolute',
+	            left: `${ov.x * 100}%`,
+	            top: `${ov.y * 100}%`,
+	            transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`,
+	            opacity: alpha,
+	            clipPath,
+	            pointerEvents: 'none',
+	        };
 
         const shadowScale = baseH / 500;
 
