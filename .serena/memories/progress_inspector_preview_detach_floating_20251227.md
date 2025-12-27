@@ -29,6 +29,16 @@
 - フローティング窓の外枠に `style={{ position: 'fixed' }}` を付けて、必ず“重なって表示”になるように修正。
 - 初期位置は「画面全体のど真ん中」を基準に戻す（`getViewportRect()` を使用）。
 
+### 追加修正（最大化直後のサイズずれ）
+- 装飾/画像/音声タブ（canvas表示）で「最大化」直後にプレビューが小さいままになる原因は、
+  `previewDetachedOpen` → `previewFloatRect` 初期化の順でポータルがマウントされるため、
+  最初の `useLayoutEffect` 実行時点では `stageRef` / `previewAreaRef` が `null` になり、
+  サイズ計測が early return して **再計測されない**ことだった。
+- 対策として `previewDetachedPortalReady = previewDetachedOpen && previewFloatRect !== null` を導入し、
+  `previewAreaInnerSize` / `stageSize` / `imageSize` の計測エフェクト依存に使って、
+  **ポータルがDOMに乗ったタイミングで必ず計測→ResizeObserverを接続**するように修正。
+- これで 装飾/画像/音声 から即最大化しても、最初から拡大表示になる。
+
 ### 検証
 - `npm test` PASS
 - `npm run build` PASS

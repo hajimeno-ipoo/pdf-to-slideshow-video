@@ -63,13 +63,14 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   
   const [activeTab, setActiveTab] = useState<'crop' | 'overlay' | 'image' | 'color' | 'audio'>('crop');
   const [overviewImage, setOverviewImage] = useState<string>("");
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [previewDetachedOpen, setPreviewDetachedOpen] = useState(false);
-  const [previewFloatRect, setPreviewFloatRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
-  type FloatResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
-  const floatPointerRef = useRef<{
-      mode: 'move' | 'resize';
-      resizeDir?: FloatResizeDir;
+	  const [isUpdating, setIsUpdating] = useState(false);
+	  const [previewDetachedOpen, setPreviewDetachedOpen] = useState(false);
+	  const [previewFloatRect, setPreviewFloatRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
+	  const previewDetachedPortalReady = previewDetachedOpen && previewFloatRect !== null;
+	  type FloatResizeDir = 'n' | 's' | 'e' | 'w' | 'ne' | 'nw' | 'se' | 'sw';
+	  const floatPointerRef = useRef<{
+	      mode: 'move' | 'resize';
+	      resizeDir?: FloatResizeDir;
       pointerId: number;
       startX: number;
       startY: number;
@@ -389,16 +390,16 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           } catch(e) { console.error(e); }
       };
       loadOverview();
-  }, [slide.id, sourceFile]);
+	  }, [slide.id, sourceFile]);
 
-  // Preview area size tracking (detached preview fit)
-  useLayoutEffect(() => {
-      if (!previewDetachedOpen) {
-          setPreviewAreaInnerSize(null);
-          return;
-      }
-      if (!previewAreaRef.current) return;
-      const el = previewAreaRef.current;
+	  // Preview area size tracking (detached preview fit)
+	  useLayoutEffect(() => {
+	      if (!previewDetachedPortalReady) {
+	          setPreviewAreaInnerSize(null);
+	          return;
+	      }
+	      if (!previewAreaRef.current) return;
+	      const el = previewAreaRef.current;
       const update = () => {
           const rect = el.getBoundingClientRect();
           const cs = window.getComputedStyle(el);
@@ -413,16 +414,16 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       const observer = new ResizeObserver(update);
       observer.observe(el);
       window.addEventListener('resize', update);
-      return () => {
-          observer.disconnect();
-          window.removeEventListener('resize', update);
-      };
-  }, [previewDetachedOpen]);
+	      return () => {
+	          observer.disconnect();
+	          window.removeEventListener('resize', update);
+	      };
+	  }, [previewDetachedPortalReady]);
 
-  // Stage size tracking (canvas mode)
-  useEffect(() => {
-      if (!stageRef.current) return;
-      if (!showCanvasStage) return;
+	  // Stage size tracking (canvas mode)
+	  useLayoutEffect(() => {
+	      if (!stageRef.current) return;
+	      if (!showCanvasStage) return;
       const el = stageRef.current;
       const update = () => {
           const rect = el.getBoundingClientRect();
@@ -432,16 +433,16 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       const observer = new ResizeObserver(update);
       observer.observe(el);
       window.addEventListener('resize', update);
-      return () => {
-          observer.disconnect();
-          window.removeEventListener('resize', update);
-      };
-  }, [previewDetachedOpen, showCanvasStage]);
+	      return () => {
+	          observer.disconnect();
+	          window.removeEventListener('resize', update);
+	      };
+	  }, [previewDetachedPortalReady, showCanvasStage]);
 
-  // Image size tracking (crop preview)
-  useEffect(() => {
-      if (!imageRef.current) return;
-      if (showCanvasStage) return;
+	  // Image size tracking (crop preview)
+	  useEffect(() => {
+	      if (!imageRef.current) return;
+	      if (showCanvasStage) return;
       const el = imageRef.current;
       const update = () => {
           setImageSize({
@@ -452,10 +453,10 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       update();
       const observer = new ResizeObserver(update);
       observer.observe(el);
-      return () => {
-          observer.disconnect();
-      };
-  }, [previewDetachedOpen, showCanvasStage]);
+	      return () => {
+	          observer.disconnect();
+	      };
+	  }, [previewDetachedPortalReady, showCanvasStage]);
 
   const detachedStageBox = (() => {
       if (!previewDetachedOpen) return null;
@@ -1593,7 +1594,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 	              className="px-2 py-1.5 text-[10px] rounded border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white transition-colors"
 	              title={previewDetachedOpen ? 'プレビューを戻す' : 'プレビューを別窓で表示する'}
 	            >
-	              {previewDetachedOpen ? '戻す' : 'プレビュー窓'}
+	              {previewDetachedOpen ? '戻す' : '最大化'}
 	            </button>
             <button
               onClick={handleApplyChanges}
