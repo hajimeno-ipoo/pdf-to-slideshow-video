@@ -12,6 +12,9 @@ interface Props {
 }
 
 const MAX_BG_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_BG_IMAGE_LONG_EDGE_PX = 1920;
+const BG_IMAGE_JPEG_QUALITY = 0.85;
+const MAX_BG_IMAGE_DATAURL_CHARS = 1_200_000; // ChromeでCSS変数に入れても安定しやすいサイズ感
 
 const clampNumber = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
@@ -106,47 +109,95 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
     onChange({ ...prefs, backgroundMode: mode });
   };
 
-  const handleBgImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBgImageErrorText('');
-    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setBgImageErrorText('画像ファイルを選んでね。');
-      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-      return;
-    }
-    if (file.size > MAX_BG_IMAGE_BYTES) {
-      setBgImageErrorText('画像が大きすぎるよ。2MBまでにしてね。');
-      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-      return;
-    }
+  const handleBgImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+	    setBgImageErrorText('');
+	    const file = e.target.files && e.target.files.length > 0 ? e.target.files[0] : null;
+	    if (!file) return;
+	    if (!file.type.startsWith('image/')) {
+	      setBgImageErrorText('画像ファイルを選んでね。');
+	      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+	      return;
+	    }
+	    if (file.size > MAX_BG_IMAGE_BYTES) {
+	      setBgImageErrorText('画像が大きすぎるよ。2MBまでにしてね。');
+	      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+	      return;
+	    }
+	
+	    const compressToDataUrl = async (srcFile: File) => {
+	      const url = URL.createObjectURL(srcFile);
+	      try {
+	        const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+	          const el = new Image();
+	          el.onload = () => resolve(el);
+	          el.onerror = () => reject(new Error('画像の読み込みに失敗したかも…'));
+	          el.src = url;
+	        });
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = typeof reader.result === 'string' ? reader.result : '';
-      if (!dataUrl.startsWith('data:image/')) {
-        setBgImageErrorText('画像の読み込みに失敗したかも…もう一回やってみて！');
-        if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-        return;
-      }
+	        const srcW = Math.max(1, img.naturalWidth || (img as any).width || 1);
+	        const srcH = Math.max(1, img.naturalHeight || (img as any).height || 1);
 
-      const nextPrefs: GlassPrefs = { ...prefs, backgroundMode: 'image', backgroundImageDataUrl: dataUrl };
-      try {
-        localStorage.setItem(GLASS_PREFS_STORAGE_KEY, JSON.stringify(nextPrefs));
-      } catch {
-        setBgImageErrorText('保存できなかったかも…容量がいっぱいっぽい！小さめ画像で試してね。');
-        if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-        return;
-      }
-      onChange(nextPrefs);
-      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-    };
-    reader.onerror = () => {
-      setBgImageErrorText('画像の読み込みに失敗したかも…もう一回やってみて！');
-      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
-    };
-    reader.readAsDataURL(file);
-  };
+	        const encode = (maxEdge: number, quality: number) => {
+	          const longEdge = Math.max(srcW, srcH);
+	          const scale = longEdge > maxEdge ? (maxEdge / longEdge) : 1;
+	          const w = Math.max(1, Math.round(srcW * scale));
+	          const h = Math.max(1, Math.round(srcH * scale));
+	          const canvas = document.createElement('canvas');
+	          canvas.width = w;
+	          canvas.height = h;
+	          const ctx = canvas.getContext('2d');
+	          if (!ctx) throw new Error('画像の変換に失敗したかも…');
+	          try {
+	            ctx.imageSmoothingEnabled = true;
+	            (ctx as any).imageSmoothingQuality = 'high';
+	          } catch {}
+	          // JPEGにするので透明は白で埋める（背景画像ならこれが自然）
+	          ctx.fillStyle = '#ffffff';
+	          ctx.fillRect(0, 0, w, h);
+	          ctx.drawImage(img, 0, 0, w, h);
+	          return canvas.toDataURL('image/jpeg', quality);
+	        };
+
+	        const attempts: Array<{ maxEdge: number; quality: number }> = [
+	          { maxEdge: MAX_BG_IMAGE_LONG_EDGE_PX, quality: BG_IMAGE_JPEG_QUALITY },
+	          { maxEdge: MAX_BG_IMAGE_LONG_EDGE_PX, quality: 0.75 },
+	          { maxEdge: 1600, quality: 0.75 },
+	          { maxEdge: 1280, quality: 0.7 },
+	        ];
+
+	        let last = '';
+	        for (const a of attempts) {
+	          const dataUrl = encode(a.maxEdge, a.quality);
+	          last = dataUrl;
+	          if (dataUrl.startsWith('data:image/') && dataUrl.length <= MAX_BG_IMAGE_DATAURL_CHARS) {
+	            return dataUrl;
+	          }
+	        }
+
+	        if (!last.startsWith('data:image/')) throw new Error('画像の読み込みに失敗したかも…');
+	        throw new Error('画像が大きすぎて、Chromeだと背景に出せないかも…小さめ画像で試してね！');
+	      } finally {
+	        URL.revokeObjectURL(url);
+	      }
+	    };
+
+	    try {
+	      const dataUrl = await compressToDataUrl(file);
+	      const nextPrefs: GlassPrefs = { ...prefs, backgroundMode: 'image', backgroundImageDataUrl: dataUrl };
+	      try {
+	        localStorage.setItem(GLASS_PREFS_STORAGE_KEY, JSON.stringify(nextPrefs));
+	      } catch {
+	        setBgImageErrorText('保存できなかったかも…容量がいっぱいっぽい！小さめ画像で試してね。');
+	        if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+	        return;
+	      }
+	      onChange(nextPrefs);
+	    } catch (err: any) {
+	      setBgImageErrorText(err?.message || '画像の読み込みに失敗したかも…もう一回やってみて！');
+	    } finally {
+	      if (bgImageInputRef.current) bgImageInputRef.current.value = '';
+	    }
+	  };
 
   const handleBgImageClear = () => {
     setBgImageErrorText('');

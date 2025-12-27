@@ -1,0 +1,4 @@
+- 現象: 背景画像をガラス設定で選ぶと、Safariでは反映するがChromeでは大きい画像だけ反映しない。
+- ユーザー切り分け: `画像.jpg`(1.6MB, 6016x3384)はChromeで反映しないが、`c.jpeg`(180KB, 1182x665)は反映する。
+- 推定原因: 背景画像は `FileReader.readAsDataURL` で base64 dataURL 化して `pdfVideo_glassPrefs_v1.backgroundImageDataUrl` に保存し、`computeIdleGlassCssVars` が `--idle-bg-image: url("data:image...")` としてCSS変数に入れる。base64は約4/3に膨らむため、1.6MBファイルは dataURL で約2.1MB相当になり、Chrome側の `data:` URL長/ CSS custom property値長の上限を超えて background-image が無効化される可能性が高い（Safariは許容範囲が広い）。
+- 関連コード: `components/GlassSettingsModal.tsx` の `MAX_BG_IMAGE_BYTES = 2MB` はファイルサイズ基準で、dataURL長の上限を保証しない。

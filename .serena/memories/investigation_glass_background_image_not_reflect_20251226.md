@@ -1,0 +1,7 @@
+- 現象: ガラス設定で背景画像を選んだのに、アプリ背景に反映されない。
+- 仕組み: 背景画像は localStorage `pdfVideo_glassPrefs_v1` の `backgroundMode/backgroundImageDataUrl` に保存され、`App.tsx` ルートの `screen-idle` div に `computeIdleGlassCssVars(glassPrefs)` のCSS変数（`--idle-bg-image`等）として inline style で適用。`index.css` の `.screen-idle` が `background-image: var(--idle-bg-image)` を参照。
+- ユーザーのDevToolsスクショでは `http://localhost:3000` の localStorage に `backgroundMode:"image"` と `data:image/jpeg;base64,...` が入っており「保存自体」は成功している可能性が高い。
+- 反映されない主因候補:
+  - (最有力) ブラウザ/URL（host/port）が違う: localStorage はブラウザごと＆オリジン（例: `localhost:3000` と `192.168.x.x:3000/3002`）ごとに別なので、別の保存箱を見ている。
+  - AppStatus.ERROR などで `useGlassTheme` が false の場合はCSS変数を当てないため背景カスタムが無効。
+- 切り分け: 反映されない画面と同じブラウザ・同じURLで DevTools → Application/Storage から `pdfVideo_glassPrefs_v1` を確認し、Elementsで `div.screen-idle` の style に `--idle-bg-image: url("data:image...")` が付いているかを見る。

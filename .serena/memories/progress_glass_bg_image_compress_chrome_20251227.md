@@ -1,0 +1,8 @@
+- 背景画像（ガラス設定）の大きいJPEGがChromeで反映されない問題を修正。
+- 原因: 背景画像を `FileReader.readAsDataURL` でbase64化し `--idle-bg-image: url("data:image...")` に入れていたため、画像によっては dataURL が巨大（例: 1.6MB JPEG → 約2.1MB相当）になり、Chrome側でCSS値が無効化され背景に反映されない。
+- 対応: `components/GlassSettingsModal.tsx` の背景画像選択時に、CanvasでJPEGへ再エンコード＆縮小して dataURL を小さくしてから保存するように変更。
+  - 長辺は最大1920pxに縮小
+  - quality 0.85を基本に、必要なら段階的に品質/サイズを落として `MAX_BG_IMAGE_DATAURL_CHARS` 以内に収める
+  - 透明がある画像は白で埋めてJPEG化
+- 影響範囲: 背景画像の保存/反映のみ（ガラススタイルや他UIは維持）。
+- テスト: `npm test` PASS（126 tests）。
