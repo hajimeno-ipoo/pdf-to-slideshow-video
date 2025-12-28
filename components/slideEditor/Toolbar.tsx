@@ -3,20 +3,22 @@ import React, { useRef, useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useEditor } from './SlideEditorContext';
 import { createSlideFromImage, createSolidColorSlide } from '../../services/pdfVideoService';
-import { TransitionType, EffectType } from '../../types';
+import { TransitionType } from '../../types';
+import { applySlideAudioOffsetDelta } from '../../utils/slideAudioBulkShift';
 import ColorPickerPopover from '../ColorPickerPopover';
 
 export const Toolbar: React.FC = () => {
   const { slides, updateSlides, selectedSlideId, setSelectedSlideId } = useEditor();
   const imageAddInputRef = useRef<HTMLInputElement>(null);
-  
-  const [globalDuration, setGlobalDuration] = useState<number>(3);
-  const [globalSlideVolume, setGlobalSlideVolume] = useState<number>(1.0);
-  const [globalTransitionType, setGlobalTransitionType] = useState<TransitionType>('fade');
-  const [globalEffectType, setGlobalEffectType] = useState<EffectType>('none');
-  const [solidAddColor, setSolidAddColor] = useState<string>('#000000');
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const colorBtnRef = useRef<HTMLButtonElement>(null);
+	  
+	  const [globalDuration, setGlobalDuration] = useState<number>(3);
+	  const [globalSlideVolume, setGlobalSlideVolume] = useState<number>(1.0);
+	  const [globalTransitionType, setGlobalTransitionType] = useState<TransitionType>('fade');
+	  const [slideAudioShiftDeltaText, setSlideAudioShiftDeltaText] = useState<string>('0');
+	  const [slideAudioShiftExtendDuration, setSlideAudioShiftExtendDuration] = useState(false);
+	  const [solidAddColor, setSolidAddColor] = useState<string>('#000000');
+	  const [showColorPicker, setShowColorPicker] = useState(false);
+	  const colorBtnRef = useRef<HTMLButtonElement>(null);
   
   // Insertion settings
   const [targetSlideIndex, setTargetSlideIndex] = useState<number>(1);
@@ -86,15 +88,20 @@ export const Toolbar: React.FC = () => {
     updateSlides(updated, true);
   };
 
-  const handleApplyGlobalTransition = () => {
-    const updated = slides.map(s => ({ ...s, transitionType: globalTransitionType }));
-    updateSlides(updated, true);
-  };
+	  const handleApplyGlobalTransition = () => {
+	    const updated = slides.map(s => ({ ...s, transitionType: globalTransitionType }));
+	    updateSlides(updated, true);
+	  };
 
-  const handleApplyGlobalEffect = () => {
-    const updated = slides.map(s => ({ ...s, effectType: globalEffectType }));
-    updateSlides(updated, true);
-  };
+	  const handleApplySlideAudioShift = () => {
+	    const delta = parseFloat(slideAudioShiftDeltaText);
+	    if (!Number.isFinite(delta) || delta === 0) return;
+	    const updated = applySlideAudioOffsetDelta(slides, delta, {
+	      extendDuration: slideAudioShiftExtendDuration,
+	    });
+	    if (updated === slides) return;
+	    updateSlides(updated, true);
+	  };
 
   return (
     <div className="flex flex-col gap-2 mb-2 bg-transparent border-b border-white/10 pb-2 px-1 select-none">
@@ -123,35 +130,49 @@ export const Toolbar: React.FC = () => {
                          <button onClick={handleApplyGlobalDuration} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
                      </div>
 
-                     {/* Volume */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
-                         <span className="text-xs text-slate-400 whitespace-nowrap">音量</span>
-                         <input type="number" min="0" max="200" step="10" value={Math.round(globalSlideVolume * 100)} onChange={(e) => setGlobalSlideVolume(Math.max(0, parseInt(e.target.value) || 0) / 100)} className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-right text-xs focus:ring-1 focus:ring-emerald-500 outline-none" />
-                         <span className="text-[10px] text-slate-500">%</span>
-                         <button onClick={handleApplyGlobalSlideVolume} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
-                     </div>
-                     
-                     {/* Transition */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
-                         <span className="text-xs text-slate-400 whitespace-nowrap">効果</span>
-                         <select value={globalTransitionType} onChange={(e) => setGlobalTransitionType(e.target.value as TransitionType)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none min-w-[96px]">
-                             <option value="none">なし</option><option value="fade">フェード</option><option value="slide">スライド</option><option value="zoom">ズーム</option>
-                             <option value="wipe">ワイプ</option><option value="flip">フリップ</option><option value="cross-zoom">クロスズーム</option>
-                         </select>
-                         <button onClick={handleApplyGlobalTransition} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
-                     </div>
+	                     {/* Volume */}
+	                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+	                         <span className="text-xs text-slate-400 whitespace-nowrap">音量</span>
+	                         <input type="number" min="0" max="200" step="10" value={Math.round(globalSlideVolume * 100)} onChange={(e) => setGlobalSlideVolume(Math.max(0, parseInt(e.target.value) || 0) / 100)} className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-right text-xs focus:ring-1 focus:ring-emerald-500 outline-none" />
+	                         <span className="text-[10px] text-slate-500">%</span>
+	                         <button onClick={handleApplyGlobalSlideVolume} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
+	                     </div>
 
-                     {/* Motion */}
-                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
-                        <span className="text-xs text-slate-400 whitespace-nowrap">モーション</span>
-                        <select value={globalEffectType} onChange={(e) => setGlobalEffectType(e.target.value as EffectType)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none min-w-[96px]">
-                            <option value="none">なし</option><option value="kenburns">Ken Burns</option>
-                        </select>
-                        <button onClick={handleApplyGlobalEffect} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
-                      </div>
-                 </div>
-             )}
-         </div>
+	                     {/* Slide Audio Shift */}
+	                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+	                         <span className="text-xs text-slate-400 whitespace-nowrap">ナレーション</span>
+	                         <input
+	                           type="number"
+	                           step="0.1"
+	                           value={slideAudioShiftDeltaText}
+	                           onChange={(e) => setSlideAudioShiftDeltaText(e.target.value)}
+	                           className="w-16 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-right text-xs focus:ring-1 focus:ring-emerald-500 outline-none"
+	                         />
+	                         <span className="text-[10px] text-slate-500">s</span>
+	                         <label className="flex items-center gap-1 text-[10px] text-slate-400 whitespace-nowrap select-none">
+	                           <input
+	                             type="checkbox"
+	                             checked={slideAudioShiftExtendDuration}
+	                             onChange={(e) => setSlideAudioShiftExtendDuration(e.target.checked)}
+	                             className="accent-emerald-500"
+	                           />
+	                           時間を伸ばす
+	                         </label>
+	                         <button onClick={handleApplySlideAudioShift} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
+	                     </div>
+	                     
+	                     {/* Transition */}
+	                     <div className="flex items-center bg-slate-900 rounded-lg border border-slate-700 px-2 py-1 gap-2">
+	                         <span className="text-xs text-slate-400 whitespace-nowrap">効果</span>
+	                         <select value={globalTransitionType} onChange={(e) => setGlobalTransitionType(e.target.value as TransitionType)} className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-white text-xs outline-none min-w-[96px]">
+	                             <option value="none">なし</option><option value="fade">フェード</option><option value="slide">スライド</option><option value="zoom">ズーム</option>
+	                             <option value="wipe">ワイプ</option><option value="flip">フリップ</option><option value="cross-zoom">クロスズーム</option>
+	                         </select>
+	                         <button onClick={handleApplyGlobalTransition} className="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-200 transition-colors border border-slate-600 whitespace-nowrap">適用</button>
+	                     </div>
+	                 </div>
+	             )}
+	         </div>
 
          {/* Group 2: Insert Slide (Accordion) */}
          <div className="rounded-xl bg-slate-800/30 border border-slate-700/50 overflow-hidden">
