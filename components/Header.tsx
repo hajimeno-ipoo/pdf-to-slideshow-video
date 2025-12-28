@@ -76,13 +76,16 @@ const Header: React.FC<HeaderProps> = ({
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-white">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
             </svg>
-          </div>
-          <div>
-            <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
-              PDF to Video
-            </h1>
-          </div>
-        </div>
+	          </div>
+		          <div className="flex items-baseline gap-2">
+		            <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400 tracking-tight">
+		              PDF Slideshow Maker
+		            </h1>
+		            <span className="text-lg text-slate-500 font-medium">
+		              PDFをスライドにして動画へ
+		            </span>
+		          </div>
+		        </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-4">
@@ -167,15 +170,16 @@ const Header: React.FC<HeaderProps> = ({
 	              </button>
 	            )}
 
-	            {/* API Key Button (icon) */}
-	            <button
-	              onClick={onOpenApiKey}
-	              aria-label="APIキー"
-	              className={`p-2 rounded-full border transition-colors idle-header-apikey ${hasApiKey ? 'idle-header-apikey--set border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
-	            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
+		            {/* API Key Button (icon) */}
+		            <button
+		              onClick={onOpenApiKey}
+		              aria-label="APIキー"
+		              title={hasApiKey ? 'APIキー（設定済み）' : 'APIキーを設定'}
+		              className={`p-2 rounded-full border transition-colors idle-header-apikey ${hasApiKey ? 'idle-header-apikey--set border-emerald-500/60 text-emerald-300 bg-emerald-900/20 hover:bg-emerald-800/30' : 'border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700'}`}
+		            >
+	              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+	                <path
+	                  strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
                   d="M15.75 5.25a3.75 3.75 0 10-2.728 6.322l-6.272 6.272v2.25h2.25l.75-.75h1.5l.75-.75h1.5l2.25-2.25"

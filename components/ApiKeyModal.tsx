@@ -30,18 +30,20 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
 
   return (
     <div className="fixed inset-0 z-[9998] flex items-center justify-center bg-black/60 px-4 api-key-overlay">
-      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-md p-5 space-y-4 api-key-panel glass-strong idle-sidebar-typography">
-        <div className="flex items-center justify-between">
-          <h3 className="text-slate-200 font-bold text-lg">Gemini APIキー</h3>
-          <button
-            onClick={onClose}
-            className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+	      <div className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-md p-5 space-y-4 api-key-panel glass-strong idle-sidebar-typography">
+	        <div className="flex items-center justify-between">
+	          <h3 className="text-slate-200 font-bold text-lg">Gemini APIキー</h3>
+	          <button
+	            onClick={onClose}
+	            aria-label="閉じる"
+	            title="閉じる"
+	            className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors"
+	          >
+	            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+	              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+	            </svg>
+	          </button>
+	        </div>
         <div className="space-y-2">
           <label className="text-xs text-slate-200 font-bold">APIキー</label>
           <div className="flex gap-2 items-center">
@@ -74,17 +76,17 @@ const ApiKeyModal: React.FC<Props> = ({ open, initialKey = '', initialRemember =
               {showHelp ? 'ヘルプを閉じる' : 'ヘルプ'}
             </button>
           </div>
-          {showHelp && (
-            <div className="text-[11px] text-slate-300 bg-slate-800/60 border border-slate-700 rounded p-3 leading-relaxed space-y-2">
-              <div className="text-slate-200 font-semibold">保存先の違い</div>
-              <ul className="list-disc pl-4 space-y-1">
-                <li><span className="text-slate-100 font-semibold">メモリのみ</span>：このタブを開いてる間だけ。リロード（更新）やタブを閉じると消えるよ。</li>
-                <li><span className="text-slate-100 font-semibold">このタブだけ</span>：リロードしても残るけど、タブを閉じたら消えるよ。</li>
-                <li><span className="text-slate-100 font-semibold">この端末に保存</span>：タブを閉じても残るよ。同じ端末・同じブラウザなら次回も使えるよ。</li>
-              </ul>
-              <div className="text-slate-400">※保存先を変えて「保存して使う」を押すと、前の保存先にあったキーは消して、選んだ保存先だけに保存するよ。</div>
-            </div>
-          )}
+	          {showHelp && (
+	            <div className="text-[11px] text-sky-300 bg-slate-800/60 border border-slate-700 rounded p-3 leading-relaxed space-y-2">
+	              <div className="text-sky-200 font-semibold">保存先の違い</div>
+	              <ul className="list-disc pl-4 space-y-1">
+	                <li><span className="text-slate-100 font-semibold">メモリのみ</span>：このタブを開いてる間だけ。リロード（更新）やタブを閉じると消えるよ。</li>
+	                <li><span className="text-slate-100 font-semibold">このタブだけ</span>：リロードしても残るけど、タブを閉じたら消えるよ。</li>
+	                <li><span className="text-slate-100 font-semibold">この端末に保存</span>：タブを閉じても残るよ。同じ端末・同じブラウザなら次回も使えるよ。</li>
+	              </ul>
+	              <div className="text-sky-300">※保存先を変えて「保存して使う」を押すと、前の保存先にあったキーは消して、選んだ保存先だけに保存するよ。</div>
+	            </div>
+	          )}
           <div className="grid grid-cols-3 gap-2 text-[11px]">
             <button
               onClick={() => { setMode('memory'); setRemember(false); }}
