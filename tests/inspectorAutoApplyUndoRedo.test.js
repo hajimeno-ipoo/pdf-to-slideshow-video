@@ -26,6 +26,22 @@ test('SlideInspector: apply button updates thumbnail without pushing undo histor
   assert.ok(src.includes('onUpdateRef.current(updatedSlide, false)'));
 });
 
+test('SlideInspector: selecting a slide does not recreate layerOrder when unchanged', () => {
+  const src = readUtf8('components/SlideInspector.tsx');
+  assert.ok(src.includes('setLayerOrder(prev => {'));
+  assert.ok(src.includes('const nextLayerOrder = slide.layerOrder || [SLIDE_TOKEN'));
+  assert.ok(src.includes('const next = nextLayerOrder'));
+  assert.ok(src.includes('prevOrder.every((id, i) => id === next[i])'));
+});
+
+test('SlideInspector: slide switch does not trigger auto-apply/thumbnail via stale inputs', () => {
+  const src = readUtf8('components/SlideInspector.tsx');
+  assert.ok(src.includes('pendingAutoApplyInputsRef'));
+  assert.ok(src.includes('pendingThumbnailInputsRef'));
+  assert.ok(src.includes('if (pendingAutoApplyInputsRef.current)'));
+  assert.ok(src.includes('if (pendingThumbnailInputsRef.current)'));
+});
+
 test('SlideEditor: handleUpdateSlide forwards addToHistory to updateSlides', () => {
   const src = readUtf8('components/SlideEditor.tsx');
   assert.ok(src.includes('const handleUpdateSlide = (updatedSlide: Slide, addToHistory: boolean = true)'));

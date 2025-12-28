@@ -122,6 +122,23 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   const ignoreNextPropSyncRef = useRef(false);
   const skipNextAutoApplyRef = useRef(true);
   const skipNextThumbnailRef = useRef(true);
+  const pendingAutoApplyInputsRef = useRef<{
+      crop: typeof crop;
+      overlays: typeof overlays;
+      layerOrder: typeof layerOrder;
+      slideLayout: typeof slideLayout;
+      solidColor: typeof solidColor;
+      audioFile: typeof audioFile;
+      audioVolume: typeof audioVolume;
+      localDuration: typeof localDuration;
+  } | null>(null);
+  const pendingThumbnailInputsRef = useRef<{
+      crop: typeof crop;
+      overlays: typeof overlays;
+      layerOrder: typeof layerOrder;
+      slideLayout: typeof slideLayout;
+      solidColor: typeof solidColor;
+  } | null>(null);
   const editSessionActiveRef = useRef(false);
   const editSessionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const autoApplyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -294,16 +311,50 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       prevSlideIdRef.current = slide.id;
 
       const nextOverlays = slide.overlays || [];
+      const nextLayerOrder = slide.layerOrder || [SLIDE_TOKEN, ...nextOverlays.map(o => o.id)];
+      const prevOrder = Array.isArray(layerOrder) ? layerOrder : [];
+      const resolvedLayerOrder =
+          prevOrder.length === nextLayerOrder.length && prevOrder.every((id, i) => id === nextLayerOrder[i])
+              ? prevOrder
+              : nextLayerOrder;
+      const nextSlideLayout = slide.layout || null;
+      const nextSolidColor = slide.backgroundColor || '#000000';
+      const nextAudioFile = slide.audioFile;
+      const nextAudioVolume = slide.audioVolume ?? 1.0;
+      const nextLocalDuration = slide.duration;
+
+      pendingAutoApplyInputsRef.current = {
+          crop: slide.crop,
+          overlays: nextOverlays,
+          layerOrder: resolvedLayerOrder,
+          slideLayout: nextSlideLayout,
+          solidColor: nextSolidColor,
+          audioFile: nextAudioFile,
+          audioVolume: nextAudioVolume,
+          localDuration: nextLocalDuration,
+      };
+      pendingThumbnailInputsRef.current = {
+          crop: slide.crop,
+          overlays: nextOverlays,
+          layerOrder: resolvedLayerOrder,
+          slideLayout: nextSlideLayout,
+          solidColor: nextSolidColor,
+      };
 
       setCrop(slide.crop);
       setStartCrop(slide.crop);
       setOverlays(nextOverlays);
-      setLayerOrder(slide.layerOrder || [SLIDE_TOKEN, ...nextOverlays.map(o => o.id)]);
-      setSlideLayout(slide.layout || null);
-      setSolidColor(slide.backgroundColor || '#000000');
-      setAudioFile(slide.audioFile);
-      setAudioVolume(slide.audioVolume ?? 1.0);
-      setLocalDuration(slide.duration);
+      setLayerOrder(prev => {
+          const next = nextLayerOrder;
+          const prevOrder = Array.isArray(prev) ? prev : [];
+          if (prevOrder.length === next.length && prevOrder.every((id, i) => id === next[i])) return prevOrder;
+          return next;
+      });
+      setSlideLayout(nextSlideLayout);
+      setSolidColor(nextSolidColor);
+      setAudioFile(nextAudioFile);
+      setAudioVolume(nextAudioVolume);
+      setLocalDuration(nextLocalDuration);
 
       setIsDraggingCrop(false);
       setDragModeCrop(null);
@@ -332,6 +383,11 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   useEffect(() => {
       if (skipNextAutoApplyRef.current) {
           skipNextAutoApplyRef.current = false;
+          if (pendingAutoApplyInputsRef.current) {
+              lastAutoApplyInputsRef.current = pendingAutoApplyInputsRef.current;
+              pendingAutoApplyInputsRef.current = null;
+              return;
+          }
           lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
           return;
       }
@@ -360,6 +416,11 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   useEffect(() => {
       if (skipNextThumbnailRef.current) {
           skipNextThumbnailRef.current = false;
+          if (pendingThumbnailInputsRef.current) {
+              lastThumbnailInputsRef.current = pendingThumbnailInputsRef.current;
+              pendingThumbnailInputsRef.current = null;
+              return;
+          }
           lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
           return;
       }
@@ -631,17 +692,19 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       try { e.currentTarget.releasePointerCapture(e.pointerId); } catch (_) {}
   };
 
-  // Keep layerOrder in sync with overlays
-  useEffect(() => {
-      setLayerOrder(prev => {
-          const ids = overlays.map(o => o.id);
-          let next = Array.isArray(prev) ? [...prev] : [];
-          if (!next.includes(SLIDE_TOKEN)) next.unshift(SLIDE_TOKEN);
-          next = next.filter(id => id === SLIDE_TOKEN || ids.includes(id));
-          for (const id of ids) if (!next.includes(id)) next.push(id);
-          return next;
-      });
-  }, [overlays]);
+	  // Keep layerOrder in sync with overlays
+	  useEffect(() => {
+	      setLayerOrder(prev => {
+	          const ids = overlays.map(o => o.id);
+	          const prevOrder = Array.isArray(prev) ? prev : [];
+	          let next = Array.isArray(prev) ? [...prev] : [];
+	          if (!next.includes(SLIDE_TOKEN)) next.unshift(SLIDE_TOKEN);
+	          next = next.filter(id => id === SLIDE_TOKEN || ids.includes(id));
+	          for (const id of ids) if (!next.includes(id)) next.push(id);
+	          if (prevOrder.length === next.length && prevOrder.every((id, i) => id === next[i])) return prevOrder;
+	          return next;
+	      });
+	  }, [overlays]);
 
   // Audio Preview & Duration Sync Logic
   useEffect(() => {
