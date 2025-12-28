@@ -1539,30 +1539,35 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 	  const renderOverlayForCanvas = (ov: Overlay, baseW: number, baseH: number) => {
 	      const isSelected = ov.id === selectedOverlayId;
 	      const interactive = isCanvasMode && activeTab !== 'crop';
-	      const baseStyle: React.CSSProperties = {
-	          position: 'absolute',
-	          left: `${ov.x * 100}%`,
-	          top: `${ov.y * 100}%`,
-	          transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg) scale(${ov.flipX ? -1 : 1}, ${ov.flipY ? -1 : 1})`,
-	          cursor: interactive ? 'move' : 'default',
-	          opacity: ov.opacity ?? 1,
-	          userSelect: 'none',
-	          pointerEvents: interactive ? 'auto' : 'none'
-      };
-      const strokeWidthPx = (ov.strokeWidth || 0) * (baseH / 500);
-      const shadowScale = baseH / 500;
+		      const baseStyle: React.CSSProperties = {
+		          position: 'absolute',
+		          left: `${ov.x * 100}%`,
+		          top: `${ov.y * 100}%`,
+		          transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`,
+		          cursor: interactive ? 'move' : 'default',
+		          opacity: ov.opacity ?? 1,
+		          userSelect: 'none',
+		          pointerEvents: interactive ? 'auto' : 'none'
+	      };
+	      const contentStyle: React.CSSProperties = {
+	          transform: `scale(${ov.flipX ? -1 : 1}, ${ov.flipY ? -1 : 1})`,
+	          transformOrigin: 'center',
+	      };
+	      const strokeWidthPx = (ov.strokeWidth || 0) * (baseH / 500);
+	      const shadowScale = baseH / 500;
 
       return (
           <div
               key={ov.id}
               id={`overlay-${ov.id}`}
-              style={baseStyle}
-              onMouseDown={interactive ? ((e) => handleMouseDownOverlay(e, ov.id, 'move')) : undefined}
-          >
-              {ov.type === 'text' && (
-                  <div style={{
-                      position: 'relative',
-                      fontSize: `${(ov.fontSize || 5) / 100 * baseH}px`,
+	              style={baseStyle}
+	              onMouseDown={interactive ? ((e) => handleMouseDownOverlay(e, ov.id, 'move')) : undefined}
+	          >
+	              <div style={contentStyle}>
+	              {ov.type === 'text' && (
+	                  <div style={{
+	                      position: 'relative',
+	                      fontSize: `${(ov.fontSize || 5) / 100 * baseH}px`,
                       fontFamily: `"${ov.fontFamily}", sans-serif`,
                       fontWeight: ov.isBold ? 'bold' : 'normal',
                       fontStyle: ov.isItalic ? 'italic' : 'normal',
@@ -1600,18 +1605,19 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                       const headLength = Math.min(w, headHeight);
                       const shaftHeight = (ov.strokeWidth || 5) * (baseH / 500);
                       const shaftY = (h - shaftHeight) / 2;
-                      return (
-                          <svg width={w} height={h} style={{ filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`, overflow: 'visible' }}>
-                              <rect x="0" y={shaftY} width={Math.max(0, w - headLength)} height={shaftHeight} fill={ov.color} />
-                              <polygon points={`${w},${h/2} ${w-headLength},0 ${w-headLength},${h}`} fill={ov.color} />
-                          </svg>
-                      );
-                  })()
-              )}
+	                      return (
+	                          <svg width={w} height={h} style={{ filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`, overflow: 'visible' }}>
+	                              <rect x="0" y={shaftY} width={Math.max(0, w - headLength)} height={shaftHeight} fill={ov.color} />
+	                              <polygon points={`${w},${h/2} ${w-headLength},0 ${w-headLength},${h}`} fill={ov.color} />
+	                          </svg>
+	                      );
+	                  })()
+	              )}
+	              </div>
 
-              {isSelected && interactive && !ov.locked && (
-                  <div className="absolute inset-0 border border-emerald-400 pointer-events-none" style={{ margin: '-4px' }}>
-                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow border border-slate-400 flex items-center justify-center cursor-grab pointer-events-auto hover:bg-emerald-50" onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'rotate')}>↻</div>
+	              {isSelected && interactive && !ov.locked && (
+	                  <div className="absolute inset-0 border border-emerald-400 pointer-events-none" style={{ margin: '-4px' }}>
+	                      <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow border border-slate-400 flex items-center justify-center cursor-grab pointer-events-auto hover:bg-emerald-50" onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'rotate')}>↻</div>
                       {ov.type !== 'line' && (
                           <>
                               <div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('nw', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'nw')} />
@@ -1927,18 +1933,20 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                         style={{ left: screenRect.x, top: screenRect.y, width: screenRect.width, height: screenRect.height, border: '1px dashed rgba(255,255,255,0.2)' }} 
                         onMouseDown={handleContainerMouseDown}
                       >
-	                        {visibleOverlays.map(ov => {
-	                          const isSelected = ov.id === selectedOverlayId;
-	                          const baseStyle: React.CSSProperties = { position: 'absolute', left: `${ov.x * 100}%`, top: `${ov.y * 100}%`, transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg) scale(${ov.flipX ? -1 : 1}, ${ov.flipY ? -1 : 1})`, cursor: 'move', opacity: ov.opacity ?? 1, userSelect: 'none', pointerEvents: 'auto' };
-	                          const strokeWidthPx = (ov.strokeWidth || 0) * (screenRect.height / 500);
-	                          const shadowScale = screenRect.height / 500;
+		                        {visibleOverlays.map(ov => {
+		                          const isSelected = ov.id === selectedOverlayId;
+		                          const baseStyle: React.CSSProperties = { position: 'absolute', left: `${ov.x * 100}%`, top: `${ov.y * 100}%`, transform: `translate(-50%, -50%) rotate(${ov.rotation || 0}deg)`, cursor: 'move', opacity: ov.opacity ?? 1, userSelect: 'none', pointerEvents: 'auto' };
+		                          const contentStyle: React.CSSProperties = { transform: `scale(${ov.flipX ? -1 : 1}, ${ov.flipY ? -1 : 1})`, transformOrigin: 'center' };
+		                          const strokeWidthPx = (ov.strokeWidth || 0) * (screenRect.height / 500);
+		                          const shadowScale = screenRect.height / 500;
 
-                          return (
-                            <div key={ov.id} id={`overlay-${ov.id}`} style={baseStyle} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'move')}>
-                                {ov.type === 'text' && (
-                                    <div style={{ 
-                                        position: 'relative', 
-                                        fontSize: `${(ov.fontSize || 5) / 100 * screenRect.height}px`, 
+	                          return (
+	                            <div key={ov.id} id={`overlay-${ov.id}`} style={baseStyle} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'move')}>
+	                                <div style={contentStyle}>
+	                                {ov.type === 'text' && (
+	                                    <div style={{ 
+	                                        position: 'relative', 
+	                                        fontSize: `${(ov.fontSize || 5) / 100 * screenRect.height}px`, 
                                         fontFamily: `"${ov.fontFamily}", sans-serif`, 
                                         fontWeight: ov.isBold ? 'bold' : 'normal', 
                                         fontStyle: ov.isItalic ? 'italic' : 'normal', 
@@ -1978,12 +1986,13 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
                                                 <polygon points={`${w},${h/2} ${w-headLength},0 ${w-headLength},${h}`} fill={ov.color} /> 
                                             </svg> 
                                         ); 
-                                    })()
-                                )}
+	                                    })()
+	                                )}
+	                                </div>
 
-                                {isSelected && (
-                                    <div className="absolute inset-0 border border-emerald-400 pointer-events-none" style={{ margin: '-4px' }}>
-                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow border border-slate-400 flex items-center justify-center cursor-grab pointer-events-auto hover:bg-emerald-50" onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'rotate')}>↻</div>
+	                                {isSelected && (
+	                                    <div className="absolute inset-0 border border-emerald-400 pointer-events-none" style={{ margin: '-4px' }}>
+	                                        <div className="absolute -top-8 left-1/2 -translate-x-1/2 w-6 h-6 bg-white rounded-full shadow border border-slate-400 flex items-center justify-center cursor-grab pointer-events-auto hover:bg-emerald-50" onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'rotate')}>↻</div>
                                         {ov.type !== 'line' && (
                                             <><div className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('nw', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'nw')} /><div className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('ne', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'ne')} /><div className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('sw', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'sw')} /><div className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('se', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'se')} /><div className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('n', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'n')} /><div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('s', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 's')} /><div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('e', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'e')} /><div className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-3 bg-white border border-emerald-500 pointer-events-auto" style={{ cursor: getCursorStyle('w', ov.rotation) }} onMouseDown={(e) => handleMouseDownOverlay(e, ov.id, 'w')} /></>
                                         )}
