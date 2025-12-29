@@ -1,0 +1,697 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PDF Slideshow Maker ユーザーマニュアル（小学生でもわかる版） | PDF Slideshow Maker</title>
+    <script>
+      (function () {
+        try {
+          var params = new URLSearchParams(location.search);
+          if (params.get('theme') === 'idle') document.documentElement.classList.add('theme-idle');
+        } catch (e) {}
+      })();
+    </script>
+    <style>
+      :root {
+        --bg-950: #0b1220;
+        --bg-900: #0e1a2b;
+        --border-800: #1f2937;
+        --text-main: #e5e7eb;
+        --text-sub: #9ca3af;
+        --link: #34d399;
+        --code-bg: rgba(148, 163, 184, 0.12);
+      }
+      html.theme-idle {
+        --bg-950: rgba(255, 255, 255, 0.14);
+        --bg-900: transparent;
+        --border-800: rgba(15, 23, 42, 0.12);
+        --text-main: rgba(15, 23, 42, 0.92);
+        --text-sub: rgba(15, 23, 42, 0.56);
+        --link: #007aff;
+        --code-bg: rgba(15, 23, 42, 0.08);
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans JP', sans-serif;
+        background-color: var(--bg-900);
+        color: var(--text-main);
+      }
+      html.theme-idle body {
+        background:
+          radial-gradient(900px 500px at 12% 18%, rgba(0, 122, 255, 0.22), transparent 60%),
+          radial-gradient(900px 500px at 88% 80%, rgba(88, 86, 214, 0.18), transparent 60%),
+          linear-gradient(180deg, #ffffff, #f1f5f9);
+      }
+      a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+      a:hover { text-decoration-thickness: 2px; }
+      header {
+        background: var(--bg-950);
+        border-bottom: 1px solid var(--border-800);
+      }
+      html.theme-idle header {
+        -webkit-backdrop-filter: blur(22px) saturate(160%);
+        backdrop-filter: blur(22px) saturate(160%);
+      }
+      .container {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 12px 16px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 16px 0 12px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 18px 0 8px;
+      }
+      h3 {
+        font-size: 14px;
+        margin: 16px 0 8px;
+      }
+      h4 {
+        font-size: 13px;
+        margin: 14px 0 8px;
+        color: var(--text-sub);
+      }
+      p, li {
+        font-size: 14px;
+        line-height: 1.75;
+      }
+      p {
+        margin: 10px 0;
+      }
+      ul, ol {
+        margin: 10px 0;
+        padding-left: 1.2em;
+      }
+      li {
+        margin: 6px 0;
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border-800);
+        margin: 18px 0;
+        opacity: 0.6;
+      }
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 8px;
+        background: var(--code-bg);
+        border: 1px solid var(--border-800);
+      }
+      pre {
+        margin: 12px 0;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid var(--border-800);
+        overflow: auto;
+      }
+      pre code {
+        display: block;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font-size: 12px;
+      }
+      figure {
+        margin: 14px 0;
+      }
+      figure img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 16px;
+        border: 1px solid var(--border-800);
+      }
+      .card {
+        margin: 12px 0 24px;
+        padding: 16px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid var(--border-800);
+        border-radius: 18px;
+      }
+    </style>
+    <script>
+      function goBackToApp() {
+        if (window.opener && !window.opener.closed) {
+          try { window.opener.focus(); } catch (e) {}
+          try { window.close(); } catch (e) {}
+          return false;
+        }
+        if (history.length > 1) {
+          history.back();
+          return false;
+        }
+        location.href = './index.html';
+        return false;
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="container">
+        <a href="./index.html" onclick="return goBackToApp();">← アプリに戻る</a>
+      </div>
+    </header>
+    <main class="container">
+      <h1>PDF Slideshow Maker ユーザーマニュアル（小学生でもわかる版）</h1>
+      <article class="card">
+<p>このアプリは、<strong>PDFを動画（スライドショー）にする</strong>ためのアプリだよ。 スライドに文字や画像をのせたり、音声やBGMもつけられるよ。</p>
+        <hr />
+        <h2>目次（どこに何が書いてある？）</h2>
+        <ul>
+        <li>まず大事なこと（安全とAI）</li>
+        <li>起動画面（PDFを入れる）</li>
+        <li>プロジェクト管理（保存/読込/削除）</li>
+        <li>ガラス設定（背景の見た目）</li>
+        <li>編集画面（スライド/タイムライン/右パネル）</li>
+        <li>スライド編集（トリミング/装飾/画像/音声）</li>
+        <li>全画面プレビュー</li>
+        <li>書き出し（動画作成とダウンロード）</li>
+        <li>JSON / APIキー / 困ったとき</li>
+        </ul>
+        <h2>まず大事なこと（超たいせつ）</h2>
+        <ul>
+        <li><strong>PDFや画像や音声は、このアプリのサーバーには送らない</strong>よ（だいたいブラウザの中で動くよ）。</li>
+        <li>でも、<strong>AIを使うときだけ</strong>は、文章やスライド画像などを <strong>Google（Gemini API）に送って処理</strong>するよ。
+        <ul>
+        <li>だから、秘密の内容はAIに送らないほうが安全だよ。</li>
+        </ul>
+        </li>
+        <li>APIキーは、<strong>パスワードみたいなもの</strong>だよ。人に教えないでね。</li>
+        </ul>
+        <hr />
+        <h2>画面の見かた（どこに何がある？）</h2>
+        <p>だいたい、こういう形だよ。</p>
+        <ul>
+        <li><strong>上のバー（ヘッダー）</strong>：利用リンク、ガラス設定、APIキー、保存の状態、Dev Mode</li>
+        <li><strong>スライド一覧（カード）</strong>：スライドを選ぶ、並び替える、削除/複製する</li>
+        <li><strong>下のタイムライン</strong>：時間の流れ（再生バー）、スライドの長さや順番をいじる</li>
+        <li><strong>右のパネル（設定）</strong>：
+        <ul>
+        <li>スライドを選んでないとき → <strong>プロジェクト設定</strong></li>
+        <li>スライドを選んだとき → <strong>スライド編集</strong></li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>起動画面（最初にやること）</h2>
+        <figure><img src="manual_images/01_idle_home.png" alt="起動画面（PDFアップロード）" /></figure>
+        <h3>1) プロジェクト管理を開く（おすすめ）</h3>
+        <ul>
+        <li>「プロジェクト管理を開く」から、昔の作業を開けるよ。</li>
+        </ul>
+        <h3>2) PDFをアップロード</h3>
+        <ol>
+        <li>「PDFファイルをアップロード」を押す（またはドラッグ＆ドロップ）</li>
+        <li>PDFを選ぶ</li>
+        </ol>
+        <h3>3) さいしょの設定（起動画面の上のほう）</h3>
+        <ul>
+        <li><strong>基本表示時間</strong>：1枚のスライドを何秒見せるか</li>
+        <li><strong>切り替え効果</strong>：スライドが切り替わるときの動き（フェードなど）</li>
+        <li><strong>AIでナレーション原稿を自動生成</strong>（ベータ）
+        <ul>
+        <li>これは <strong>AIが使える状態（connected）</strong> のときだけONにできるよ</li>
+        <li>ONにすると、PDFを読む時間が少し長くなることがあるよ</li>
+        </ul>
+        </li>
+        </ul>
+        <h3>スマホの注意</h3>
+        <ul>
+        <li>スマホは <strong>縦向き</strong>で使ってね（横向きだと使えないよって画面が出るよ）</li>
+        </ul>
+        <hr />
+        <h2>プロジェクト管理（保存/読み込み/削除）</h2>
+        <p>「プロジェクト管理」は、<strong>このブラウザの中に保存した作業</strong>をまとめて見れる画面だよ。</p>
+        <figure><img src="manual_images/02_project_manager.png" alt="プロジェクト管理" /></figure>
+        <h3>開き方</h3>
+        <ul>
+        <li>起動画面 or 編集画面の「プロジェクト管理」</li>
+        </ul>
+        <h3>できること</h3>
+        <ul>
+        <li><strong>読込（開く）</strong>
+        <ul>
+        <li>一覧で選んで「読込」ボタン</li>
+        <li>または <strong>サムネをダブルクリック</strong></li>
+        </ul>
+        </li>
+        <li><strong>更新</strong>
+        <ul>
+        <li>一覧を読み直すよ（増えたり減ったりした時に便利）</li>
+        </ul>
+        </li>
+        <li><strong>新規作成</strong>
+        <ul>
+        <li>プロジェクト管理を閉じて、まっさらで始めるよ</li>
+        </ul>
+        </li>
+        <li><strong>削除</strong>
+        <ul>
+        <li>1つ選んでから「削除」（戻せないよ）</li>
+        </ul>
+        </li>
+        <li><strong>JSONから読込</strong>
+        <ul>
+        <li>以前「保存（JSON）」したファイルを読み込んで、続きから編集できるよ</li>
+        </ul>
+        </li>
+        </ul>
+        <h3>注意</h3>
+        <ul>
+        <li>プロジェクトは <strong>ブラウザの中に保存</strong>されるよ。</li>
+        <li>ブラウザの「サイトデータ削除」みたいなのをすると、消えることがあるよ。
+        <ul>
+        <li>大事なら <strong>JSON保存</strong>もしておくと安心だよ。</li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>ガラス設定（背景の見た目）</h2>
+        <p>ヘッダーの「ガラス設定」ボタンで、背景の見た目を変えられるよ。</p>
+        <figure><img src="manual_images/03_glass_settings.png" alt="ガラス設定" /></figure>
+        <h3>できること</h3>
+        <ul>
+        <li><strong>背景</strong>：デフォルト / 色 / 画像</li>
+        <li><strong>画像モード</strong>（画像を選んだとき）
+        <ul>
+        <li>自由（ドラッグして位置を変えられる）</li>
+        <li>画面フィット（画像がぜんぶ見える）</li>
+        <li>タイル（同じ画像をくり返す）</li>
+        </ul>
+        </li>
+        <li><strong>ガラス</strong>：ガラスの色、透明度（うすさ）、ぼかし（ブラー）</li>
+        </ul>
+        <h3>ポイント</h3>
+        <ul>
+        <li>変えたら <strong>すぐ反映</strong> されるよ</li>
+        <li>これは <strong>この端末だけに保存</strong> されるよ（別のPC/スマホでは別になるよ）</li>
+        <li>迷ったら「リセット」や「デフォルトに戻す」でOKだよ</li>
+        </ul>
+        <h2>編集画面（メイン）</h2>
+        <figure><img src="manual_images/05_editor_main.png" alt="編集画面（スライド一覧・タイムライン・右パネル）" /></figure>
+        <h3>上のボタン（編集画面の一番上）</h3>
+        <ul>
+        <li><strong>読込</strong>：JSONのプロジェクトを読み込む</li>
+        <li><strong>保存</strong>：JSONで書き出す（バックアップや別PC移動用）</li>
+        <li><strong>名前をつけて保存</strong>：プロジェクト管理に保存する（複数持てる）</li>
+        <li><strong>プロジェクト管理</strong>：保存した一覧を開く</li>
+        <li><strong>元に戻す / やり直し</strong>：Ctrl+Z / Ctrl+Y（または Ctrl+Shift+Z）</li>
+        <li><strong>全画面プレビュー</strong>：動画みたいに再生して確認する</li>
+        <li><strong>書き出し</strong>：MP4/MOV を作る（終わったら「動画ダウンロード」で保存するよ）</li>
+        <li><strong>設定を開く/閉じる（≡）</strong>：右の設定パネルを開いたり閉じたり</li>
+        <li><strong>Dev Mode</strong>（スイッチ）
+        <ul>
+        <li>ONにすると、APIの状態（connected など）や、使った量っぽい情報が出るよ（ふだんはOFFでOK）</li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>スライド追加（「スライド追加」）</h2>
+        <p>好きな場所にスライドを足せるよ。</p>
+        <ul>
+        <li><strong>No.◯ の 前/後 に追加</strong>：入れたい場所を決める</li>
+        <li><strong>画像</strong>：画像ファイルからスライドを追加</li>
+        <li><strong>無地</strong>：色だけのスライドを追加（暗転/休憩スライドに便利）</li>
+        </ul>
+        <hr />
+        <h2>一括設定（全スライド適用）</h2>
+        <p>「全部まとめて同じにしたい！」ときに使うよ。</p>
+        <ul>
+        <li>全スライドの <strong>表示時間</strong> をそろえる</li>
+        <li>全スライドの <strong>音量</strong> をそろえる</li>
+        <li>全スライドの <strong>切り替え効果</strong> をそろえる</li>
+        <li><strong>ナレーション（Slide Audio）をまとめてずらす</strong>（例：+1.5秒）
+        <ul>
+        <li>音声があるスライドだけが対象だよ</li>
+        <li>0秒より左には行かないよ（マイナスでずらしても0で止まるよ）</li>
+        <li>「時間を伸ばす」をONにすると、ずらした分だけ <strong>スライドの表示時間も伸ばす</strong> よ</li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>スライド一覧（カードのところ）</h2>
+        <p>スライド1枚ずつに、こういう操作ができるよ。</p>
+        <ul>
+        <li><strong>クリック</strong>：そのスライドを選ぶ（右の「スライド編集」が出る）</li>
+        <li><strong>もう一回クリック</strong>：選択を外す（右が「プロジェクト設定」に戻る）</li>
+        <li><strong>ドラッグ</strong>：順番を入れ替え</li>
+        <li><strong>⤓（画像を保存）</strong>：そのスライドの画像を <strong>PNGで保存（高画質）</strong> できるよ（カード右上に出るよ）</li>
+        <li><strong>♫</strong>：そのスライドに音声があるマークだよ</li>
+        <li><strong>切り替え効果</strong>：カード下のラベルを押して選ぶ</li>
+        <li><strong>時間（秒）</strong>：カード下の数字を変える</li>
+        <li><strong>複製</strong>：同じスライドをもう1枚作る</li>
+        <li><strong>削除</strong>：消す（戻せないことがあるから注意）</li>
+        </ul>
+        <hr />
+        <h2>タイムライン（下の時間のやつ）</h2>
+        <p>ここは「動画の時間」をいじる場所だよ。</p>
+        <ul>
+        <li>赤い線：いま見てる時間（再生位置）
+        <ul>
+        <li>クリック/ドラッグで動かせるよ（動かしてる間、ちっちゃいプレビューが出るよ）</li>
+        </ul>
+        </li>
+        <li>Zoom：大きくすると細かく見れるよ（小さくすると全体が見れるよ）</li>
+        <li>スライドのかたまり
+        <ul>
+        <li>ドラッグで順番を入れ替え</li>
+        <li>端っこをドラッグで「秒数（長さ）」を変えられるよ</li>
+        </ul>
+        </li>
+        <li>切り替えの長さ（ふわっとする時間）
+        <ul>
+        <li>スライドの <strong>右はし</strong> に、色つきのしましま（Fとか）が出るよ</li>
+        <li>その <strong>しましまの左はし</strong> の細い棒を左右にドラッグすると、切り替えが <strong>長く/短く</strong> なるよ</li>
+        </ul>
+        </li>
+        <li>音声がある時
+        <ul>
+        <li>スライドの音声やBGMが見えるよ（ずらしたり、長さを合わせたりできるよ）</li>
+        </ul>
+        </li>
+        </ul>
+        <p>※ タイムラインでいじったことも、最後はちゃんと画面を見て確認してね。</p>
+        <hr />
+        <h2>右のパネル：プロジェクト設定（スライド未選択のとき）</h2>
+        <h3>動画出力</h3>
+        <ul>
+        <li><strong>フォーマット</strong>：MP4 / MOV</li>
+        <li><strong>アスペクト比</strong>：16:9 / 4:3 / 1:1 / 9:16</li>
+        <li><strong>解像度</strong>：1080p / 720p</li>
+        <li><strong>背景処理</strong>
+        <ul>
+        <li>黒帯 / 白帯 / 画像</li>
+        <li>「画像」を選ぶと、背景画像を選べるよ</li>
+        </ul>
+        </li>
+        </ul>
+        <h3>書き出しと保存（ダウンロード）</h3>
+        <ul>
+        <li>上の「書き出し」で動画を作るよ</li>
+        <li>終わったら「動画ダウンロード」で保存できるよ
+        <ul>
+        <li>保存場所は、だいたい <strong>ブラウザのダウンロード先</strong> だよ（ブラウザの設定で変わるよ）</li>
+        <li>ファイル名は <code>slideshow.mp4</code> / <code>slideshow.mov</code> になるよ（あとで名前を変えてOK）</li>
+        </ul>
+        </li>
+        <li>ブラウザによっては書き出しできないことがあるよ（その時は <strong>Chrome / Edge</strong> がおすすめ）</li>
+        </ul>
+        <h3>見た目</h3>
+        <ul>
+        <li><strong>スライド縮小</strong>：スライドを少し小さくして背景を見せる量</li>
+        <li><strong>角丸半径</strong>：スライドの角を丸くする</li>
+        <li><strong>標準切替時間</strong>：切り替えの長さ（例：0.5秒）</li>
+        </ul>
+        <h3>BGM &amp; オーディオ</h3>
+        <ul>
+        <li><strong>BGM</strong>
+        <ul>
+        <li>追加/削除</li>
+        <li>波の絵（波形）で、流す範囲と音量を調整できるよ</li>
+        <li>Fade In / Fade Out（BGMの最初/最後をふわっと）</li>
+        <li>「スライドを曲の長さに合わせる」：曲の長さに合わせて1枚の秒数を自動でそろえる</li>
+        </ul>
+        </li>
+        <li><strong>自動音量調整（Ducking）</strong>
+        <ul>
+        <li>ナレーション中だけBGMを小さくするやつだよ</li>
+        </ul>
+        </li>
+        <li><strong>全体ナレーション</strong>
+        <ul>
+        <li>動画ぜんぶにかぶせる音声（1本）を入れられるよ</li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>右のパネル：スライド編集（スライド選択中）</h2>
+        <figure><img src="manual_images/06_inspector_crop.png" alt="スライド編集（トリミング）" /></figure>
+        <h3>まず大事：編集はだいたい“すぐ反映”されるよ</h3>
+        <ul>
+        <li>いまは、インスペクターでいじった内容が <strong>すぐ反映</strong> される作りだよ（Appleっぽい感じ）</li>
+        <li>Undo（元に戻す）も、増えすぎないように <strong>まとめて1回ぶん</strong> になりやすいよ</li>
+        </ul>
+        <h3>「適用」ボタンってなに？</h3>
+        <ul>
+        <li>右上の <strong>「適用」</strong> は、主に <strong>スライド一覧のサムネ（小さい見本画像）を作り直すボタン</strong> だよ</li>
+        <li>「一覧の絵がまだ古いかも？」ってときに押すと安心だよ（更新中はボタンが止まるよ）</li>
+        </ul>
+        <h3>プレビュー（上の絵のところ）</h3>
+        <ul>
+        <li><strong>スライド（白っぽい枠）</strong> と <strong>背景（黒っぽい所）</strong> があるよ</li>
+        <li>スライドは <strong>移動</strong> と <strong>大きさ変更</strong> ができるよ（回転はしないよ）</li>
+        <li>オブジェクト（文字/画像/装飾）は
+        <ul>
+        <li>クリックで選択</li>
+        <li>ドラッグで移動</li>
+        <li>四角いハンドルで大きさ変更</li>
+        <li>くるっとマークで回転（オブジェクトだけ）</li>
+        </ul>
+        </li>
+        </ul>
+        <h3>要素一覧（レイヤー）</h3>
+        <p>ここ、めっちゃ便利だよ。</p>
+        <ul>
+        <li>クリックで選択できる</li>
+        <li>「非表示」：見えなくする</li>
+        <li>「ロック」：動かないようにする（ミス防止）</li>
+        <li><strong>ドラッグで並び替え（上ほど手前）</strong>
+        <ul>
+        <li>上のほうにある物ほど、前（手前）に見えるよ</li>
+        </ul>
+        </li>
+        <li><code>SLD</code> はスライド本体だよ
+        <ul>
+        <li><code>SLD</code> より上に置くと「スライドより前」</li>
+        <li><code>SLD</code> より下に置くと「スライドの後ろ」</li>
+        </ul>
+        </li>
+        </ul>
+        <h3>キーボード操作（選択してる時）</h3>
+        <ul>
+        <li><strong>Delete / Backspace</strong>：選んでるオブジェクトを削除（ロック中は消えない）</li>
+        <li><strong>矢印キー</strong>：ちょっとずつ動かす
+        <ul>
+        <li><strong>Shift + 矢印</strong>：大きく動かす</li>
+        </ul>
+        </li>
+        <li><strong>Esc</strong>：追加しようとしてる状態をやめる</li>
+        </ul>
+        <h3>プレビューの「最大化」</h3>
+        <ul>
+        <li>右上の <strong>「最大化」</strong> を押すと、プレビューだけを <strong>別窓みたいに大きく</strong> 出せるよ</li>
+        <li>「戻す」を押すと、元の場所に戻るよ</li>
+        </ul>
+        <hr />
+        <h2>タブ：トリミング（表示範囲）</h2>
+        <ul>
+        <li>スライドの「見せたいところ」を決めるよ</li>
+        <li>枠をドラッグして調整してね</li>
+        <li><strong>ガイド線</strong>：枠の中に線を出したり消したりできるよ（だいたい目安）</li>
+        <li><strong>比率</strong>：デフォルト / 16:9 / 4:3 / 1:1 / 9:16 / フリー を選べるよ</li>
+        <li>「範囲リセット」で元に戻せるよ</li>
+        </ul>
+        <p>※ トリミング中は、スライドやオブジェクトの移動とは役割がちがうよ。</p>
+        <hr />
+        <h2>タブ：装飾（テキスト/線/矢印/四角/丸）</h2>
+        <figure><img src="manual_images/07_inspector_overlay.png" alt="スライド編集（装飾）" /></figure>
+        <h3>追加</h3>
+        <ul>
+        <li>「テキスト / 線 / 矢印 / 四角 / 丸」を押す</li>
+        <li>画面に「ダブルクリックして配置」って出たら、<strong>置きたい所をダブルクリック</strong>してね</li>
+        </ul>
+        <h3>できること</h3>
+        <ul>
+        <li>色、太さ、透明度</li>
+        <li>ふち（アウトライン）</li>
+        <li>影（シャドウ）</li>
+        <li>回転</li>
+        <li>反転（左右/上下）</li>
+        <li>アニメーション（入/アウト）</li>
+        <li><strong>開始時間</strong>（いつから出すか）と <strong>長さ</strong>（いつまで出すか）</li>
+        </ul>
+        <hr />
+        <h2>タブ：画像（アップロード / AIで生成）</h2>
+        <figure><img src="manual_images/08_inspector_image.png" alt="スライド編集（画像）" /></figure>
+        <h3>追加（アップロード）</h3>
+        <ul>
+        <li>「ファイルを選択」から画像を選ぶよ</li>
+        </ul>
+        <h3>追加（AIで生成）</h3>
+        <ul>
+        <li>「AIで生成」は <strong>APIが connected の時だけ</strong>使えるよ</li>
+        <li>文章（プロンプト）を入れて「画像を生成」</li>
+        </ul>
+        <h3>できること</h3>
+        <ul>
+        <li>透明度</li>
+        <li>反転（左右/上下）</li>
+        <li>アニメーション（入/アウト）</li>
+        <li>影（ドロップシャドウ）</li>
+        <li>回転</li>
+        <li>レイヤー順（前/後）</li>
+        </ul>
+        <hr />
+        <h2>タブ：音声（アップロード / 録音 / AI読み上げ）</h2>
+        <figure><img src="manual_images/09_inspector_audio.png" alt="スライド編集（音声）" /></figure>
+        <h3>アップロード</h3>
+        <ul>
+        <li>音声ファイルを選んで、そのスライドに付けるよ</li>
+        <li>音量も変えられるよ</li>
+        </ul>
+        <h3>録音</h3>
+        <ul>
+        <li>マイクを使って録音できるよ</li>
+        <li>さいしょに「マイク使っていい？」って聞かれたら <strong>許可</strong>してね</li>
+        </ul>
+        <h3>AI読み上げ（Gemini）</h3>
+        <ul>
+        <li>これは <strong>APIが connected の時だけ</strong>使えるよ</li>
+        <li>できること
+        <ul>
+        <li>スライド画像から原稿を作る（指示文も書ける）</li>
+        <li>原稿を読み上げ音声にする（声の種類も選べる）</li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>全画面プレビュー（再生チェック）</h2>
+        <figure><img src="manual_images/10_fullscreen_preview.png" alt="全画面プレビュー" /></figure>
+        <ul>
+        <li>「全画面プレビュー」で動画みたいに再生できるよ</li>
+        <li>再生バー（シークバー）を動かして、好きなところから見れるよ</li>
+        </ul>
+        <p>※ 重いときは、他のタブを閉じたり、解像度を下げるとラクになることがあるよ。</p>
+        <hr />
+        <h2>書き出し（MP4/MOVを作る）</h2>
+        <figure><img src="manual_images/12_export_completed.png" alt="書き出し完了（ダウンロード）" /></figure>
+        <h3>事前にやること</h3>
+        <ul>
+        <li>右の「プロジェクト設定」で
+        <ul>
+        <li>フォーマット（MP4/MOV）</li>
+        <li>アスペクト比</li>
+        <li>解像度</li>
+        <li>背景処理（黒帯/白帯/画像）</li>
+        </ul>
+        </li>
+        </ul>
+        <p>を決めてね。</p>
+        <ul>
+        <li>音を入れたいときは、BGM / 全体ナレーション / 各スライドの音声 を先に入れてね</li>
+        </ul>
+        <p>※ もし「書き出し」を押して <strong>「このブラウザでは動画の書き出しができないよ」</strong> みたいに出たら、対応ブラウザ（Chrome/Edgeなど）で開いてね。</p>
+        <h3>書き出しのしかた</h3>
+        <ol>
+        <li>上の「書き出し」を押す</li>
+        <li>しばらく待つ（スライドが多いほど時間かかるよ）</li>
+        <li>終わったらプレビューが出るよ</li>
+        </ol>
+        <p>※ 書き出し中は、できれば <strong>タブを閉じない/PCをスリープしない</strong> ほうが安全だよ。</p>
+        <h3>終わった後（保存）</h3>
+        <ul>
+        <li><strong>動画ダウンロード</strong>：動画ファイルを保存するよ</li>
+        <li><strong>画像ダウンロード</strong>：動画の好きな時間の画像を保存できるよ（1枚 / ZIP）</li>
+        <li><strong>再編集</strong>：編集画面に戻るよ</li>
+        <li><strong>最初から</strong>：全部リセットするよ</li>
+        </ul>
+        <figure><img src="manual_images/13_thumbnail_download.png" alt="画像ダウンロード（サムネ画像を書き出す）" /></figure>
+        <h4>画像ダウンロードの中身</h4>
+        <ul>
+        <li><strong>1枚</strong>：好きな秒数を入れて画像を1枚ダウンロード</li>
+        <li><strong>ZIP（最大20枚）</strong>：時間の範囲を入れて、最大20枚までまとめてダウンロード</li>
+        </ul>
+        <p>※ ダウンロードした動画がQuickTimeでうまく再生できない時は、VLC Playerやブラウザ再生を試してね。</p>
+        <hr />
+        <h2>JSONってなに？（かんたん説明）</h2>
+        <ul>
+        <li>JSON（ジェイソン）は、<strong>設定が入ったメモみたいなファイル</strong>だよ</li>
+        <li>「保存（JSON）」で書き出したら、他のPCに移したり、バックアップにできるよ</li>
+        </ul>
+        <h3>注意（サイズ上限）</h3>
+        <ul>
+        <li>JSONの読み込みは <strong>最大100MB</strong> までだよ</li>
+        <li>大きすぎると読み込めないよ（画像/音声が多いと大きくなりがち）</li>
+        <li>それと、JSONの中の <code>version</code> が合わないと読めないよ（古い/新しい形式だと弾かれることがある）</li>
+        </ul>
+        <hr />
+        <h2>APIキー（AI機能）の保存先（かんたん説明）</h2>
+        <p>APIキー画面で、保存先を選べるよ。</p>
+        <figure><img src="manual_images/04_api_key_modal.png" alt="APIキー設定" /></figure>
+        <ul>
+        <li><strong>メモリのみ</strong>：リロードやタブを閉じると消える（その場だけ）</li>
+        <li><strong>このタブだけ</strong>：同じタブのリロードはOK、タブを閉じると消える</li>
+        <li><strong>この端末に保存</strong>：次回も残る（同じ端末・同じブラウザだけ）</li>
+        </ul>
+        <p>「パスフレーズで暗号化」をONにすると、保存したキーを暗号化できるよ（共有PCにおすすめ）。</p>
+        <h3>AIを使うときの注意（お金/ネット）</h3>
+        <ul>
+        <li>AIは <strong>ネットが必要</strong>だよ</li>
+        <li>Geminiは使い方によって <strong>料金がかかることがある</strong>よ（APIキーを作ったあなたの契約側のルールになるよ）</li>
+        </ul>
+        <hr />
+        <h2>よくあるつまずき（困ったらここ）</h2>
+        <h3>AIが押せない</h3>
+        <ul>
+        <li>まずヘッダーの「APIキー」を入れて、「保存して使う」を押してね</li>
+        <li>少し待つと、AIのボタン（AIで生成 / AI読み上げ など）が押せるようになるよ</li>
+        <li>Dev Mode をONにすると、APIの状態が見えるよ（緑っぽいならだいたいOKだよ）</li>
+        </ul>
+        <h3>音声の録音ができない</h3>
+        <ul>
+        <li>マイクの許可がOFFになってるかも</li>
+        <li>ブラウザの設定で、このサイトのマイクをONにしてね</li>
+        </ul>
+        <h3>オブジェクトが動かない / 消せない</h3>
+        <ul>
+        <li>「要素一覧」で <strong>ロック</strong> になってないか見てね</li>
+        </ul>
+        <h3>オブジェクトが見えない</h3>
+        <ul>
+        <li>「要素一覧」で <strong>非表示</strong> になってないか見てね</li>
+        <li>レイヤー順で、スライドの後ろに行ってないかも見てね</li>
+        </ul>
+        <h3>書き出しができない（警告が出る）</h3>
+        <ul>
+        <li>「書き出し」を押して「このブラウザでは動画の書き出しができないよ」って出たら、対応ブラウザで開いてね（Chrome/Edgeなど）</li>
+        <li>「音あり動画ができないよ」って出たら、BGMや音声を外すか、別ブラウザで試してね</li>
+        </ul>
+        <h3>編集したのに、一覧のサムネ（カードの絵）が変わらない</h3>
+        <ul>
+        <li>右の「スライド編集」で <strong>「適用」</strong> を押してみてね（サムネを作り直すよ）</li>
+        </ul>
+        <h3>APIクールダウン中って出た</h3>
+        <ul>
+        <li>AIをたくさん使った時に、一時的に待つやつだよ</li>
+        <li>0秒になるまで待ってね</li>
+        </ul>
+        <hr />
+        <h2>自動保存と復元（とちゅうで消えても安心）</h2>
+        <ul>
+        <li>このアプリは、作業を <strong>自動で保存</strong>してるよ（右上に「保存中…」「保存済み」って出ることがあるよ）</li>
+        <li>もし途中でタブを閉じちゃったり、落ちちゃっても、 次に開いたとき「作業の続きから始めますか？」って出たら を選べるよ
+        <ul>
+        <li><strong>復元する</strong>：続きから再開</li>
+        <li><strong>破棄して新規作成</strong>：前の作業は捨てて最初から</li>
+        </ul>
+        </li>
+        </ul>
+        <hr />
+        <h2>よくある質問（FAQ）</h2>
+        <h3>Q. APIキーを入れないと、何もできない？</h3>
+        <p>A. そんなことないよ。PDFを読み込んで編集して書き出すのはできるよ。 ただし <strong>AIのボタンだけ</strong> は <code>connected</code> の時しか使えないよ。</p>
+        <h3>Q. プロジェクトを別のPCに持っていける？</h3>
+        <p>A. 「保存（JSON）」で書き出して、そのJSONを別PCで「読込」すればOKだよ。 でも、画像や音声が多いとJSONが大きくなって（最大100MB）読み込めないことがあるよ。</p>
+        <h3>Q. 画像やBGMって何でも使っていいの？</h3>
+        <p>A. なんでもOKじゃないよ。<strong>自分が使っていい物（権利がある物）</strong> を使ってね。</p>
+      </article>
+    </main>
+  </body>
+</html>

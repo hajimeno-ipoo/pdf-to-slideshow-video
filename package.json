@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "generate:user-manual": "node scripts/generate-user-manual.mjs",
     "dev": "vite",
+    "prebuild": "node scripts/generate-user-manual.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test tests/*.test.js",
