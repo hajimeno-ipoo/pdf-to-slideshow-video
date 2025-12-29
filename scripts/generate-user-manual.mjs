@@ -271,6 +271,7 @@ function buildHtml({ title, bodyHtml }) {
           radial-gradient(900px 500px at 12% 18%, rgba(0, 122, 255, 0.22), transparent 60%),
           radial-gradient(900px 500px at 88% 80%, rgba(88, 86, 214, 0.18), transparent 60%),
           linear-gradient(180deg, #ffffff, #f1f5f9);
+        background-attachment: fixed;
       }
       a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
       a:hover { text-decoration-thickness: 2px; }
@@ -306,17 +307,20 @@ function buildHtml({ title, bodyHtml }) {
       }
       p, li {
         font-size: 14px;
-        line-height: 1.75;
+        line-height: 1.7;
       }
       p {
-        margin: 10px 0;
+        margin: 8px 0;
       }
       ul, ol {
-        margin: 10px 0;
+        margin: 8px 0;
         padding-left: 1.2em;
       }
       li {
         margin: 6px 0;
+      }
+      section {
+        margin: 14px 0;
       }
       hr {
         border: 0;
@@ -340,6 +344,9 @@ function buildHtml({ title, bodyHtml }) {
         border: 1px solid var(--border-800);
         overflow: auto;
       }
+      html.theme-idle pre {
+        background: rgba(15, 23, 42, 0.06);
+      }
       pre code {
         display: block;
         padding: 0;
@@ -358,11 +365,32 @@ function buildHtml({ title, bodyHtml }) {
         border: 1px solid var(--border-800);
       }
       .card {
-        margin: 12px 0 24px;
+        margin: 12px 0 0;
         padding: 16px;
         background: rgba(0, 0, 0, 0.18);
         border: 1px solid var(--border-800);
-        border-radius: 18px;
+        border-radius: 12px;
+      }
+      html.theme-idle .card {
+        position: relative;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.18);
+        -webkit-backdrop-filter: blur(16px) saturate(160%);
+        backdrop-filter: blur(16px) saturate(160%);
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+      }
+      html.theme-idle .card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 55%);
+        box-shadow: inset 0 0 15px -5px rgba(255, 255, 255, 1);
+      }
+      html.theme-idle .card > * { position: relative; }
+      .meta {
+        color: var(--text-sub);
+        font-size: 12px;
       }
     </style>
     <script>
@@ -429,4 +457,3 @@ async function main() {
 }
 
 await main();
-

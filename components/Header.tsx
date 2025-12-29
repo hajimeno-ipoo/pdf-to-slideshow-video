@@ -91,6 +91,9 @@ const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-4">
             {/* Docs Links */}
             <nav className="flex items-center gap-3 text-[10px] font-medium">
+                <a href={getDocUrl('user_manual.html')} onClick={(e) => openDoc(e, getDocUrl('user_manual.html'))} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
+                    ユーザーマニュアル
+                </a>
                 <a href={getDocUrl('usage.html')} onClick={(e) => openDoc(e, getDocUrl('usage.html'))} className="text-slate-300 hover:text-emerald-400 hover:underline underline-offset-2">
                     利用について
                 </a>

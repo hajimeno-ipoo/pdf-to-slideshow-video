@@ -5,15 +5,17 @@ interface FileUploadProps {
   onFileSelect: (file: File, duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => void;
   status: AppStatus;
   aiEnabled: boolean;
+  onOpenProjectManager?: () => void;
 }
 
-const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled }) => {
+const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled, onOpenProjectManager }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [duration, setDuration] = useState<number>(3); // Default 3 seconds
   const [transitionType, setTransitionType] = useState<TransitionType>('fade'); // Default fade
   const [autoGenerateScript, setAutoGenerateScript] = useState<boolean>(false); // AI script generation
   const [customScriptPrompt, setCustomScriptPrompt] = useState<string>(''); // Custom prompt for AI
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -54,17 +56,96 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
     if (isAiLocked) setAutoGenerateScript(false);
   }, [isAiLocked]);
 
-  return (
-    <div 
-      className={`w-full max-w-2xl mx-auto mt-6 sm:mt-10 transition-all duration-300 px-2 sm:px-0 idle-sidebar-typography ${isDisabled ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
-    >
-      {/* Settings Area */}
-      <div className="mb-6 glass p-4 sm:p-6 rounded-[32px] flex flex-col gap-4">
-         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-between">
-             {/* Duration Setting */}
-             <div className="flex flex-col sm:block space-y-2 sm:space-y-0">
-                <div className="flex items-center justify-between sm:justify-start gap-4">
-                  <label htmlFor="duration" className="text-slate-300 font-medium whitespace-nowrap">
+	  return (
+	    <div 
+	      className={`w-full max-w-2xl mx-auto mt-6 sm:mt-10 transition-all duration-300 px-2 sm:px-0 idle-sidebar-typography ${isDisabled ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}
+	    >
+	      <div
+	        onDragOver={handleDragOver}
+	        onDragLeave={handleDragLeave}
+	        onDrop={handleDrop}
+	        onClick={() => inputRef.current?.click()}
+	        className={`
+	          relative border-2 border-transparent rounded-[40px] p-8 sm:p-10 pb-16 sm:pb-20 text-center cursor-pointer transition-all duration-300 group glass-strong
+	          ${isDragging 
+	            ? 'border-dashed border-blue-500 bg-blue-500/10 scale-[1.02]' 
+	            : ''
+	          }
+	        `}
+	      >
+	        <input 
+	          type="file" 
+	          accept="application/pdf" 
+	          ref={inputRef} 
+	          className="hidden" 
+	          onChange={handleChange}
+	        />
+	        
+	        <div className="flex flex-col items-center justify-center gap-4">
+	          <div className={`p-4 rounded-full glass-thin transition-colors ${isDragging ? 'text-blue-600' : 'text-slate-400'}`}>
+	            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+	              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+	            </svg>
+	          </div>
+	          
+	          <div>
+	            <h3 className="text-lg font-semibold text-white group-hover:text-blue-600 transition-colors">
+	              PDFファイルをアップロード
+	            </h3>
+	            <p className="text-sm text-slate-400 mt-2">
+	              タップ または ドラッグ＆ドロップ
+	            </p>
+	          </div>
+	        </div>
+
+	        <p className="absolute inset-x-0 bottom-4 sm:bottom-5 px-6 text-center text-xs text-red-500 font-bold pointer-events-none">
+	          ※ サーバーにファイルは送信されません。ブラウザ内で安全に変換されます。
+	        </p>
+	      </div>
+
+	      <div className="mt-4 flex items-center justify-center gap-3">
+	        {onOpenProjectManager && (
+	          <button
+	            type="button"
+	            onClick={onOpenProjectManager}
+	            aria-label="プロジェクト管理を開く"
+	            title="前の作業を開く（プロジェクト一覧）"
+	            className="w-11 h-11 flex items-center justify-center rounded-full border transition-colors bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 idle-btn-glass"
+	          >
+	            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+	              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 5.25h6l2 2h8.5A1.75 1.75 0 0122 9v9.75A2.25 2.25 0 0119.75 21H4.25A2.25 2.25 0 012 18.75V7.5A2.25 2.25 0 014.25 5.25z" />
+	            </svg>
+	          </button>
+	        )}
+
+	        <button
+	          type="button"
+	          onClick={() => setShowAdvancedSettings(v => !v)}
+	          aria-label="こだわり設定"
+	          title="こだわり設定（あとでOK）"
+	          aria-pressed={showAdvancedSettings}
+	          className={`w-11 h-11 flex items-center justify-center rounded-full border transition-colors ${
+	            showAdvancedSettings
+	              ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500/40 idle-btn-primary'
+	              : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 idle-btn-glass'
+	          }`}
+	        >
+	          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+	            <path strokeLinecap="round" strokeLinejoin="round" d="M6 13.5h12M6 7.5h12M6 19.5h12" />
+	            <path strokeLinecap="round" strokeLinejoin="round" d="M9 13.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm6-6a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm-6 12a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" />
+	          </svg>
+	        </button>
+	      </div>
+
+	      {/* Settings Area */}
+	      {showAdvancedSettings && (
+	      <div className="mt-6 glass p-4 sm:p-6 rounded-[32px] flex flex-col gap-4 animate-fade-in">
+           <div className="text-xs text-slate-400 font-bold tracking-wide">こだわり設定（あとでOK）</div>
+	         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-between">
+	             {/* Duration Setting */}
+	             <div className="flex flex-col sm:block space-y-2 sm:space-y-0">
+	                <div className="flex items-center justify-between sm:justify-start gap-4">
+	                  <label htmlFor="duration" className="text-slate-300 font-medium whitespace-nowrap">
                     基本表示時間:
                   </label>
                   <div className="flex items-center gap-2">
@@ -156,54 +237,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
                          />
                      </div>
                  </div>
-             )}
-         </div>
-      </div>
-
-      <div
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={() => inputRef.current?.click()}
-        className={`
-          relative border-2 border-transparent rounded-[40px] p-8 sm:p-10 pb-16 sm:pb-20 text-center cursor-pointer transition-all duration-300 group glass-strong
-          ${isDragging 
-            ? 'border-dashed border-blue-500 bg-blue-500/10 scale-[1.02]' 
-            : ''
-          }
-        `}
-      >
-        <input 
-          type="file" 
-          accept="application/pdf" 
-          ref={inputRef} 
-          className="hidden" 
-          onChange={handleChange}
-        />
-        
-        <div className="flex flex-col items-center justify-center gap-4">
-          <div className={`p-4 rounded-full glass-thin transition-colors ${isDragging ? 'text-blue-600' : 'text-slate-400'}`}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-            </svg>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold text-white group-hover:text-blue-600 transition-colors">
-              PDFファイルをアップロード
-            </h3>
-            <p className="text-sm text-slate-400 mt-2">
-              タップ または ドラッグ＆ドロップ
-            </p>
-          </div>
-        </div>
-
-        <p className="absolute inset-x-0 bottom-4 sm:bottom-5 px-6 text-center text-xs text-red-500 font-bold pointer-events-none">
-          ※ サーバーにファイルは送信されません。ブラウザ内で安全に変換されます。
-        </p>
-      </div>
-    </div>
-  );
-};
+		             )}
+		         </div>
+	      </div>
+	      )}
+	    </div>
+	  );
+	};
 
 export default FileUpload;

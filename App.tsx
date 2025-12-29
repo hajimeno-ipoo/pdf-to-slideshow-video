@@ -1226,35 +1226,27 @@ const App: React.FC = () => {
             </div>
         ) : (
             // Non-Editor Views (Landing, Processing, Result)
-	            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 items-center pb-24 flex flex-col ${(isIdle || isProcessing || isCompleted) ? 'idle-surface' : ''}`}>
-                {/* Hero Section */}
+	            <div className={`w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 items-center flex flex-col ${isIdle ? 'flex-1 justify-center py-10 sm:py-12' : 'py-8 sm:py-12 pb-24'} ${(isIdle || isProcessing || isCompleted) ? 'idle-surface' : ''}`}>
+		                {/* Hero Section */}
+			                {state.status === AppStatus.IDLE && (
+			                <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
+			                    <h2 className="idle-title-3d text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
+			                      PDF資料を<br className="sm:hidden" />
+			                      動画ファイルに変換
+			                    </h2>
+			                    <p className="text-white/90 text-sm sm:text-base font-semibold leading-relaxed drop-shadow-lg">
+			                      資料を“見せる動画”に。まずはPDFをアップロード。整えて、動画を書き出そう
+			                    </p>
+			                </div>
+			                )}
+
 	                {state.status === AppStatus.IDLE && (
-	                <div className="text-center max-w-3xl mx-auto mb-8 space-y-4 animate-fade-in-up px-2">
-	                    <h2 className="idle-title-3d text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
-	                      PDF資料を<br className="sm:hidden" />
-	                      動画ファイルに変換
-	                    </h2>
-	                </div>
-	                )}
+		                <FileUpload onFileSelect={handleFileSelect} status={state.status} aiEnabled={aiEnabled} onOpenProjectManager={() => setProjectManagerOpen(true)} />
+		                )}
 
-                {/* Upload Area */}
-                {state.status === AppStatus.IDLE && (
-                  <div className="w-full max-w-2xl mx-auto mb-4 flex flex-col items-center gap-2 px-2 sm:px-0">
-                    <button
-                      onClick={() => setProjectManagerOpen(true)}
-                      className="px-4 py-2 rounded-lg transition-colors idle-btn-glass"
-                    >
-                      プロジェクト管理を開く
-                    </button>
-                  </div>
-                )}
-                {state.status === AppStatus.IDLE && (
-	                <FileUpload onFileSelect={handleFileSelect} status={state.status} aiEnabled={aiEnabled} />
-	                )}
-
-                {/* Processing Status (Analysis or Conversion) */}
-                {(state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING) && (
-                <ProcessingStep currentStatus={state.status} progress={state.progress} />
+	                {/* Processing Status (Analysis or Conversion) */}
+	                {(state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING) && (
+	                <ProcessingStep currentStatus={state.status} progress={state.progress} />
                 )}
 
                 {/* Error Display */}
