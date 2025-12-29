@@ -1,8 +1,9 @@
 
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { TokenUsage } from "../types";
 import { getUserApiKey } from "../utils/apiKeyStore";
 import { sanitizeMessage } from "../utils/sanitize";
+import { extractNarrationText } from "../utils/narrationScript";
 
 let cachedClient: GoogleGenAI | null = null;
 let cachedKey: string | null = null;
@@ -442,6 +443,8 @@ export const generateSlideScript = async (imageBase64: string, previousContext?:
             prompt += `\n\n【ユーザーからのスタイル・内容指示】\n上記の「文脈の維持」を崩さない範囲で、以下の指示を反映してください：\n「${customInstructions}」\n`;
         }
 
+        prompt += `\n\n【絶対に守る出力ルール】\n必ず次のJSON形式だけで返してください：{\"narration\":\"...\"}\n・narration にはナレーション本文の文章だけを入れる\n・前置き／説明／見出し／「ナレーション原稿:」などのラベル／記号装飾／Markdown は一切入れない`;
+
         try {
             const response = await callWithRetry(async () => {
                 const ai = await getClient();
@@ -459,18 +462,34 @@ export const generateSlideScript = async (imageBase64: string, previousContext?:
                                 text: prompt
                             }
                         ]
+                    },
+                    config: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: Type.OBJECT,
+                            properties: {
+                                narration: {
+                                    type: Type.STRING,
+                                    description: "ナレーション原稿本文のみ（前置き・見出し・装飾なし）"
+                                }
+                            },
+                            required: ["narration"],
+                            propertyOrdering: ["narration"]
+                        }
                     }
                 });
             });
 
-            const text = response.text;
-            if (!text) throw new Error("テキストが生成されませんでした");
+            const raw = response.text;
+            if (!raw) throw new Error("テキストが生成されませんでした");
+            const narration = extractNarrationText(raw).trim();
+            if (!narration) throw new Error("テキストが生成されませんでした");
             
             const usage: TokenUsage = {
                 totalTokens: response.usageMetadata?.totalTokenCount || 0
             };
             
-            return { text: text.trim(), usage };
+            return { text: narration, usage };
         } catch (error: any) {
             const msg = getErrorMessage(error);
             console.error("Script Gen Error:", error);
