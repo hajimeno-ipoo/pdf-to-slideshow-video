@@ -330,6 +330,36 @@ export const renderBackground = (ctx: CanvasRenderingContext2D, width: number, h
     } else { ctx.fillStyle = fill; ctx.fillRect(0, 0, width, height); }
 };
 
+const clampCropRectToSource = (crop: Slide['crop'], sourceW: number, sourceH: number) => {
+    const sw = Number.isFinite(sourceW) && sourceW > 0 ? sourceW : 1;
+    const sh = Number.isFinite(sourceH) && sourceH > 0 ? sourceH : 1;
+    const cx = Number.isFinite(crop?.x) ? crop.x : 0;
+    const cy = Number.isFinite(crop?.y) ? crop.y : 0;
+    const cw = Number.isFinite(crop?.width) ? crop.width : sw;
+    const ch = Number.isFinite(crop?.height) ? crop.height : sh;
+
+    const sx = Math.min(Math.max(0, cx), sw - 1);
+    const sy = Math.min(Math.max(0, cy), sh - 1);
+    const sWidth = Math.min(Math.max(1, cw), sw - sx);
+    const sHeight = Math.min(Math.max(1, ch), sh - sy);
+
+    return { x: sx, y: sy, width: sWidth, height: sHeight };
+};
+
+const createImageBitmapWithCrop = async (file: File, crop: Slide['crop']): Promise<ImageBitmap> => {
+    const full = await createImageBitmap(file);
+    const rect = clampCropRectToSource(crop, full.width, full.height);
+    if (rect.x === 0 && rect.y === 0 && rect.width === full.width && rect.height === full.height) return full;
+    try {
+        const cropped = await createImageBitmap(full, rect.x, rect.y, rect.width, rect.height);
+        try { full.close?.(); } catch (_) {}
+        return cropped;
+    } catch (e) {
+        try { full.close?.(); } catch (_) {}
+        throw e;
+    }
+};
+
 export const renderSlideToImage = async (pdfDoc: PDFDocumentProxy | null, slide: Slide, targetWidth: number, targetHeight: number, settings: VideoSettings): Promise<ImageBitmap> => {
     const canvas = document.createElement('canvas'); const scaleFactor = 1.5; 
     canvas.width = targetWidth * scaleFactor; canvas.height = targetHeight * scaleFactor;
@@ -343,14 +373,22 @@ export const renderSlideToImage = async (pdfDoc: PDFDocumentProxy | null, slide:
         const viewportScaled = page.getViewport({ scale: tempScale });
         tempCanvas.width = crop.width * tempScale; tempCanvas.height = crop.height * tempScale;
         const tempCtx = tempCanvas.getContext('2d'); if (!tempCtx) throw new Error("Temp Canvas failed");
+        tempCtx.fillStyle = '#ffffff';
+        tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
         const renderContext = { canvasContext: tempCtx, viewport: viewportScaled, transform: [1, 0, 0, 1, -crop.x * tempScale, -crop.y * tempScale] };
         await page.render(renderContext).promise;
         return createImageBitmap(tempCanvas);
     } else if (slide.customImageFile) {
-        return createImageBitmap(slide.customImageFile);
+        return createImageBitmapWithCrop(slide.customImageFile, slide.crop);
     } else if (slide.backgroundColor) {
-        ctx.fillStyle = slide.backgroundColor; ctx.fillRect(0, 0, canvas.width, canvas.height);
-        return createImageBitmap(canvas);
+        const cropW = Number.isFinite(slide.crop?.width) && slide.crop.width > 0 ? slide.crop.width : canvas.width;
+        const cropH = Number.isFinite(slide.crop?.height) && slide.crop.height > 0 ? slide.crop.height : canvas.height;
+        const solid = document.createElement('canvas');
+        solid.width = Math.max(1, Math.round(cropW));
+        solid.height = Math.max(1, Math.round(cropH));
+        const sctx = solid.getContext('2d');
+        if (sctx) { sctx.fillStyle = slide.backgroundColor; sctx.fillRect(0, 0, solid.width, solid.height); }
+        return createImageBitmap(solid);
     }
     return createImageBitmap(canvas);
 };
@@ -446,6 +484,8 @@ export const renderPageOverview = async (sourceFile: File | null, slide: Slide):
         const viewport = page.getViewport({ scale: 2.0 }); 
         const canvas = document.createElement('canvas'); canvas.width = viewport.width; canvas.height = viewport.height;
         const ctx = canvas.getContext('2d'); if(!ctx) return "";
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         await page.render({ canvasContext: ctx, viewport }).promise;
         return canvas.toDataURL('image/jpeg', 0.8);
     }
@@ -620,7 +660,7 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
     let shouldCloseSlideImage = false;
     try {
         if (slide.customImageFile) {
-            slideImage = await createImageBitmap(slide.customImageFile);
+            slideImage = await createImageBitmapWithCrop(slide.customImageFile, slide.crop);
             shouldCloseSlideImage = true;
         } else if (sourceFile && slide.pageIndex > 0) {
             initPdfJs();
@@ -677,12 +717,19 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
                     }
                     thumbnailPageBitmapCache.delete(oldestKey);
                 }
-                slideImage = bmp;
+            slideImage = bmp;
             }
         } else {
             // solid 色スライド
             const tmp = document.createElement('canvas');
-            tmp.width = 640; tmp.height = 360;
+            const cropW = Number.isFinite(slide.crop?.width) && slide.crop.width > 0 ? slide.crop.width : 1920;
+            const cropH = Number.isFinite(slide.crop?.height) && slide.crop.height > 0 ? slide.crop.height : 1080;
+            const aspect = cropW > 0 && cropH > 0 ? (cropW / cropH) : (16 / 9);
+            let w = 640;
+            let h = Math.round(w / aspect);
+            if (h > 640) { h = 640; w = Math.round(h * aspect); }
+            tmp.width = Math.max(1, w);
+            tmp.height = Math.max(1, h);
             const tctx = tmp.getContext('2d');
             if (tctx) { tctx.fillStyle = slide.backgroundColor || '#000'; tctx.fillRect(0,0,tmp.width,tmp.height); }
             slideImage = await createImageBitmap(tmp);
@@ -769,9 +816,12 @@ export const generateVideoFromSlides = async (
             mimeType = s.customImageFile.type;
         } else if (s.backgroundColor) {
             const canvas = document.createElement('canvas');
-            canvas.width = 1920; canvas.height = 1080;
+            const cropW = Number.isFinite(s.crop?.width) && s.crop.width > 0 ? s.crop.width : 1920;
+            const cropH = Number.isFinite(s.crop?.height) && s.crop.height > 0 ? s.crop.height : 1080;
+            canvas.width = Math.max(1, Math.round(cropW));
+            canvas.height = Math.max(1, Math.round(cropH));
             const ctx = canvas.getContext('2d')!;
-            ctx.fillStyle = s.backgroundColor; ctx.fillRect(0,0,1920,1080);
+            ctx.fillStyle = s.backgroundColor; ctx.fillRect(0,0,canvas.width,canvas.height);
             bitmap = await createImageBitmap(canvas);
         } else if (sourceFile && s.pageIndex > 0) {
             initPdfJs();

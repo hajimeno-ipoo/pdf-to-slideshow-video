@@ -843,7 +843,9 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
   };
 
   const getSlideAspect = () => {
-      if (slide.crop && slide.crop.width && slide.crop.height) return slide.crop.width / slide.crop.height;
+      const cw = (crop?.width ?? slide.crop?.width);
+      const ch = (crop?.height ?? slide.crop?.height);
+      if (Number.isFinite(cw) && Number.isFinite(ch) && cw > 0 && ch > 0) return cw / ch;
       if (slide.width && slide.height) return slide.width / slide.height;
       return 16 / 9;
   };
@@ -1733,12 +1735,12 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
 	                              ? toCanvasPreview(draggingOverlay)
 	                              : null;
 
-	                          const elements = layerOrder.map(id => {
+		                              const elements = layerOrder.map(id => {
 		                              if (id === SLIDE_TOKEN) {
-		                                  const cropW = crop?.width || slide.crop?.width || slide.width || 1;
-		                                  const cropH = crop?.height || slide.crop?.height || slide.height || 1;
-	                                  const cropX = crop?.x || slide.crop?.x || 0;
-	                                  const cropY = crop?.y || slide.crop?.y || 0;
+		                                  const cropW = crop?.width ?? slide.crop?.width ?? slide.width ?? 1;
+		                                  const cropH = crop?.height ?? slide.crop?.height ?? slide.height ?? 1;
+	                                  const cropX = crop?.x ?? slide.crop?.x ?? 0;
+	                                  const cropY = crop?.y ?? slide.crop?.y ?? 0;
 	                                  const originalW = slide.originalWidth || slide.width || cropW;
 	                                  const originalH = slide.originalHeight || slide.height || cropH;
 	                                  const cropLayout = getCroppedImageLayoutPx({
@@ -1768,17 +1770,17 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
 	                                              handleMouseDownSlide(e, 'move');
 	                                          }}
 	                                      >
-	                                          {overviewImage ? (
-	                                              <img
-	                                                  src={overviewImage}
-	                                                  alt="Slide"
-	                                                  draggable={false}
-	                                                  className="absolute pointer-events-none select-none"
-	                                                  style={{
-	                                                      left: cropLayout.left,
-	                                                      top: cropLayout.top,
-	                                                      width: cropLayout.width,
-	                                                      height: cropLayout.height,
+		                                          {overviewImage ? (
+		                                              <img
+		                                                  src={overviewImage}
+		                                                  alt="Slide"
+		                                                  draggable={false}
+		                                                  className="absolute pointer-events-none select-none max-w-none max-h-none"
+		                                                  style={{
+		                                                      left: cropLayout.left,
+		                                                      top: cropLayout.top,
+		                                                      width: cropLayout.width,
+		                                                      height: cropLayout.height,
 	                                                      borderRadius: `${videoSettings.slideBorderRadius}px`,
 	                                                  }}
 	                                              />
