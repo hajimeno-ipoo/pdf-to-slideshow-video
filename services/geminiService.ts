@@ -2,6 +2,7 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { TokenUsage } from "../types";
 import { getUserApiKey } from "../utils/apiKeyStore";
+import { getGeminiRetryDelayMs } from "../utils/geminiRetryDelay";
 import { sanitizeMessage } from "../utils/sanitize";
 import { extractNarrationText } from "../utils/narrationScript";
 
@@ -197,12 +198,16 @@ async function callWithRetry<T>(fn: () => Promise<T>, retries = 3, initialDelay 
         msg.includes('Overloaded');
 
       if ((isRateLimit || isServerOverload) && i < retries - 1) {
-        console.warn(`Gemini API Retry (${i + 1}/${retries}): ${msg}. Waiting ${delay}ms`);
+        const recommendedDelay = isRateLimit ? getGeminiRetryDelayMs(error, msg) : null;
+        // Avoid excessively long waits if the backend suggests a huge delay (e.g. daily quota).
+        const cappedRecommendedDelay = recommendedDelay ? Math.min(recommendedDelay, 5 * 60 * 1000) : null;
+        const waitTime = Math.max(delay, cappedRecommendedDelay || 0);
+        console.warn(`Gemini API Retry (${i + 1}/${retries}): ${msg}. Waiting ${waitTime}ms`);
         const reason = isRateLimit ? 'API制限により待機中' : 'サーバー混雑のため待機中';
-        notifyCooldown(true, delay, reason);
-        await wait(delay);
+        notifyCooldown(true, waitTime, reason);
+        await wait(waitTime);
         notifyCooldown(false, 0);
-        delay *= 2; // Exponential backoff
+        delay = Math.max(delay * 2, waitTime); // Exponential backoff (never decreases)
         continue;
       }
       

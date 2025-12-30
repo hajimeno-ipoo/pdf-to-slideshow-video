@@ -314,12 +314,13 @@ const SlideEditorLayout: React.FC<{
 	        >
 	          <div className="w-full h-full flex flex-col min-w-[320px]">
 	            {selectedSlideId && selectedSlide ? (
-	              <div className="flex flex-col h-full relative">
-	                <SlideInspector 
-	                  slide={selectedSlide} 
-	                  onUpdate={handleUpdateSlide} 
-	                  onUsageUpdate={onUsageUpdate}
-	                  aiEnabled={aiEnabled}
+		              <div className="flex flex-col h-full relative">
+		                <SlideInspector 
+		                  isOpen={isInspectorOpen}
+		                  slide={selectedSlide} 
+		                  onUpdate={handleUpdateSlide} 
+		                  onUsageUpdate={onUsageUpdate}
+		                  aiEnabled={aiEnabled}
 	                  sourceFile={sourceFile}
 	                  onClose={handleCloseInspectorMobile}
 	                />

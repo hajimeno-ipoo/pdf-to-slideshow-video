@@ -48,9 +48,7 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
   const isAiLocked = !aiEnabled;
 
   useEffect(() => {
-      if (initialScript && !ttsText) {
-          setTtsText(initialScript);
-      }
+      setTtsText(initialScript || '');
       if (initialScript && !audioFile && !isAiLocked) {
           setAudioMode('tts');
       }

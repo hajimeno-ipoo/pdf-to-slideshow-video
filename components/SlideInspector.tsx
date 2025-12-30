@@ -13,6 +13,7 @@ import { deleteOverlayById, nudgeOverlayById, reorderOverlaysById, toggleOverlay
 import { getCroppedImageLayoutPx } from '../utils/cropPreviewUtils';
 
 interface SlideInspectorProps {
+  isOpen?: boolean;
   slide: Slide;
   onUpdate: (updatedSlide: Slide, addToHistory?: boolean) => void;
   onUsageUpdate?: (usage: TokenUsage) => void;
@@ -50,7 +51,7 @@ const getCursorStyle = (handle: ResizeHandleType, rotation: number = 0): string 
 
 const SOLID_PREVIEW_WIDTH = 400; // 無地スライド用のデフォルト描画幅
 
-const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsageUpdate, aiEnabled, sourceFile, onClose }) => {
+const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate, onUsageUpdate, aiEnabled, sourceFile, onClose }) => {
   const { videoSettings } = useEditor(); // Get global settings
   const SLIDE_TOKEN = '__SLIDE__';
   const previewAreaRef = useRef<HTMLDivElement>(null);
@@ -152,6 +153,48 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
 
   const onUpdateRef = useRef(onUpdate);
   onUpdateRef.current = onUpdate;
+
+  const discardLocalEdits = useCallback(() => {
+      const s = slideRef.current;
+      const nextOverlays = s.overlays || [];
+      const nextLayerOrder = s.layerOrder || [SLIDE_TOKEN, ...nextOverlays.map(o => o.id)];
+
+      setCrop(s.crop);
+      setStartCrop(s.crop);
+      setOverlays(nextOverlays);
+      setLayerOrder(prev => {
+          const prevOrder = Array.isArray(prev) ? prev : [];
+          if (prevOrder.length === nextLayerOrder.length && prevOrder.every((id, i) => id === nextLayerOrder[i])) return prevOrder;
+          return nextLayerOrder;
+      });
+      setSlideLayout(s.layout || null);
+      setSolidColor(s.backgroundColor || '#000000');
+      setAudioFile(s.audioFile);
+      setAudioVolume(s.audioVolume ?? 1.0);
+      setLocalDuration(s.duration);
+
+      setIsDraggingCrop(false);
+      setDragModeCrop(null);
+      setIsDraggingOverlay(false);
+      setActiveOverlayTool(null);
+      setIsDraggingSlide(false);
+      setSlideDragMode(null);
+      setPendingAddType(null);
+
+      setSelectedOverlayId(null);
+      setSelectedLayerId(null);
+      setImageSize({ width: 0, height: 0 });
+      setCropAspectPreset('slide');
+  }, [SLIDE_TOKEN]);
+
+  const handleCloseInspector = () => {
+      discardLocalEdits();
+      if (onClose) onClose();
+  };
+
+  useEffect(() => {
+      if (isOpen === false) discardLocalEdits();
+  }, [discardLocalEdits, isOpen]);
 
   const lastAutoApplyInputsRef = useRef<{
       crop: typeof crop;
@@ -378,69 +421,6 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           });
       }
   }, [SLIDE_TOKEN, resetEditSession, slide]);
-
-  // Auto apply (Apple-like): reflect inspector edits immediately, grouped into one Undo step
-  useEffect(() => {
-      if (skipNextAutoApplyRef.current) {
-          skipNextAutoApplyRef.current = false;
-          if (pendingAutoApplyInputsRef.current) {
-              lastAutoApplyInputsRef.current = pendingAutoApplyInputsRef.current;
-              pendingAutoApplyInputsRef.current = null;
-              return;
-          }
-          lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
-          return;
-      }
-      const prev = lastAutoApplyInputsRef.current;
-      const didChange =
-          !prev ||
-          prev.crop !== crop ||
-          prev.overlays !== overlays ||
-          prev.layerOrder !== layerOrder ||
-          prev.slideLayout !== slideLayout ||
-          prev.solidColor !== solidColor ||
-          prev.audioFile !== audioFile ||
-          prev.audioVolume !== audioVolume ||
-          prev.localDuration !== localDuration;
-      if (!didChange) return;
-      if (isDraggingCrop || isDraggingOverlay || isDraggingSlide) return;
-      if (isUpdating) {
-          lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
-          return;
-      }
-      scheduleAutoApplyUpdate();
-      lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
-  }, [audioFile, audioVolume, crop, isDraggingCrop, isDraggingOverlay, isDraggingSlide, isUpdating, layerOrder, localDuration, overlays, scheduleAutoApplyUpdate, slideLayout, solidColor]);
-
-  // Auto thumbnail update (grid reflection): only when visual parts change
-  useEffect(() => {
-      if (skipNextThumbnailRef.current) {
-          skipNextThumbnailRef.current = false;
-          if (pendingThumbnailInputsRef.current) {
-              lastThumbnailInputsRef.current = pendingThumbnailInputsRef.current;
-              pendingThumbnailInputsRef.current = null;
-              return;
-          }
-          lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
-          return;
-      }
-      const prev = lastThumbnailInputsRef.current;
-      const didChange =
-          !prev ||
-          prev.crop !== crop ||
-          prev.overlays !== overlays ||
-          prev.layerOrder !== layerOrder ||
-          prev.slideLayout !== slideLayout ||
-          prev.solidColor !== solidColor;
-      if (!didChange) return;
-      if (isDraggingCrop || isDraggingOverlay || isDraggingSlide) return;
-      if (isUpdating) {
-          lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
-          return;
-      }
-      scheduleThumbnailUpdate(0);
-      lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
-  }, [crop, isDraggingCrop, isDraggingOverlay, isDraggingSlide, isUpdating, layerOrder, overlays, scheduleThumbnailUpdate, slideLayout, solidColor]);
 
   // Load Overview Image
   useEffect(() => {
@@ -810,17 +790,11 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
   // Apply Changes Logic
   const handleApplyChanges = async () => {
       setIsUpdating(true);
-      const hadPendingAutoApply = !!autoApplyTimerRef.current;
-      if (autoApplyTimerRef.current) {
-          clearTimeout(autoApplyTimerRef.current);
-          autoApplyTimerRef.current = null;
-      }
       if (thumbnailTimerRef.current) {
           clearTimeout(thumbnailTimerRef.current);
           thumbnailTimerRef.current = null;
       }
       thumbnailJobIdRef.current += 1;
-      if (hadPendingAutoApply) emitAutoApplyUpdate();
       const updatedSlide = buildUpdatedSlide();
       
       try {
@@ -828,7 +802,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
           const newThumb = await updateThumbnail(sourceFile, updatedSlide, videoSettings);
           updatedSlide.thumbnailUrl = newThumb;
           ignoreNextPropSyncRef.current = true;
-          onUpdateRef.current(updatedSlide, false);
+          onUpdateRef.current(updatedSlide, true);
       } catch(e) { console.error("Update failed", e); }
       lastAutoApplyInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor, audioFile, audioVolume, localDuration };
       lastThumbnailInputsRef.current = { crop, overlays, layerOrder, slideLayout, solidColor };
@@ -1642,19 +1616,19 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ slide, onUpdate, onUsag
       );
   };
 
-  const panel = (
-	    <div className="idle-sidebar-typography flex flex-col h-full bg-transparent border-l border-white/10">
-	      {/* 1. Header & Tabs */}
-	      <div className="flex-none p-3 border-b border-white/10 bg-transparent z-10 flex flex-col gap-3">
-	        <div className="flex justify-between items-center">
-	          <div className="flex items-center gap-2">
-            {onClose && (
-              <button onClick={onClose} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-xs font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
-                閉じる
-              </button>
-            )}
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">スライド編集</h3>
+	  const panel = (
+		    <div className="idle-sidebar-typography flex flex-col h-full bg-transparent border-l border-white/10">
+		      {/* 1. Header & Tabs */}
+		      <div className="flex-none p-3 border-b border-white/10 bg-transparent z-10 flex flex-col gap-3">
+		        <div className="flex justify-between items-center">
+		          <div className="flex items-center gap-2">
+	            {onClose && (
+	              <button onClick={handleCloseInspector} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-xs font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
+	                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+	                閉じる
+	              </button>
+	            )}
+	            <h3 className="text-sm font-bold text-white uppercase tracking-wider">スライド編集</h3>
 	          </div>
 	          <div className="flex items-center gap-2">
 	            <button
