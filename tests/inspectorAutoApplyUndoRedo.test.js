@@ -27,6 +27,13 @@ test('SlideInspector: does not auto-apply changes', () => {
   assert.ok(!src.includes('scheduleAutoApplyUpdate();'));
 });
 
+test('SlideInspector: can reset slide layout (position/size) from inspector', () => {
+  const src = readUtf8('components/SlideInspector.tsx');
+  assert.ok(src.includes('handleResetSlideLayout'));
+  assert.ok(src.includes('setSlideLayout(null)'));
+  assert.ok(src.includes('位置リセット'));
+});
+
 test('SlideInspector: selecting a slide does not recreate layerOrder when unchanged', () => {
   const src = readUtf8('components/SlideInspector.tsx');
   assert.ok(src.includes('setLayerOrder(prev => {'));

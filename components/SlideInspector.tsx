@@ -1440,6 +1440,12 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
   };
 
   const handleResetCrop = () => { setCrop({ x: 0, y: 0, width: slide.originalWidth, height: slide.originalHeight }); };
+  const canResetSlideLayout = activeTab !== 'crop' && slideLayout !== null;
+  const handleResetSlideLayout = () => {
+      setSlideLayout(null);
+      setIsDraggingSlide(false);
+      setSlideDragMode(null);
+  };
 
   const getSlideNativeAspectRatio = () => {
       const w = slide.originalWidth || slide.width;
@@ -1642,6 +1648,17 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
 	            >
 	              {previewDetachedOpen ? '戻す' : '最大化'}
 	            </button>
+              {activeTab !== 'crop' && (
+                <button
+                  type="button"
+                  onClick={handleResetSlideLayout}
+                  disabled={!canResetSlideLayout}
+                  className="px-2 py-1.5 text-[10px] rounded border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  title="スライドの位置・サイズをリセット"
+                >
+                  位置リセット
+                </button>
+              )}
             <button
               onClick={handleApplyChanges}
               disabled={isUpdating}
