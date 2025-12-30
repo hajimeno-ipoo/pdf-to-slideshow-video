@@ -801,6 +801,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
           // Generate thumbnail with baked-in overlays for grid view
           const newThumb = await updateThumbnail(sourceFile, updatedSlide, videoSettings);
           updatedSlide.thumbnailUrl = newThumb;
+          updatedSlide.thumbnailIsFrame = true;
           ignoreNextPropSyncRef.current = true;
           onUpdateRef.current(updatedSlide, true);
       } catch(e) { console.error("Update failed", e); }

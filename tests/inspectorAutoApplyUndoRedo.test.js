@@ -19,6 +19,7 @@ test('SlideInspector: apply button updates thumbnail and pushes undo history', (
   const src = readUtf8('components/SlideInspector.tsx');
   assert.ok(src.includes('const newThumb = await updateThumbnail'));
   assert.ok(src.includes('onUpdateRef.current(updatedSlide, true)'));
+  assert.ok(src.includes('updatedSlide.thumbnailIsFrame = true'));
 });
 
 test('SlideInspector: does not auto-apply changes', () => {
@@ -39,4 +40,10 @@ test('SlideEditor: handleUpdateSlide forwards addToHistory to updateSlides', () 
   assert.ok(src.includes('const handleUpdateSlide = (updatedSlide: Slide, addToHistory: boolean = true)'));
   assert.ok(src.includes('updateSlides(newSlides, addToHistory)'));
   assert.ok(src.includes('isOpen={isInspectorOpen}'));
+});
+
+test('SlideGrid: frame thumbnail does not double-apply slideScale', () => {
+  const src = readUtf8('components/slideEditor/SlideGrid.tsx');
+  assert.ok(src.includes('const isFrameThumb = !!slide.thumbnailIsFrame'));
+  assert.ok(src.includes("transform: isFrameThumb ? 'none' : `scale(${videoSettings.slideScale / 100})`"));
 });

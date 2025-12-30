@@ -100,6 +100,41 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
     return { mimeType, bytes };
   };
 
+  const isPngFrameThumbnailDataUrl = (dataUrl: string) => {
+    const prefix = 'data:image/png;base64,';
+    if (!dataUrl.startsWith(prefix)) return false;
+    if (typeof atob !== 'function') return false;
+    try {
+      const b64 = dataUrl.slice(prefix.length);
+      const head = b64.slice(0, 96);
+      const padded = head.padEnd(Math.ceil(head.length / 4) * 4, '=');
+      const bin = atob(padded);
+      if (bin.length < 24) return false;
+      if (
+        bin.charCodeAt(0) !== 0x89 ||
+        bin.charCodeAt(1) !== 0x50 ||
+        bin.charCodeAt(2) !== 0x4E ||
+        bin.charCodeAt(3) !== 0x47 ||
+        bin.charCodeAt(4) !== 0x0D ||
+        bin.charCodeAt(5) !== 0x0A ||
+        bin.charCodeAt(6) !== 0x1A ||
+        bin.charCodeAt(7) !== 0x0A
+      ) return false;
+      if (bin.slice(12, 16) !== 'IHDR') return false;
+      const readU32 = (offset: number) => (
+        ((bin.charCodeAt(offset) << 24) |
+          (bin.charCodeAt(offset + 1) << 16) |
+          (bin.charCodeAt(offset + 2) << 8) |
+          bin.charCodeAt(offset + 3)) >>> 0
+      );
+      const width = readU32(16);
+      const height = readU32(20);
+      return width === 640 && height === 360;
+    } catch (_) {
+      return false;
+    }
+  };
+
   const mimeTypeToExtension = (mimeType: string) => {
     if (mimeType === 'image/jpeg') return 'jpg';
     if (mimeType === 'image/png') return 'png';
@@ -269,6 +304,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
           return !!ov && !ov.hidden && ov.type === 'image' && !!ov.imageData;
         });
         const canvasBgUrl = canvasBgId ? (getOverlayById(canvasBgId)?.imageData || '') : '';
+        const isFrameThumb = !!slide.thumbnailIsFrame || isPngFrameThumbnailDataUrl(slide.thumbnailUrl);
 
 	        return (
 	        <div 
@@ -295,9 +331,9 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
 	            </button>
 	          </div>
 	          
-		          <div 
-		            draggable={true} 
-		            onDragStart={(e) => onDragStart(e, index)} 
+	          <div 
+	            draggable={true} 
+	            onDragStart={(e) => onDragStart(e, index)} 
 	            className="aspect-video w-full flex items-center justify-center overflow-hidden relative"
 	            style={{ backgroundColor: getBackgroundColor() }}
 	          >
@@ -306,15 +342,15 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
 	            <div 
 	                className="relative w-full h-full flex items-center justify-center"
 	                style={{ 
-	                    transform: `scale(${videoSettings.slideScale / 100})`, 
+                    transform: isFrameThumb ? 'none' : `scale(${videoSettings.slideScale / 100})`, 
 	                    boxShadow: videoSettings.slideScale < 100 ? '0 4px 6px -1px rgba(0, 0, 0, 0.5)' : 'none',
 	                    borderRadius: `${videoSettings.slideBorderRadius * 0.4}px`, // Approximate scaling
 	                    overflow: 'hidden',
-                        // Slide thumbnail uses object-contain, so the empty area shows through.
-                        // If a canvas background image exists, use it to fill the “black bars” inside the slide frame.
-                        backgroundImage: canvasBgUrl ? `url(${canvasBgUrl})` : undefined,
-                        backgroundSize: canvasBgUrl ? 'cover' : undefined,
-                        backgroundPosition: canvasBgUrl ? 'center' : undefined,
+	                        // Slide thumbnail uses object-contain, so the empty area shows through.
+	                        // If a canvas background image exists, use it to fill the “black bars” inside the slide frame.
+	                        backgroundImage: canvasBgUrl ? `url(${canvasBgUrl})` : undefined,
+	                        backgroundSize: canvasBgUrl ? 'cover' : undefined,
+	                        backgroundPosition: canvasBgUrl ? 'center' : undefined,
 	                        backgroundRepeat: canvasBgUrl ? 'no-repeat' : undefined,
 	                }}
 	            >

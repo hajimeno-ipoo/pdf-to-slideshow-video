@@ -154,6 +154,7 @@ export interface Slide {
   id: string;
   pageIndex: number; // -1 for custom image or solid color
   thumbnailUrl: string; // Data URL for preview
+  thumbnailIsFrame?: boolean;
   duration: number; // seconds
   
   width: number;
