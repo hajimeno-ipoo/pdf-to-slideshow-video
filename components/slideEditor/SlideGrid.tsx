@@ -10,16 +10,20 @@ declare const pdfjsLib: any;
 interface SlideGridProps {
   onSelect: (id: string | null) => void;
   selectedId: string | null;
+  viewMode?: 'grid' | 'coverflow';
 }
 
-export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) => {
+export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, viewMode = 'grid' }) => {
   const { slides, updateSlides, videoSettings, sourceFile } = useEditor();
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [downloadingSlideId, setDownloadingSlideId] = useState<string | null>(null);
+  const [coverflowEdgePx, setCoverflowEdgePx] = useState(0);
   const pdfDocRef = React.useRef<any | null>(null);
   const pdfFileRef = React.useRef<File | null>(null);
   const bgBitmapRef = React.useRef<ImageBitmap | null>(null);
   const bgFileRef = React.useRef<File | undefined>(undefined);
+  const coverflowScrollRef = React.useRef<HTMLDivElement | null>(null);
+  const coverflowCardRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
   const getTransitionIcon = (type: TransitionType) => {
     switch (type) {
@@ -277,18 +281,159 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
       return '#000000';
   };
 
-  return (
-    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 p-1 pb-20">
-	      {slides.map((slide, index) => {
-	        const isSelected = slide.id === selectedId;
-	        const SLIDE_TOKEN = '__SLIDE__';
-	        const overlays = Array.isArray(slide.overlays) ? slide.overlays : [];
-	        const overlayIds = overlays.map(o => o.id);
-	        let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
-        if (!layerOrder.includes(SLIDE_TOKEN)) layerOrder.unshift(SLIDE_TOKEN);
-        for (const id of overlayIds) if (!layerOrder.includes(id)) layerOrder.push(id);
-        layerOrder = layerOrder.filter(id => id === SLIDE_TOKEN || overlayIds.includes(id));
-        const slideIndex = layerOrder.indexOf(SLIDE_TOKEN);
+  const isCoverflow = viewMode === 'coverflow';
+  const slideIdsKey = slides.map(s => s.id).join('|');
+
+  const setCoverflowCardRef = React.useCallback((id: string, el: HTMLDivElement | null) => {
+    if (!el) {
+      coverflowCardRefs.current.delete(id);
+      return;
+    }
+    coverflowCardRefs.current.set(id, el);
+  }, []);
+
+	  const clearCoverflowStyles = React.useCallback(() => {
+	    for (const el of coverflowCardRefs.current.values()) {
+	      el.style.removeProperty('transform');
+	      el.style.removeProperty('opacity');
+	      el.style.removeProperty('z-index');
+	      el.style.removeProperty('transform-origin');
+	    }
+	  }, []);
+
+	  const updateCoverflowEdgePadding = React.useCallback(() => {
+	    if (!isCoverflow) return;
+	    const scroller = coverflowScrollRef.current;
+	    if (!scroller) return;
+	    const firstId = slides[0]?.id;
+	    if (!firstId) {
+	      setCoverflowEdgePx(prev => (prev === 0 ? prev : 0));
+	      return;
+	    }
+	    const firstEl = coverflowCardRefs.current.get(firstId);
+	    if (!firstEl) return;
+
+	    const scrollerWidth = scroller.getBoundingClientRect().width;
+	    const cardWidth = firstEl.offsetWidth || firstEl.getBoundingClientRect().width;
+	    const edge = Math.max(0, (scrollerWidth - cardWidth) / 2);
+	    setCoverflowEdgePx(prev => (Math.abs(prev - edge) < 0.5 ? prev : edge));
+	  }, [isCoverflow, slides]);
+
+	  const updateCoverflowTransforms = React.useCallback(() => {
+	    if (!isCoverflow) return;
+	    const scroller = coverflowScrollRef.current;
+	    if (!scroller) return;
+
+	    const scrollerRect = scroller.getBoundingClientRect();
+	    const centerX = scrollerRect.left + scrollerRect.width / 2;
+
+	    const minScale = 0.82;
+	    const maxZ = 60;
+	    const maxOpacityDrop = 0.35;
+
+	    for (const el of coverflowCardRefs.current.values()) {
+	      const rect = el.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const dx = cardCenter - centerX;
+	      const normalized = dx / Math.max(1, rect.width);
+	      const clamped = Math.max(-1, Math.min(1, normalized));
+	      const t = Math.min(1, Math.abs(clamped));
+
+	      const scale = 1 - (1 - minScale) * t;
+	      const z = (1 - t) * maxZ;
+	      const opacity = 1 - maxOpacityDrop * t;
+	      const zIndex = Math.round((1 - t) * 1000);
+
+	      el.style.transform = `translateZ(${z}px) scale(${scale})`;
+	      el.style.opacity = `${opacity}`;
+	      el.style.zIndex = `${zIndex}`;
+	    }
+	  }, [isCoverflow]);
+
+  React.useEffect(() => {
+    if (!isCoverflow) {
+      clearCoverflowStyles();
+      return;
+    }
+
+    const scroller = coverflowScrollRef.current;
+    if (!scroller) return;
+
+	    let raf: number | null = null;
+	    const schedule = () => {
+	      if (raf !== null) cancelAnimationFrame(raf);
+	      raf = requestAnimationFrame(() => {
+	        raf = null;
+	        updateCoverflowEdgePadding();
+	        updateCoverflowTransforms();
+	      });
+	    };
+
+	    schedule();
+	    scroller.addEventListener('scroll', schedule, { passive: true });
+	    window.addEventListener('resize', schedule);
+    return () => {
+      scroller.removeEventListener('scroll', schedule);
+	      window.removeEventListener('resize', schedule);
+	      if (raf !== null) cancelAnimationFrame(raf);
+	    };
+	  }, [isCoverflow, clearCoverflowStyles, updateCoverflowEdgePadding, updateCoverflowTransforms, slides.length]);
+
+	  React.useEffect(() => {
+	    if (!isCoverflow) return;
+	    updateCoverflowEdgePadding();
+	    updateCoverflowTransforms();
+	  }, [isCoverflow, slideIdsKey, updateCoverflowEdgePadding, updateCoverflowTransforms]);
+
+  const getCoverflowCenterIndex = React.useCallback(() => {
+    if (!isCoverflow) return -1;
+    const scroller = coverflowScrollRef.current;
+    if (!scroller) return -1;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const centerX = scrollerRect.left + scrollerRect.width / 2;
+
+    let bestIndex = -1;
+    let bestDist = Number.POSITIVE_INFINITY;
+    for (let i = 0; i < slides.length; i++) {
+      const el = coverflowCardRefs.current.get(slides[i].id);
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      const cardCenter = rect.left + rect.width / 2;
+      const dist = Math.abs(cardCenter - centerX);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIndex = i;
+      }
+    }
+    return bestIndex;
+  }, [isCoverflow, slides]);
+
+  const scrollCoverflowToIndex = React.useCallback((index: number) => {
+    if (!isCoverflow) return;
+    const target = slides[index];
+    if (!target) return;
+    const el = coverflowCardRefs.current.get(target.id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, [isCoverflow, slides]);
+
+  const handleCoverflowMove = React.useCallback((dir: -1 | 1) => {
+    const current = getCoverflowCenterIndex();
+    const base = current >= 0 ? current : 0;
+    const next = Math.max(0, Math.min(slides.length - 1, base + dir));
+    scrollCoverflowToIndex(next);
+  }, [getCoverflowCenterIndex, scrollCoverflowToIndex, slides.length]);
+
+  const cards = slides.map((slide, index) => {
+    const isSelected = slide.id === selectedId;
+    const SLIDE_TOKEN = '__SLIDE__';
+    const overlays = Array.isArray(slide.overlays) ? slide.overlays : [];
+    const overlayIds = overlays.map(o => o.id);
+    let layerOrder: string[] = Array.isArray(slide.layerOrder) ? [...slide.layerOrder] : [SLIDE_TOKEN, ...overlayIds];
+    if (!layerOrder.includes(SLIDE_TOKEN)) layerOrder.unshift(SLIDE_TOKEN);
+    for (const id of overlayIds) if (!layerOrder.includes(id)) layerOrder.push(id);
+    layerOrder = layerOrder.filter(id => id === SLIDE_TOKEN || overlayIds.includes(id));
+    const slideIndex = layerOrder.indexOf(SLIDE_TOKEN);
 
         const getOverlayById = (id: string) => overlays.find(o => o.id === id);
         const isCanvasOverlay = (id: string) => {
@@ -312,7 +457,13 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
 	            onClick={() => onSelect(slide.id)}
 	            onDragOver={(e) => onDragOver(e, index)} 
 	            onDrop={(e) => onDrop(e, index)} 
-		            className={`relative group rounded-lg overflow-hidden border transition-all flex flex-col cursor-pointer ${isSelected ? 'ring-2 ring-emerald-500 border-emerald-500' : (draggedItemIndex === index ? 'opacity-50 border-emerald-500' : 'border-slate-700 hover:border-slate-500 bg-transparent')}`}
+	            className={`relative group rounded-lg overflow-hidden border transition-all flex flex-col cursor-pointer ${
+	              isSelected
+	                ? 'ring-2 ring-emerald-500 border-emerald-500'
+	                : (draggedItemIndex === index ? 'opacity-50 border-emerald-500' : 'border-slate-700 hover:border-slate-500 bg-transparent')
+	            } ${isCoverflow ? 'flex-none w-[260px] sm:w-[320px] snap-center transition-[transform,opacity] duration-150 ease-out' : ''}`}
+	            ref={isCoverflow ? (el) => setCoverflowCardRef(slide.id, el) : null}
+	            style={isCoverflow ? { transformStyle: 'preserve-3d', willChange: 'transform' } : undefined}
 	        >
 	          <div className="absolute top-1 left-1 z-20 flex gap-1 pointer-events-none">
 	             <div className="bg-black/60 backdrop-blur px-1.5 py-0.5 rounded text-[8px] text-white font-mono">{index + 1}</div>
@@ -412,7 +563,55 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId }) =>
           </div>
         </div>
         );
-      })}
+  });
+
+  if (isCoverflow) {
+    return (
+      <div className="relative h-full">
+        <button
+          type="button"
+          onClick={() => handleCoverflowMove(-1)}
+          aria-label="前へ"
+          title="前へ"
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-slate-800/70 border border-white/10 backdrop-blur flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-700/70 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+            <path fillRule="evenodd" d="M11.78 15.53a.75.75 0 01-1.06.0l-5-5a.75.75 0 010-1.06l5-5a.75.75 0 111.06 1.06L7.31 10l4.47 4.47a.75.75 0 010 1.06z" clipRule="evenodd" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleCoverflowMove(1)}
+          aria-label="次へ"
+          title="次へ"
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-slate-800/70 border border-white/10 backdrop-blur flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-700/70 transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+            <path fillRule="evenodd" d="M8.22 4.47a.75.75 0 011.06 0l5 5a.75.75 0 010 1.06l-5 5a.75.75 0 11-1.06-1.06L12.69 10 8.22 5.53a.75.75 0 010-1.06z" clipRule="evenodd" />
+          </svg>
+        </button>
+		        <div
+		          ref={coverflowScrollRef}
+		          className="h-full overflow-x-auto overflow-y-hidden scrollbar-hide snap-x snap-mandatory"
+		          style={{ perspective: '1200px' }}
+		        >
+	          <div
+	            className="inline-flex items-center gap-4 py-4 h-full"
+	            style={{
+	              paddingLeft: coverflowEdgePx,
+	              paddingRight: coverflowEdgePx,
+	            }}
+	          >
+	            {cards}
+	          </div>
+	        </div>
+	      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 p-1 pb-20">
+      {cards}
     </div>
   );
 };

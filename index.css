@@ -403,16 +403,16 @@
 }
 
 /* EDITOR内のボタン/入力も “ガラス寄せ” に統一（IDLEっぽい質感） */
-.screen-idle .editor-glass button:not(.idle-btn-primary) {
+.screen-idle .editor-glass button:not(.idle-btn-primary):not(.idle-toggle-switch) {
   background: rgba(255, 255, 255, 0.1) !important;
   -webkit-backdrop-filter: blur(8px) saturate(160%);
   backdrop-filter: blur(8px) saturate(160%);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.24);
 }
-.screen-idle .editor-glass button:not(.idle-btn-primary):hover {
+.screen-idle .editor-glass button:not(.idle-btn-primary):not(.idle-toggle-switch):hover {
   background: rgba(255, 255, 255, 0.16) !important;
 }
-.screen-idle .editor-glass button:not(.idle-btn-primary):active {
+.screen-idle .editor-glass button:not(.idle-btn-primary):not(.idle-toggle-switch):active {
   background: rgba(255, 255, 255, 0.22) !important;
 }
 

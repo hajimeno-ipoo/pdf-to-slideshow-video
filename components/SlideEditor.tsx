@@ -45,6 +45,7 @@ const SlideEditorLayout: React.FC<{
   const [isImporting, setIsImporting] = useState(false);
   const [isSavingNamed, setIsSavingNamed] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+  const [slideListViewMode, setSlideListViewMode] = useState<'grid' | 'coverflow'>('grid');
   const projectInputRef = useRef<HTMLInputElement>(null);
 
   const selectedSlide = slides.find(s => s.id === selectedSlideId);
@@ -276,12 +277,40 @@ const SlideEditorLayout: React.FC<{
 	            </div>
 	          </div>
 
-	          {/* Card 2: Slide grid */}
-	          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-1 min-h-0 idle-sidebar-typography">
-	            <div className="flex-1 overflow-y-auto custom-scrollbar h-full">
-	              <SlideGrid onSelect={handleSlideSelect} selectedId={selectedSlideId} />
-	            </div>
-	          </div>
+		          {/* Card 2: Slide grid */}
+		          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0 idle-sidebar-typography">
+			            <div className="flex items-center justify-end gap-2 px-3 py-2 border-b border-white/10">
+			              <div className="flex items-center gap-2">
+			                <div className="text-[11px] text-slate-300 font-bold tracking-wide">スライド</div>
+			                {slideListViewMode === 'coverflow' ? (
+			                  <div className="text-[10px] font-bold text-sky-400">カバーフロー</div>
+			                ) : (
+			                  <div className="text-[10px] font-bold text-slate-500">グリッド</div>
+			                )}
+			              </div>
+			              <button
+			                type="button"
+			                role="switch"
+		                aria-checked={slideListViewMode === 'coverflow'}
+		                aria-label="カバーフロー表示を切り替え"
+		                onClick={() => setSlideListViewMode(v => (v === 'grid' ? 'coverflow' : 'grid'))}
+		                className={`idle-toggle-switch relative inline-flex h-5 w-9 items-center rounded-full border transition-colors ${
+		                  slideListViewMode === 'coverflow'
+		                    ? 'bg-sky-600/80 border-sky-500/60'
+		                    : 'bg-slate-700/80 border-white/10'
+		                }`}
+		              >
+		                <span
+		                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+		                    slideListViewMode === 'coverflow' ? 'translate-x-4' : 'translate-x-1'
+		                  }`}
+		                />
+		              </button>
+		            </div>
+		            <div className={`flex-1 min-h-0 custom-scrollbar ${slideListViewMode === 'coverflow' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+		              <SlideGrid onSelect={handleSlideSelect} selectedId={selectedSlideId} viewMode={slideListViewMode} />
+		            </div>
+		          </div>
 
 	          {/* Card 3: Timeline */}
 	          <div className="editor-glass editor-glass--strong rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none h-[300px] relative idle-sidebar-typography">
