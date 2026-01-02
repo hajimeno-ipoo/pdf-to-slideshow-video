@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useEditor } from './SlideEditorContext';
 import { TransitionType, Slide } from '../../types';
 import { safeRandomUUID } from '../../utils/uuid';
-import { drawSlideFrame, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground, renderSlideToImage } from '../../services/pdfVideoService';
+import { initPdfJs } from '../../services/pdfVideoService';
 
 declare const pdfjsLib: any;
 
@@ -20,8 +20,6 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
   const [coverflowEdgePx, setCoverflowEdgePx] = useState(0);
   const pdfDocRef = React.useRef<any | null>(null);
   const pdfFileRef = React.useRef<File | null>(null);
-  const bgBitmapRef = React.useRef<ImageBitmap | null>(null);
-  const bgFileRef = React.useRef<File | undefined>(undefined);
   const coverflowScrollRef = React.useRef<HTMLDivElement | null>(null);
   const coverflowCardRefs = React.useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -162,6 +160,17 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
 
+  const downloadBlob = (blob: Blob, filename: string) => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+
   const resolvePdfDoc = async () => {
     if (!sourceFile) return null;
     if (pdfDocRef.current && pdfFileRef.current === sourceFile) return pdfDocRef.current;
@@ -175,79 +184,54 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
     return doc;
   };
 
-  const resolveBackgroundBitmap = async () => {
-    if (videoSettings.backgroundFill !== 'custom_image') return null;
-    const file = videoSettings.backgroundImageFile;
-    if (!file) return null;
-    if (bgBitmapRef.current && bgFileRef.current === file) return bgBitmapRef.current;
-    bgBitmapRef.current?.close?.();
-    bgBitmapRef.current = null;
-    bgFileRef.current = file;
-    try {
-      bgBitmapRef.current = await createImageBitmap(file);
-      return bgBitmapRef.current;
-    } catch (_) {
-      bgBitmapRef.current = null;
-      return null;
-    }
-  };
-
   const handleDownloadSlideImage = async (e: React.MouseEvent, slide: Slide, index: number) => {
     e.stopPropagation();
     if (downloadingSlideId) return;
     setDownloadingSlideId(slide.id);
     try {
-      const { width, height } = getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution);
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas が作れなかったよ。');
+      const baseName = `slide_${String(index + 1).padStart(3, '0')}`;
 
-      const fill = videoSettings.backgroundFill === 'white' ? '#ffffff' : '#000000';
-      const bgBitmap = await resolveBackgroundBitmap();
-      renderBackground(ctx, width, height, fill, bgBitmap);
+      // 元画像アップロードのスライドは、画像そのものを保存（トリミング/背景/オーバーレイなし）
+      if (slide.customImageFile instanceof File) {
+        const extFromName = slide.customImageFile.name.match(/\.([a-z0-9]+)$/i)?.[1];
+        const ext = slide.customImageFile.type ? mimeTypeToExtension(slide.customImageFile.type) : (extFromName || 'png');
+        downloadBlob(slide.customImageFile, `${baseName}.${ext}`);
+        return;
+      }
 
-      const pdfDoc = slide.pageIndex > 0 ? await resolvePdfDoc() : null;
-      const slideImage = await renderSlideToImage(pdfDoc, slide, width, height, videoSettings);
-      await drawSlideFrame(
-        ctx,
-        slideImage,
-        width,
-        height,
-        slide.effectType,
-        slide.effectType === 'kenburns' ? getKenBurnsParams(slide.id) : null,
-        0,
-        slide,
-        videoSettings,
-        0,
-        new Map(),
-        false
-      );
-      slideImage.close?.();
+      // PDFのスライドは、元ページをそのまま保存（トリミング/背景/オーバーレイなし）
+      if (slide.pageIndex > 0) {
+        const pdfDoc = await resolvePdfDoc();
+        if (!pdfDoc) throw new Error('PDFが読み込めなかったよ。');
+        const page = await pdfDoc.getPage(slide.pageIndex);
+        const viewport = page.getViewport({ scale: 1 });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.ceil(viewport.width));
+        canvas.height = Math.max(1, Math.ceil(viewport.height));
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Canvas が作れなかったよ。');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        const task = page.render({ canvasContext: ctx, viewport });
+        await task.promise;
+        const pngBlob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNGが作れなかったよ。'))), 'image/png');
+        });
+        downloadBlob(pngBlob, `${baseName}.png`);
+        return;
+      }
 
-      const pngBlob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('PNGが作れなかったよ。'))), 'image/png');
-      });
+      // フォールバック（元データが無い時だけ）
+      if (slide.thumbnailUrl) {
+        const { mimeType } = decodeDataUrlToBytes(slide.thumbnailUrl);
+        const ext = mimeTypeToExtension(mimeType);
+        downloadDataUrl(slide.thumbnailUrl, `${baseName}.${ext}`);
+        return;
+      }
 
-      const url = URL.createObjectURL(pngBlob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `slide_${String(index + 1).padStart(3, '0')}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      throw new Error('保存できる画像が見つからなかったよ。');
     } catch (err) {
       console.error(err);
-      try {
-        if (slide.thumbnailUrl) {
-          const { mimeType } = decodeDataUrlToBytes(slide.thumbnailUrl);
-          const ext = mimeTypeToExtension(mimeType);
-          downloadDataUrl(slide.thumbnailUrl, `slide_${String(index + 1).padStart(3, '0')}.${ext}`);
-          return;
-        }
-      } catch (_) {}
       alert('画像の保存に失敗しちゃった…！');
     } finally {
       setDownloadingSlideId(null);
