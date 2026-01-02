@@ -10,13 +10,14 @@ import CooldownNotification from './components/CooldownNotification';
 import ApiKeyModal from './components/ApiKeyModal';
 import GlassSettingsModal from './components/GlassSettingsModal';
 import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions } from './types';
-import { analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground } from './services/pdfVideoService';
+import { analyzeImages, analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
 import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey, hasEncryptedStored, PersistMode } from './utils/apiKeyStore';
 import { getExportSupportError } from './utils/exportSupport';
 import { DEFAULT_GLASS_PREFS, loadGlassPrefsFromLocalStorage, saveGlassPrefsToLocalStorage, GlassPrefs, computeIdleGlassCssVars } from './utils/glassPrefs';
 import { buildThumbnailCaptureTimes, clampSeconds, formatSecondsForFilename } from './utils/thumbnailExport';
+import { classifyUploadFiles } from './utils/uploadSource';
 
 declare const pdfjsLib: any;
 
@@ -405,20 +406,57 @@ const App: React.FC = () => {
   };
 
   // Step 1: Upload & Analyze
-  const handleFileSelect = async (file: File, duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => {
+  const handleFileSelect = async (files: File[], duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => {
     try {
-      setSourceFile(file);
-      
+      const selection = classifyUploadFiles(files);
+      if (selection.kind === 'error') {
+        alert(selection.message);
+        return;
+      }
+
+      if (selection.kind === 'pdf') {
+        const file = selection.pdfFile as File;
+        setSourceFile(file);
+
+        setState({ 
+          status: AppStatus.ANALYZING, 
+          message: 'PDFを解析中...',
+          progress: { current: 0, total: 0 }
+        });
+
+        const analyzedSlides = await analyzePdf(
+          file, 
+          duration,
+          transitionType, // ユーザーの初期設定を各スライドに適用
+          (current, total) => {
+            setState(prev => ({
+              ...prev,
+              progress: { current, total }
+            }));
+          },
+          autoGenerateScript,
+          handleUsageUpdate, // Pass usage callback
+          customScriptPrompt // Pass custom prompt
+        );
+
+        setSlides(analyzedSlides);
+        setState({ status: AppStatus.EDITING, progress: undefined });
+        return;
+      }
+
+      const imageFiles = selection.imageFiles as File[];
+      setSourceFile(null);
+
       setState({ 
         status: AppStatus.ANALYZING, 
-        message: 'PDFを解析中...',
-        progress: { current: 0, total: 0 }
+        message: '画像を読み込み中...',
+        progress: { current: 0, total: imageFiles.length }
       });
-      
-      const analyzedSlides = await analyzePdf(
-        file, 
+
+      const analyzedSlides = await analyzeImages(
+        imageFiles,
         duration,
-        transitionType, // ユーザーの初期設定を各スライドに適用
+        transitionType,
         (current, total) => {
           setState(prev => ({
             ...prev,
@@ -426,8 +464,8 @@ const App: React.FC = () => {
           }));
         },
         autoGenerateScript,
-        handleUsageUpdate, // Pass usage callback
-        customScriptPrompt // Pass custom prompt
+        handleUsageUpdate,
+        customScriptPrompt
       );
 
       setSlides(analyzedSlides);

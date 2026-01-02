@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AppStatus, TransitionType } from '../types';
 
 interface FileUploadProps {
-  onFileSelect: (file: File, duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => void;
+  onFileSelect: (files: File[], duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => void;
   status: AppStatus;
   aiEnabled: boolean;
   onOpenProjectManager?: () => void;
@@ -31,22 +31,18 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      validateAndUpload(e.dataTransfer.files[0]);
+      validateAndUpload(Array.from(e.dataTransfer.files));
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
-      validateAndUpload(e.target.files[0]);
+      validateAndUpload(Array.from(e.target.files));
     }
   };
 
-  const validateAndUpload = (file: File) => {
-    if (file.type !== 'application/pdf') {
-      alert('PDFファイルのみアップロード可能です。');
-      return;
-    }
-    onFileSelect(file, duration, transitionType, autoGenerateScript, customScriptPrompt);
+  const validateAndUpload = (files: File[]) => {
+    onFileSelect(files, duration, transitionType, autoGenerateScript, customScriptPrompt);
   };
 
   const isDisabled = status === AppStatus.CONVERTING;
@@ -75,7 +71,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
 	      >
 	        <input 
 	          type="file" 
-	          accept="application/pdf" 
+	          accept="application/pdf,image/*" 
+	          multiple
 	          ref={inputRef} 
 	          className="hidden" 
 	          onChange={handleChange}
@@ -90,10 +87,10 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
 	          
 	          <div>
 	            <h3 className="text-lg font-semibold text-white group-hover:text-blue-600 transition-colors">
-	              PDFファイルをアップロード
+	              PDF / 画像をアップロード
 	            </h3>
 	            <p className="text-sm text-slate-400 mt-2">
-	              タップ または ドラッグ＆ドロップ
+	              タップ または ドラッグ＆ドロップ（画像は複数OK）
 	            </p>
 	          </div>
 	        </div>

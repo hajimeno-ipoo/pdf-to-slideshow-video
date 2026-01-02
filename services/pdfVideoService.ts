@@ -587,19 +587,82 @@ export const analyzePdf = async (
   return slides;
 };
 
+export const analyzeImages = async (
+  files: File[],
+  durationPerSlide: number,
+  transitionType: TransitionType,
+  onProgress?: (current: number, total: number) => void,
+  autoGenerateScript: boolean = false,
+  onUsageUpdate?: (usage: TokenUsage) => void,
+  customScriptPrompt?: string
+): Promise<Slide[]> => {
+  const images = Array.from(files || []);
+  const numSlides = images.length;
+  const slides: Slide[] = [];
+  const baseTotalUnits = numSlides;
+  const totalUnits = baseTotalUnits + (autoGenerateScript ? numSlides : 0);
+  let doneUnits = 0;
+
+  const report = () => {
+    if (!onProgress) return;
+    const current = totalUnits > 0 ? (doneUnits / totalUnits) * numSlides : 0;
+    onProgress(current, numSlides);
+  };
+
+  let previousContext = "";
+  for (let i = 0; i < numSlides; i++) {
+    const file = images[i];
+    const slide = await createSlideFromImage(file, durationPerSlide, transitionType);
+    doneUnits += 1;
+    report();
+
+    if (autoGenerateScript) {
+      try {
+        const gen = await generateSlideScript(slide.thumbnailUrl, previousContext, customScriptPrompt);
+        slide.narrationScript = gen.text;
+        previousContext = gen.text;
+        if (onUsageUpdate) onUsageUpdate(gen.usage);
+      } catch (e) {
+        console.error(`Script generation failed for image ${i + 1}`, e);
+      } finally {
+        doneUnits += 1;
+        report();
+      }
+    }
+
+    slides.push(slide);
+  }
+
+  return slides;
+};
+
+const inferImageMimeType = (file: File): string => {
+  const t = (file.type || '').toLowerCase();
+  if (t.startsWith('image/')) return t;
+  const ext = file.name?.match(/\.([a-z0-9]+)$/i)?.[1]?.toLowerCase() || '';
+  if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+  if (ext === 'png') return 'image/png';
+  if (ext === 'gif') return 'image/gif';
+  if (ext === 'webp') return 'image/webp';
+  if (ext === 'svg') return 'image/svg+xml';
+  return 'image/png';
+};
+
 export const createSlideFromImage = async (file: File, duration: number, transitionType: TransitionType): Promise<Slide> => {
-    const base64 = await fileToBase64(file);
+    const mimeType = inferImageMimeType(file);
+    const normalizedFile = (file.type || '').toLowerCase() === mimeType ? file : new File([file], file.name, { type: mimeType });
+    const base64 = await fileToBase64(normalizedFile);
     const img = new Image();
     await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
-        img.src = `data:${file.type};base64,${base64}`;
+        img.src = `data:${mimeType};base64,${base64}`;
     });
     
     return {
         id: safeRandomUUID(),
         pageIndex: -1, 
-        thumbnailUrl: `data:${file.type};base64,${base64}`,
+        thumbnailUrl: `data:${mimeType};base64,${base64}`,
         duration: duration,
         width: img.width,
         height: img.height,
@@ -608,7 +671,7 @@ export const createSlideFromImage = async (file: File, duration: number, transit
         crop: { x: 0, y: 0, width: img.width, height: img.height },
         transitionType: transitionType,
         effectType: 'none',
-        customImageFile: file,
+        customImageFile: normalizedFile,
         overlays: []
     };
 };
