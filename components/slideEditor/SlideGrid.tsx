@@ -342,8 +342,15 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
 
     const scroller = coverflowScrollRef.current;
     if (!scroller) return;
+    const coverflowScope = scroller.closest('.screen-idle') as HTMLElement | null;
 
 	    let raf: number | null = null;
+	    let scrollingTimer: number | null = null;
+	    const scrollingIdleDelayMs = 500;
+	    let lastScrollLeft = scroller.scrollLeft;
+	    const clearScrolling = () => {
+	      if (coverflowScope) delete coverflowScope.dataset.coverflowScrolling;
+	    };
 	    const schedule = () => {
 	      if (raf !== null) cancelAnimationFrame(raf);
 	      raf = requestAnimationFrame(() => {
@@ -352,14 +359,46 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
 	        updateCoverflowTransforms();
 	      });
 	    };
+	    const scheduleClearScrolling = () => {
+	      if (scrollingTimer !== null) window.clearTimeout(scrollingTimer);
+	      scrollingTimer = window.setTimeout(() => {
+	        scrollingTimer = null;
+	        const currentLeft = scroller.scrollLeft;
+	        if (Math.abs(currentLeft - lastScrollLeft) > 0.5) {
+	          lastScrollLeft = currentLeft;
+	          if (coverflowScope && coverflowScope.dataset.coverflowScrolling !== 'true') {
+	            coverflowScope.dataset.coverflowScrolling = 'true';
+	          }
+	          schedule();
+	          scheduleClearScrolling();
+	          return;
+	        }
+	        clearScrolling();
+	      }, scrollingIdleDelayMs);
+	    };
+	    const markScrolling = () => {
+	      if (!coverflowScope) return;
+	      if (coverflowScope.dataset.coverflowScrolling !== 'true') {
+	        coverflowScope.dataset.coverflowScrolling = 'true';
+	      }
+	      lastScrollLeft = scroller.scrollLeft;
+	      scheduleClearScrolling();
+	    };
 
+	    clearScrolling();
 	    schedule();
-	    scroller.addEventListener('scroll', schedule, { passive: true });
+	    const onScroll = () => {
+	      markScrolling();
+	      schedule();
+	    };
+	    scroller.addEventListener('scroll', onScroll, { passive: true });
 	    window.addEventListener('resize', schedule);
     return () => {
-      scroller.removeEventListener('scroll', schedule);
+      scroller.removeEventListener('scroll', onScroll);
 	      window.removeEventListener('resize', schedule);
 	      if (raf !== null) cancelAnimationFrame(raf);
+	      if (scrollingTimer !== null) window.clearTimeout(scrollingTimer);
+	      clearScrolling();
 	    };
 	  }, [isCoverflow, clearCoverflowStyles, updateCoverflowEdgePadding, updateCoverflowTransforms, slides.length]);
 

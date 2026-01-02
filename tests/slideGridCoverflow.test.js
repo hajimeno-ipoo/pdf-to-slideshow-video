@@ -35,4 +35,8 @@ test('SlideGrid: coverflow viewMode and navigation are present', () => {
   assert.ok(src.includes("scrollIntoView({ behavior: 'smooth', inline: 'center'"));
   assert.ok(src.includes('aria-label="前へ"'));
   assert.ok(src.includes('aria-label="次へ"'));
+
+  assert.ok(src.includes('dataset.coverflowScrolling'));
+  const css = readUtf8('index.css');
+  assert.ok(css.includes('.screen-idle[data-coverflow-scrolling="true"] .editor-glass::after'));
 });

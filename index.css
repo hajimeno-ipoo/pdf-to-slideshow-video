@@ -247,6 +247,11 @@
   -webkit-filter: url(#glass-distortion);
   filter: url(#glass-distortion);
 }
+.screen-idle[data-coverflow-scrolling="true"] .editor-glass::after {
+  /* coverflow操作中も、ゆがみはONのまま（ユーザー要望） */
+  -webkit-filter: url(#glass-distortion);
+  filter: url(#glass-distortion);
+}
 .screen-idle .editor-glass.overflow-visible {
   overflow: visible;
 }
