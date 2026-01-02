@@ -26,6 +26,7 @@ test('SlideGrid: coverflow viewMode and navigation are present', () => {
   const src = readUtf8('components/slideEditor/SlideGrid.tsx');
   assert.ok(src.includes("viewMode?: 'grid' | 'coverflow'"));
   assert.ok(src.includes("const isCoverflow = viewMode === 'coverflow'"));
+  assert.ok(src.includes('min-w-0 group/select'));
   assert.ok(src.includes('snap-x snap-mandatory'));
   assert.ok(src.includes("style={{ perspective: '1200px' }}"));
   assert.ok(src.includes('inline-flex items-center gap-4'));

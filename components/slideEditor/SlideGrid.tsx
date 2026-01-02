@@ -454,14 +454,14 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
 	             {slide.audioFile && <div className="bg-indigo-500/80 px-1 py-0.5 rounded text-[8px] text-white">♫</div>}
 	          </div>
 	          <div className="absolute top-1 right-1 z-20 opacity-0 pointer-events-none group-hover:pointer-events-auto group-hover:opacity-100 transition-opacity">
-		            <button
-		              onClick={(e) => handleDownloadSlideImage(e, slide, index)}
-		              className={`h-6 w-6 rounded bg-emerald-500/30 backdrop-blur border border-emerald-300/50 text-emerald-50 hover:text-white hover:border-emerald-200/70 hover:bg-emerald-500/40 flex items-center justify-center text-[12px] ${
-		                downloadingSlideId === slide.id ? 'opacity-60 cursor-wait' : ''
-		              }`}
-		              title="画像を保存（高画質）"
-		              aria-label="画像を保存（高画質）"
-		            >
+			            <button
+			              onClick={(e) => handleDownloadSlideImage(e, slide, index)}
+			              className={`h-6 w-6 rounded bg-emerald-500/80 backdrop-blur border border-emerald-300/50 text-white hover:border-emerald-200/70 hover:bg-emerald-500/90 flex items-center justify-center text-[12px] ${
+			                downloadingSlideId === slide.id ? 'opacity-60 cursor-wait' : ''
+			              }`}
+			              title="画像を保存（高画質）"
+			              aria-label="画像を保存（高画質）"
+			            >
 	              ⤓
 	            </button>
 	          </div>
@@ -499,7 +499,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
           
 	          <div className="h-10 bg-transparent border-t border-white/10 flex items-center justify-between px-2 gap-2" onClick={(e) => e.stopPropagation()}>
               {/* Transition Selector */}
-              <div className="relative group/select hover:opacity-100 transition-opacity max-w-[40%] sm:max-w-[50%]">
+	              <div className="relative min-w-0 group/select hover:opacity-100 transition-opacity max-w-[40%] sm:max-w-[50%]">
                   <div className={`flex items-center gap-1.5 px-2 py-1 rounded border text-xs font-medium transition-colors ${getTransitionColor(slide.transitionType)}`}>
                       {getTransitionIcon(slide.transitionType)}
                       <span className="uppercase tracking-wider truncate">{slide.transitionType === 'none' ? 'None' : slide.transitionType.replace('-',' ')}</span>
