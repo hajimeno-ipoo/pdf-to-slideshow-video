@@ -428,6 +428,10 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   }>({ slide: null, nextSlide: null, transProgress: 0, kenBurns: null, nextKenBurns: null, currentProgress: 0, nextProgress: 0, width: 0, height: 0, localTime: 0 });
 
   const [scale, setScale] = useState(1);
+  const videoDims = useMemo(
+      () => getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution),
+      [videoSettings.aspectRatio, videoSettings.resolution]
+  );
 
   const audioCtxRef = useRef<AudioContext | null>(null);
   const bgmSourceRef = useRef<AudioBufferSourceNode | null>(null);
@@ -1208,7 +1212,21 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
                    </div>
                )}
                
-               {bgAnimUrl && <img src={bgAnimUrl} alt="" className="absolute inset-0 w-full h-full object-cover z-0 opacity-100" style={{ objectFit: videoSettings.aspectRatio === '9:16' ? 'cover' : 'contain' }} />}
+               {bgAnimUrl && (
+                   <img
+                       src={bgAnimUrl}
+                       alt=""
+                       className="absolute top-1/2 left-1/2 max-w-none max-h-none pointer-events-none z-0"
+                       style={{
+                           width: videoDims.width,
+                           height: videoDims.height,
+                           transform: `translate(-50%, -50%) scale(${scale})`,
+                           transformOrigin: 'center center',
+                           objectFit: 'cover',
+                           opacity: 1
+                       }}
+                   />
+               )}
 
                <canvas ref={canvasRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl z-1" style={{ maxWidth: '100%', maxHeight: '100%', aspectRatio: videoSettings.aspectRatio.replace(':', '/') }} />
 
