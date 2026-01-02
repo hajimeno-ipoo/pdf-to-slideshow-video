@@ -12,7 +12,7 @@ export interface GlassPrefs {
 }
 
 export const GLASS_PREFS_STORAGE_KEY = 'pdfVideo_glassPrefs_v1';
-const DEFAULT_IDLE_BG_IMAGE_URL = '/Doc/f570240bf2b14647823c4a9489fb410d_3.png';
+const DEFAULT_IDLE_BG_IMAGE_URL = '/Doc/IMG_9349_BG.webp';
 
 export const DEFAULT_GLASS_PREFS: GlassPrefs = {
   tintHex: '#ffffff',

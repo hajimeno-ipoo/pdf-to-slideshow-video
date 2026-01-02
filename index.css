@@ -14,7 +14,7 @@
 
 .screen-idle {
   --idle-bg-color: #ffffff;
-  --idle-bg-image: url('/Doc/f570240bf2b14647823c4a9489fb410d_3.png');
+  --idle-bg-image: url('/Doc/IMG_9349_BG.webp');
   --idle-bg-position: center;
   --idle-bg-size: cover;
   --idle-bg-repeat: no-repeat;
@@ -848,6 +848,17 @@
 .screen-idle .preview-panel.glass-strong::after {
   /* 端が“凹んで”見えるのを防ぐ（他モーダルと同じ対策） */
   inset: -28px;
+}
+/* 全画面プレビューのstageは「上だけ真っ白」を避けるため、ガラスの“ツヤ”を弱める */
+.screen-idle .preview-stage.glass::before {
+  background: none !important;
+  box-shadow: none !important;
+}
+/* 全画面プレビューのstageは、下部（glass-thin）と同じ“薄めガラス”に寄せる */
+.screen-idle .preview-stage.glass::after {
+  background: var(--idle-glass-bg-thin) !important;
+  -webkit-backdrop-filter: blur(var(--idle-glass-blur-thin)) saturate(var(--idle-glass-sat)) !important;
+  backdrop-filter: blur(var(--idle-glass-blur-thin)) saturate(var(--idle-glass-sat)) !important;
 }
 
 /* Slide Inspector（全画面編集）（IDLE時だけガラス寄せ） */
