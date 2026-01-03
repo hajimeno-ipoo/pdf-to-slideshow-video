@@ -433,9 +433,11 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
         loadOverview();
     }, [slide.id, sourceFile]);
 
-    // Preview area size tracking (detached preview fit)
+    const previewAreaReady = previewDetachedOpen ? previewDetachedPortalReady : true;
+
+    // Preview area size tracking (preview fit)
     useLayoutEffect(() => {
-        if (!previewDetachedPortalReady) {
+        if (!previewAreaReady) {
             setPreviewAreaInnerSize(null);
             return;
         }
@@ -459,7 +461,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
             observer.disconnect();
             window.removeEventListener('resize', update);
         };
-    }, [previewDetachedPortalReady]);
+    }, [previewAreaReady]);
 
     // Stage size tracking (canvas mode)
     useLayoutEffect(() => {
@@ -499,8 +501,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
         };
     }, [previewDetachedPortalReady, showCanvasStage]);
 
-    const detachedStageBox = (() => {
-        if (!previewDetachedOpen) return null;
+    const stageBox = (() => {
         if (!showCanvasStage) return null;
         if (!previewAreaInnerSize) return null;
         const [aw, ah] = videoSettings.aspectRatio.split(':').map(v => parseFloat(v));
@@ -1707,7 +1708,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                                         height: 'auto',
                                         maxWidth: '100%',
                                         maxHeight: '100%',
-                                        ...(detachedStageBox ? { width: detachedStageBox.width, height: detachedStageBox.height } : {}),
+                                        ...(stageBox ? { width: stageBox.width, height: stageBox.height } : {}),
                                     }}
                                     onDoubleClick={isCanvasMode ? handleDoubleClick : undefined}
                                     onMouseDown={(e) => {
