@@ -399,6 +399,7 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null); 
+  const seekRangeRef = useRef<HTMLInputElement>(null);
   
   const [currentTime, setCurrentTime] = useState(0);
   const totalDuration = useMemo(() => slides.reduce((acc, s) => acc + s.duration, 0), [slides]);
@@ -407,6 +408,24 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const [bgAnimUrl, setBgAnimUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+      const range = seekRangeRef.current;
+      if (!range) return;
+
+      const min = Number(range.min || '0');
+      const max = Number(range.max || '100');
+      const value = Number(range.value);
+
+      if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min || !Number.isFinite(value)) {
+          range.style.setProperty('--idle-range-progress', '0%');
+          return;
+      }
+
+      const clampedValue = Math.min(max, Math.max(min, value));
+      const progressPercent = ((clampedValue - min) / (max - min)) * 100;
+      range.style.setProperty('--idle-range-progress', `${progressPercent}%`);
+  }, [currentTime, totalDuration, isOpen]);
   
   const requestRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
@@ -1321,7 +1340,8 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
 		                      onPointerUp={endSeekScrub}
 		                      onPointerCancel={endSeekScrub}
 		                      disabled={isLoading}
-		                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 opacity-50 idle-range"
+		                      ref={seekRangeRef}
+		                      className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 idle-range"
 		                  />
 	                  <div className="flex justify-between text-xs text-slate-500 mt-1 font-mono">
 	                      <span>{Math.floor(currentTime)}s</span>

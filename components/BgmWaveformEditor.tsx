@@ -376,14 +376,14 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
        {/* Canvas Container */}
        <div 
          ref={containerRef}
-         className="relative h-32 bg-slate-900 rounded-lg overflow-hidden border border-slate-700 shadow-inner group select-none"
+         className="relative h-32 bg-white/10 rounded-lg overflow-hidden border border-white/15 shadow-inner group select-none"
          onMouseDown={handleMouseDown}
          onMouseMove={handleMouseMove}
          onMouseUp={handleMouseUp}
          onMouseLeave={handleMouseUp}
        >
          {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-slate-900/80 z-30">
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30 z-30">
                 <div className="flex items-center gap-2 text-emerald-400 text-xs font-medium animate-pulse">
                     <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -473,7 +473,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
        </div>
 
        {/* Controls Bar */}
-       <div className="flex flex-wrap items-center gap-3 bg-slate-900/50 p-2 rounded-lg border border-slate-700/50">
+       <div className="flex flex-wrap items-center gap-3 bg-white/10 p-2 rounded-lg border border-white/15">
            {/* Left Controls: Play + Time */}
            <div className="flex items-center gap-4 flex-1 min-w-[180px]">
                <button 
@@ -540,7 +540,7 @@ const BgmWaveformEditor: React.FC<BgmWaveformEditorProps> = ({ file, range, onCh
                  className={`w-full min-w-[100px] idle-range h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer ${readonly ? 'accent-indigo-500 hover:accent-indigo-400' : 'accent-emerald-500 hover:accent-emerald-400'}`}
                  title={`Volume: ${Math.round(volume * 100)}%`}
                />
-               <span className="text-[10px] text-slate-500 w-8 text-right font-mono">{Math.round(volume * 100)}%</span>
+               <span className="text-[10px] text-slate-200 w-8 text-right font-mono">{Math.round(volume * 100)}%</span>
            </div>
        </div>
     </div>

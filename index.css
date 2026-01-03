@@ -331,8 +331,9 @@
   --editor-pane-blur: var(--idle-glass-blur-strong);
 }
 
-/* Appleっぽい range（スライダー）: つまみ/トラックを統一（IDLEだけ） */
-.screen-idle .idle-range {
+/* Appleっぽい range（スライダー）: つまみ/トラックを統一（IDLE + プレビュー） */
+.screen-idle .idle-range,
+.preview-overlay .idle-range {
   -webkit-appearance: none;
   appearance: none;
   background: transparent !important;
@@ -343,10 +344,12 @@
   --idle-range-progress-color: rgba(0, 122, 255, 0.45);
   --idle-range-track-color: rgba(255, 255, 255, 0.2);
 }
-.screen-idle .idle-range:focus {
+.screen-idle .idle-range:focus,
+.preview-overlay .idle-range:focus {
   outline: none;
 }
-.screen-idle .idle-range::-webkit-slider-runnable-track {
+.screen-idle .idle-range::-webkit-slider-runnable-track,
+.preview-overlay .idle-range::-webkit-slider-runnable-track {
   height: 6px;
   border-radius: 9999px;
   background: linear-gradient(
@@ -360,7 +363,8 @@
   -webkit-backdrop-filter: blur(10px) saturate(160%);
   backdrop-filter: blur(10px) saturate(160%);
 }
-.screen-idle .idle-range::-webkit-slider-thumb {
+.screen-idle .idle-range::-webkit-slider-thumb,
+.preview-overlay .idle-range::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
@@ -370,32 +374,37 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.26);
   margin-top: -5px;
 }
-.screen-idle .idle-range:active::-webkit-slider-thumb {
+.screen-idle .idle-range:active::-webkit-slider-thumb,
+.preview-overlay .idle-range:active::-webkit-slider-thumb {
   transform: scale(0.96);
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.26),
     0 0 0 4px rgba(0, 122, 255, 0.18),
     0 0 18px rgba(0, 122, 255, 0.35);
 }
-.screen-idle .idle-range:focus-visible::-webkit-slider-thumb {
+.screen-idle .idle-range:focus-visible::-webkit-slider-thumb,
+.preview-overlay .idle-range:focus-visible::-webkit-slider-thumb {
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.26),
     0 0 0 4px rgba(0, 122, 255, 0.25);
 }
 
 /* Firefox */
-.screen-idle .idle-range::-moz-range-track {
+.screen-idle .idle-range::-moz-range-track,
+.preview-overlay .idle-range::-moz-range-track {
   height: 6px;
   border-radius: 9999px;
   background: var(--idle-range-track-color);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
 }
-.screen-idle .idle-range::-moz-range-progress {
+.screen-idle .idle-range::-moz-range-progress,
+.preview-overlay .idle-range::-moz-range-progress {
   height: 6px;
   border-radius: 9999px;
   background: var(--idle-range-progress-color);
 }
-.screen-idle .idle-range::-moz-range-thumb {
+.screen-idle .idle-range::-moz-range-thumb,
+.preview-overlay .idle-range::-moz-range-thumb {
   width: 16px;
   height: 16px;
   border-radius: 9999px;
@@ -403,7 +412,8 @@
   border: 1px solid rgba(255, 255, 255, 0.32);
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.26);
 }
-.screen-idle .idle-range:active::-moz-range-thumb {
+.screen-idle .idle-range:active::-moz-range-thumb,
+.preview-overlay .idle-range:active::-moz-range-thumb {
   transform: scale(0.96);
   box-shadow:
     0 6px 14px rgba(0, 0, 0, 0.26),
