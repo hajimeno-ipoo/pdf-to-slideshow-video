@@ -555,7 +555,7 @@ export const analyzePdf = async (
         previousContext = gen.text;
         if (onUsageUpdate) onUsageUpdate(gen.usage);
       } catch (e) {
-        console.error(`Script generation failed for page ${i}`, e);
+        console.error('Script generation failed for page', i, e);
       } finally {
         doneUnits += 1;
         report();
@@ -623,7 +623,7 @@ export const analyzeImages = async (
         previousContext = gen.text;
         if (onUsageUpdate) onUsageUpdate(gen.usage);
       } catch (e) {
-        console.error(`Script generation failed for image ${i + 1}`, e);
+        console.error('Script generation failed for image', i + 1, e);
       } finally {
         doneUnits += 1;
         report();

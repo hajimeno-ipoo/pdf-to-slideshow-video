@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* IDLE（最初の画面）だけ Apple寄せの“ガラス素材”を当てる用
 	   - レイアウトは変えない（見た目だけ）
 	   - Tailwind全体の色上書きはしない（事故防止）

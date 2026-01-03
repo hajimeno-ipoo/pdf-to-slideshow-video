@@ -89,7 +89,7 @@ export const checkVoicevoxConnection = async (customUrl?: string): Promise<Conne
           lastError = `Status: ${response.status} ${response.statusText}`;
       }
     } catch (e: any) {
-      console.warn(`Standard connection failed for ${url}:`, e);
+      console.warn('Standard connection failed for', url, e);
       lastError = e.message || "Network Error";
     }
 
@@ -116,7 +116,7 @@ export const checkVoicevoxConnection = async (customUrl?: string): Promise<Conne
           lastError = `Status: ${response.status} (With Header)`;
       }
     } catch (e: any) {
-      console.warn(`Header connection failed for ${url}:`, e);
+      console.warn('Header connection failed for', url, e);
       // If Strategy 1 failed (Network Error or HTML), and Strategy 2 failed (Network Error),
       // it is almost certainly a CORS Preflight failure (403/405 from server).
       if (e.message === "Failed to fetch") {

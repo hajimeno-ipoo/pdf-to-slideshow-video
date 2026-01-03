@@ -13,13 +13,16 @@ const PUBLIC_DIR = path.join(projectRoot, 'public');
 const PUBLIC_MANUAL_HTML_PATH = path.join(PUBLIC_DIR, 'user_manual.html');
 const PUBLIC_IMAGES_DIR = path.join(PUBLIC_DIR, 'manual_images');
 
+const HTML_ESCAPE_MAP = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+  "'": '&#39;'
+};
+
 function escapeHtml(text) {
-  return text
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#39;');
+  return text.replace(/[&<>"']/g, (ch) => HTML_ESCAPE_MAP[ch]);
 }
 
 function formatInline(text) {

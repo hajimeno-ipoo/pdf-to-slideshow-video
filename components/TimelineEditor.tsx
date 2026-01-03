@@ -235,7 +235,7 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                       ctx.close();
                       hasUpdates = true;
                   } catch (e) {
-                      console.error(`Failed to get duration for slide ${slide.id}`, e);
+                      console.error('Failed to get duration for slide', slide.id, e);
                   }
               } else if (slide.audioFile && audioDurations.has(slide.id)) {
                   newDurations.set(slide.id, audioDurations.get(slide.id)!);
