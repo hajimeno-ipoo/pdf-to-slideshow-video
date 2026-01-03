@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Semgrep outputs (do not commit)
+reports/semgrep/
