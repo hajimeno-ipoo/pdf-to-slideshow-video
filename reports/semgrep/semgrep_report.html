@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pdf-to-slideshow-video セキュリティレポート</title>
+  <script src="./chart.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; background: #f8fafc; }
+    h1 { margin: 0 0 8px; }
+    .meta { color: #475569; margin-bottom: 16px; }
+    .summary { display: flex; gap: 16px; flex-wrap: wrap; margin: 16px 0; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; min-width: 140px; }
+    .card-block { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin: 12px 0; }
+    .card-title { font-weight: 700; margin-bottom: 6px; }
+    .card-row { font-size: 12px; color: #334155; margin: 2px 0; }
+    .scan-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+    .chart-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 12px 0; }
+    .chart-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px; }
+    table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e2e8f0; }
+    th, td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; font-size: 12px; vertical-align: top; }
+    th { background: #f1f5f9; text-align: left; }
+    .severity-CRITICAL td { background: #fee2e2; }
+    .severity-HIGH td { background: #ffedd5; }
+    .severity-MEDIUM td { background: #fef9c3; }
+    .severity-LOW td { background: #ecfccb; }
+    .severity-INFO td { background: #e0f2fe; }
+    .note { color: #b45309; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>pdf-to-slideshow-video セキュリティレポート</h1>
+  <div class="meta">生成日時: 2026-01-03 14:27:01</div>
+
+  <div class="summary">
+    <div class="card"><strong>総数</strong><div>0</div></div>
+    <div class="card"><strong>SAST</strong><div>0</div></div>
+    <div class="card"><strong>SCA</strong><div>0</div></div>
+    <div class="card"><strong>Critical</strong><div>0</div></div>
+    <div class="card"><strong>High</strong><div>0</div></div>
+    <div class="card"><strong>Medium</strong><div>0</div></div>
+    <div class="card"><strong>Low</strong><div>0</div></div>
+    <div class="card"><strong>Info</strong><div>0</div></div>
+  </div>
+
+  <div class="card-block">
+    <div class="card-title">サマリー</div>
+    <div>指摘なし。</div>
+  </div>
+
+  <div class="card-block">
+    <div class="card-title">スキャン情報</div>
+    <div class="meta">Semgrep: 1.146.0</div>
+    <div class="scan-grid">
+      
+        <div class="card">
+          <div class="card-title">SAST</div>
+          
+          <div class="card-row"><strong>コマンド:</strong> semgrep scan --config auto --json</div>
+          <div class="card-row"><strong>開始:</strong> 2026-01-03 14:25:57</div>
+          <div class="card-row"><strong>終了:</strong> 2026-01-03 14:26:35</div>
+          <div class="card-row"><strong>所要:</strong> 38.15s</div>
+          <div class="card-row"><strong>Targets:</strong> 287</div>
+          <div class="card-row"><strong>Rules:</strong> N/A</div>
+          <div class="card-row"><strong>Lines:</strong> N/A</div>
+          <div class="card-row"><strong>Skipped:</strong> N/A</div>
+        </div>
+        
+      
+        <div class="card">
+          <div class="card-title">SCA</div>
+          <div class="card-row"><strong>モード:</strong> ci (fallback)</div>
+          <div class="card-row"><strong>コマンド:</strong> semgrep ci --supply-chain --dry-run --json</div>
+          <div class="card-row"><strong>開始:</strong> 2026-01-03 14:26:35</div>
+          <div class="card-row"><strong>終了:</strong> 2026-01-03 14:27:01</div>
+          <div class="card-row"><strong>所要:</strong> 25.4s</div>
+          <div class="card-row"><strong>Targets:</strong> 1</div>
+          <div class="card-row"><strong>Rules:</strong> N/A</div>
+          <div class="card-row"><strong>Lines:</strong> N/A</div>
+          <div class="card-row"><strong>Skipped:</strong> N/A</div>
+        </div>
+        
+    </div>
+  </div>
+
+  <div class="card-block">
+    <div class="card-title">Git情報</div>
+    <div class="card-row"><strong>Branch:</strong> main</div>
+    <div class="card-row"><strong>Commit:</strong> bf83eb930b7d503ac372bf90f37fa0f4f70fc75b</div>
+    <div class="card-row"><strong>Dirty:</strong> Yes</div>
+  </div>
+
+  <p class="note">SCA注意: semgrep scan は --supply-chain 未対応のため ci に切り替え</p>
+
+  <div class="chart-grid">
+    <div class="chart-card"><canvas id="radarChart" width="400" height="240"></canvas></div>
+    <div class="chart-card"><canvas id="severityPie" width="400" height="240"></canvas></div>
+    <div class="chart-card"><canvas id="severityBar" width="400" height="240"></canvas></div>
+    <div class="chart-card"><canvas id="sastScaPie" width="400" height="240"></canvas></div>
+  </div>
+
+  <div class="card-block">
+    <div class="card-title">重要指摘（上位3件）</div>
+    <ul>
+      <li>指摘なし</li>
+    </ul>
+  </div>
+
+  <div class="card-block">
+    <div class="card-title">依存ライブラリ（SCA）</div>
+    <table>
+      <thead>
+        <tr><th>Package</th><th>Version</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr><td colspan="3">影響なし</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card-block">
+    <div class="card-title">対策プラン（ToDo）</div>
+    <ol>
+      <li>対応不要</li>
+    </ol>
+  </div>
+
+  <h2>Findings</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Severity</th>
+        <th>Type</th>
+        <th>Rule/ID</th>
+        <th>Location</th>
+        <th>Reason</th>
+        <th>Fix</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td colspan="6">指摘なし</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    const data = {
+      labels: ["SAST件数", "SCA件数", "Critical", "High", "Medium", "Low"],
+      datasets: [{
+        label: 'Semgrep Summary',
+        data: [0, 0, 0, 0, 0, 0],
+        fill: true,
+        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+        borderColor: 'rgba(16, 185, 129, 1)',
+        pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+      }]
+    };
+
+    new Chart(document.getElementById('radarChart'), {
+      type: 'radar',
+      data,
+      options: {
+        responsive: true,
+        scales: {
+          r: { beginAtZero: true }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('severityPie'), {
+      type: 'pie',
+      data: {
+        labels: ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO", "UNKNOWN"],
+        datasets: [{
+          data: [0, 0, 0, 0, 0, 0],
+          backgroundColor: [
+            '#ef4444', '#f97316', '#facc15', '#84cc16', '#38bdf8', '#94a3b8'
+          ]
+        }]
+      },
+      options: { responsive: true }
+    });
+
+    new Chart(document.getElementById('severityBar'), {
+      type: 'bar',
+      data: {
+        labels: ["CRITICAL", "HIGH", "MEDIUM", "LOW", "INFO", "UNKNOWN"],
+        datasets: [{
+          label: 'Severity Count',
+          data: [0, 0, 0, 0, 0, 0],
+          backgroundColor: '#10b981'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    new Chart(document.getElementById('sastScaPie'), {
+      type: 'pie',
+      data: {
+        labels: ['SAST', 'SCA'],
+        datasets: [{
+          data: [0, 0],
+          backgroundColor: ['#0ea5e9', '#a855f7']
+        }]
+      },
+      options: { responsive: true }
+    });
+  </script>
+</body>
+</html>

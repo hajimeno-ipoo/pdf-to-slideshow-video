@@ -1,0 +1,1947 @@
+{
+  "version": "1.146.0",
+  "results": [],
+  "errors": [
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on App.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "App.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on App.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "App.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on App.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "App.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/ApiKeyModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ApiKeyModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/ApiKeyModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ApiKeyModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/ApiKeyModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ApiKeyModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/BgmWaveformEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/BgmWaveformEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/BgmWaveformEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/BgmWaveformEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/BgmWaveformEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/BgmWaveformEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/ColorPickerPopover.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ColorPickerPopover.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/ColorPickerPopover.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ColorPickerPopover.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/ColorPickerPopover.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ColorPickerPopover.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/CooldownNotification.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/CooldownNotification.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/CooldownNotification.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/CooldownNotification.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/CooldownNotification.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/CooldownNotification.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/CropModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/CropModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/CropModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/CropModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/CropModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/CropModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/FileUpload.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/FileUpload.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/FileUpload.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/FileUpload.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/FileUpload.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/FileUpload.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/GlassSettingsModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/GlassSettingsModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/GlassSettingsModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/GlassSettingsModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/GlassSettingsModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/GlassSettingsModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/Header.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/Header.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/Header.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/Header.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/Header.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/Header.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/PreviewPlayer.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/PreviewPlayer.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/PreviewPlayer.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/PreviewPlayer.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/PreviewPlayer.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/PreviewPlayer.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/ProcessingStep.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProcessingStep.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/ProjectManagerModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProjectManagerModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/ProjectManagerModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProjectManagerModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/ProjectManagerModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProjectManagerModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/ProjectSettings.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProjectSettings.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/ProjectSettings.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProjectSettings.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/ProjectSettings.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/ProjectSettings.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/RestoreModal.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/RestoreModal.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/SlideEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/SlideEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/SlideEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/SlideEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/SlideEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/SlideEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/SlideInspector.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/SlideInspector.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/SlideInspector.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/SlideInspector.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/SlideInspector.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/SlideInspector.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/TimelineEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/TimelineEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/TimelineEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/TimelineEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/TimelineEditor.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/TimelineEditor.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/cropModal/AudioSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/AudioSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/cropModal/AudioSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/AudioSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/cropModal/AudioSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/AudioSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/cropModal/ColorSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/ColorSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/cropModal/ColorSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/ColorSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/cropModal/ColorSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/ColorSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/cropModal/ImageSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/ImageSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/cropModal/ImageSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/ImageSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/cropModal/ImageSettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/ImageSettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/cropModal/InlineColorPicker.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/InlineColorPicker.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/cropModal/InlineColorPicker.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/InlineColorPicker.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/cropModal/InlineColorPicker.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/InlineColorPicker.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/cropModal/OverlaySettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/OverlaySettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/cropModal/constants.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/cropModal/constants.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/slideEditor/SettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/slideEditor/SettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/slideEditor/SettingsPanel.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SettingsPanel.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/slideEditor/SlideEditorContext.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SlideEditorContext.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/slideEditor/SlideEditorContext.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SlideEditorContext.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/slideEditor/SlideEditorContext.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SlideEditorContext.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/slideEditor/SlideGrid.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SlideGrid.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/slideEditor/SlideGrid.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SlideGrid.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/slideEditor/SlideGrid.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/SlideGrid.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on components/slideEditor/Toolbar.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/Toolbar.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on components/slideEditor/Toolbar.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/Toolbar.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on components/slideEditor/Toolbar.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "components/slideEditor/Toolbar.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on index.tsx:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "index.tsx"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on scripts/generate-user-manual.mjs:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "scripts/generate-user-manual.mjs"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on scripts/generate-user-manual.mjs:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "scripts/generate-user-manual.mjs"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on scripts/generate-user-manual.mjs:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "scripts/generate-user-manual.mjs"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on services/geminiService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/geminiService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on services/geminiService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/geminiService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on services/geminiService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/geminiService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on services/pdfVideoService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/pdfVideoService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on services/pdfVideoService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/pdfVideoService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on services/pdfVideoService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/pdfVideoService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on services/projectStorage.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/projectStorage.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on services/projectStorage.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/projectStorage.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on services/projectStorage.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/projectStorage.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on services/videoWorkerScript.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/videoWorkerScript.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on services/voicevoxService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/voicevoxService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on services/voicevoxService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/voicevoxService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on services/voicevoxService.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "services/voicevoxService.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/aacAudioSpecificConfig.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/aacAudioSpecificConfig.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/audioSettingsPanelInitialScriptSync.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/audioSettingsPanelInitialScriptSync.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/canvasSizing.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/canvasSizing.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/completedVideoControlsAutohide.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/completedVideoControlsAutohide.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/cropGuidesAndAspectLock.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/cropGuidesAndAspectLock.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/cropOverlayDimmingClip.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/cropOverlayDimmingClip.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/cropPreviewUtils.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/cropPreviewUtils.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/cropReflectInPreviewAndExport.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/cropReflectInPreviewAndExport.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/duckingSchedule.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/duckingSchedule.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/exportButtonsUi.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/exportButtonsUi.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/exportSupport.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/exportSupport.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/geminiRetryDelay.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/geminiRetryDelay.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/glassPrefs.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/glassPrefs.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/hiddenOverlaysExport.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/hiddenOverlaysExport.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/idleGlassTheme.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/idleGlassTheme.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/idleRangeProgress.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/idleRangeProgress.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/idleSegmentSelectedPlate.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/idleSegmentSelectedPlate.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/inspectorAutoApplyUndoRedo.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/inspectorAutoApplyUndoRedo.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/mp4AvcColorPatch.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/mp4AvcColorPatch.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on tests/mp4AvcColorPatch.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/mp4AvcColorPatch.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on tests/mp4AvcColorPatch.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/mp4AvcColorPatch.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/narrationScript.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/narrationScript.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/overlayFlipInspectorHandles.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/overlayFlipInspectorHandles.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/overlayFlipPreview.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/overlayFlipPreview.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/overlayUtils.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/overlayUtils.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/pendingAddOverlayToggle.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/pendingAddOverlayToggle.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/previewPlayerAnimatedBackgroundSizing.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/previewPlayerAnimatedBackgroundSizing.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/projectFileImport.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/projectFileImport.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/projectMetaUtils.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/projectMetaUtils.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/publicDocs.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/publicDocs.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on tests/publicDocs.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/publicDocs.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on tests/publicDocs.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/publicDocs.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/safariExportAndSeekFix.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/safariExportAndSeekFix.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/slideAudioBulkShift.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/slideAudioBulkShift.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/slideGridCoverflow.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/slideGridCoverflow.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/slideGridDownloadImage.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/slideGridDownloadImage.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/solidColorAddButtonSwatch.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/solidColorAddButtonSwatch.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/thumbnailExport.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/thumbnailExport.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/undoRedoExpandedScope.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/undoRedoExpandedScope.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/uploadSource.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/uploadSource.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on tests/waveformEnvelope.test.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "tests/waveformEnvelope.test.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/aacAudioSpecificConfig.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/aacAudioSpecificConfig.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/apiKeyStore.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/apiKeyStore.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/apiKeyStore.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/apiKeyStore.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/apiKeyStore.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/apiKeyStore.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/canvasSizing.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/canvasSizing.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/cropPreviewUtils.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/cropPreviewUtils.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/duckingSchedule.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/duckingSchedule.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/fileUtils.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/fileUtils.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/fileUtils.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/fileUtils.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/fileUtils.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/fileUtils.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/geminiRetryDelay.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/geminiRetryDelay.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/geminiRetryDelay.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/geminiRetryDelay.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/geminiRetryDelay.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/geminiRetryDelay.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/glassPrefs.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/glassPrefs.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/glassPrefs.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/glassPrefs.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/glassPrefs.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/glassPrefs.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/mp4AvcColorPatch.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/mp4AvcColorPatch.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/mp4AvcColorPatch.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/mp4AvcColorPatch.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/mp4AvcColorPatch.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/mp4AvcColorPatch.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/narrationScript.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/narrationScript.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/narrationScript.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/narrationScript.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/narrationScript.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/narrationScript.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/overlayUtils.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/overlayUtils.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/overlayUtils.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/overlayUtils.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/overlayUtils.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/overlayUtils.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/projectFileImport.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/projectFileImport.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/projectFileImport.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/projectFileImport.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/projectFileImport.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/projectFileImport.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/projectMetaUtils.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/projectMetaUtils.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/sanitize.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/sanitize.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/slideAudioBulkShift.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/slideAudioBulkShift.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/thumbnailExport.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/thumbnailExport.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/uploadSource.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/uploadSource.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/uploadSource.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/uploadSource.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/uploadSource.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/uploadSource.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/uuid.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/uuid.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on utils/uuid.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/uuid.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on utils/uuid.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/uuid.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on utils/waveformEnvelope.js:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "utils/waveformEnvelope.js"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm",
+      "message": "Internal matching error when running javascript.crypto-js.cryptojs-weak-algorithm.cryptojs-weak-algorithm on vite.config.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "vite.config.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.express.web.cors-default-config-express.cors-default-config-express",
+      "message": "Internal matching error when running javascript.express.web.cors-default-config-express.cors-default-config-express on vite.config.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "vite.config.ts"
+    },
+    {
+      "code": 2,
+      "level": "warn",
+      "type": "Internal matching error",
+      "rule_id": "javascript.koa.web.cors-default-config-koa.cors-default-config-koa",
+      "message": "Internal matching error when running javascript.koa.web.cors-default-config-koa.cors-default-config-koa on vite.config.ts:\n An error occurred while invoking the Semgrep engine. Please help us fix this by creating an issue at https://github.com/semgrep/semgrep\n\nmetavariable-name:module(s) operator is only supported in the Pro engine",
+      "path": "vite.config.ts"
+    },
+    {
+      "code": 3,
+      "level": "warn",
+      "type": [
+        "PartialParsing",
+        [
+          {
+            "path": "components/ProjectSettings.tsx",
+            "start": {
+              "line": 137,
+              "col": 101,
+              "offset": 0
+            },
+            "end": {
+              "line": 137,
+              "col": 118,
+              "offset": 17
+            }
+          }
+        ]
+      ],
+      "message": "Syntax error at line components/ProjectSettings.tsx:137:\n `& オーディオ` was unexpected",
+      "path": "components/ProjectSettings.tsx",
+      "spans": [
+        {
+          "file": "components/ProjectSettings.tsx",
+          "start": {
+            "line": 137,
+            "col": 101,
+            "offset": 0
+          },
+          "end": {
+            "line": 137,
+            "col": 118,
+            "offset": 17
+          }
+        }
+      ]
+    },
+    {
+      "code": 3,
+      "level": "warn",
+      "type": [
+        "PartialParsing",
+        [
+          {
+            "path": "components/slideEditor/SettingsPanel.tsx",
+            "start": {
+              "line": 129,
+              "col": 85,
+              "offset": 0
+            },
+            "end": {
+              "line": 129,
+              "col": 99,
+              "offset": 14
+            }
+          }
+        ]
+      ],
+      "message": "Syntax error at line components/slideEditor/SettingsPanel.tsx:129:\n `& 範囲設定` was unexpected",
+      "path": "components/slideEditor/SettingsPanel.tsx",
+      "spans": [
+        {
+          "file": "components/slideEditor/SettingsPanel.tsx",
+          "start": {
+            "line": 129,
+            "col": 85,
+            "offset": 0
+          },
+          "end": {
+            "line": 129,
+            "col": 99,
+            "offset": 14
+          }
+        }
+      ]
+    }
+  ],
+  "paths": {
+    "scanned": [
+      ".gitignore",
+      ".kamui/dev.pid",
+      ".kamui/model-versions-cache.json",
+      ".kamui/prompt/merge-prompt.txt",
+      ".kamui/system-graph-state.json",
+      ".kamui/tasks-state.json",
+      ".semgrepignore",
+      ".serena/.gitignore",
+      ".serena/memories/agents_rules_memorized_20251212.md",
+      ".serena/memories/investigation_coverflow_swipe_flicker_20260102.md",
+      ".serena/memories/investigation_flicker_coverflow_20260102.md",
+      ".serena/memories/investigation_flicker_coverflow_20260102_user_split.md",
+      ".serena/memories/investigation_fullscreen_preview_white_top_20260102.md",
+      ".serena/memories/investigation_glass_background_image_not_reflect_20251226.md",
+      ".serena/memories/investigation_glass_bg_image_large_dataurl_chrome_limit_20251227.md",
+      ".serena/memories/investigation_import_images_and_pptx_20260102.md",
+      ".serena/memories/investigation_preview_background_sample_misaligned_20260101.md",
+      ".serena/memories/investigation_preview_seek_and_safari_export_audio_20251221.md",
+      ".serena/memories/investigation_safari_export_preview_dark_20251222.md",
+      ".serena/memories/investigation_safari_export_preview_dark_color_metadata_20251225.md",
+      ".serena/memories/investigation_slide_select_shrink_thumbnail_regen_20251228.md",
+      ".serena/memories/investigation_slide_select_thumbnail_regen_confirmed_20251228.md",
+      ".serena/memories/investigation_slide_switch_triggers_thumbnail_regen_due_to_crop_overlays_20251228.md",
+      ".serena/memories/investigation_slidegrid_inner_black_thumbnail_jpeg_20251217.md",
+      ".serena/memories/investigation_timeline_audio_bulk_shift_20251228.md",
+      ".serena/memories/investigation_undo_redo_buttons_20251226.md",
+      ".serena/memories/plan_bulk_shift_slide_audio_delta_20251228.md",
+      ".serena/memories/progress_add_public_docs_links_20251220.md",
+      ".serena/memories/progress_add_slide_button_size_20251213.md",
+      ".serena/memories/progress_add_user_manual_html_public_20251229.md",
+      ".serena/memories/progress_ai_feature_lock_connected_only_20251218.md",
+      ".serena/memories/progress_apikeymodal_storage_help_20251218.md",
+      ".serena/memories/progress_app_display_20251211.md",
+      ".serena/memories/progress_blank_slide_preview_20251211.md",
+      ".serena/memories/progress_bulk_shift_slide_audio_delta_20251228.md",
+      ".serena/memories/progress_canvas_add_always_canvas_20251217.md",
+      ".serena/memories/progress_canvas_add_image_default_size_fix_20251217.md",
+      ".serena/memories/progress_canvas_background_image_cover_default_20251217.md",
+      ".serena/memories/progress_canvas_drag_promote_to_canvas_fix_20251217.md",
+      ".serena/memories/progress_canvas_drag_release_promote_b_mode_20251217.md",
+      ".serena/memories/progress_canvas_layout_foundation_20251217.md",
+      ".serena/memories/progress_canvas_mode_apply_black_and_toggle_reflect_fix_20251217.md",
+      ".serena/memories/progress_canvas_mode_finish_notes_20251217.md",
+      ".serena/memories/progress_canvas_mode_slide_clean_background_20251217.md",
+      ".serena/memories/progress_color_picker_glass_style_20251225.md",
+      ".serena/memories/progress_coverflow_disable_glass_distortion_while_scrolling_20260102.md",
+      ".serena/memories/progress_coverflow_fixes_20260101.md",
+      ".serena/memories/progress_coverflow_keep_glass_distortion_on_while_swiping_20260102.md",
+      ".serena/memories/progress_coverflow_last_center_and_label_20260101.md",
+      ".serena/memories/progress_coverflow_last_slide_center_fix_20260101.md",
+      ".serena/memories/progress_coverflow_scrolling_flicker_reduce_20260102.md",
+      ".serena/memories/progress_coverflow_scrolling_flicker_reduce_20260102_followup.md",
+      ".serena/memories/progress_coverflow_switch_blue_and_label_position_20260101.md",
+      ".serena/memories/progress_crop_aspect_presets_handles_20251225.md",
+      ".serena/memories/progress_crop_guides_aspect_lock_20251225.md",
+      ".serena/memories/progress_crop_overlay_not_always_dark_20251225.md",
+      ".serena/memories/progress_default_idle_bg_image_20260102.md",
+      ".serena/memories/progress_disable_glass_distortion_safari_20251222.md",
+      ".serena/memories/progress_disable_glass_distortion_safari_ua_class_20251222.md",
+      ".serena/memories/progress_docs_pages_fix_and_json_limit_100mb_20251220.md",
+      ".serena/memories/progress_docs_pages_fix_and_json_limit_100mb_20251220_followup.md",
+      ".serena/memories/progress_docs_return_to_previous_screen_20251220.md",
+      ".serena/memories/progress_ducking_smooth_global_narration_20251213.md",
+      ".serena/memories/progress_ducking_value_display_20251213.md",
+      ".serena/memories/progress_export_buttons_ui_text_20251221.md",
+      ".serena/memories/progress_export_complete_idle_glass_typography_20251222.md",
+      ".serena/memories/progress_fix_ai_narration_inserts_preface_20251229.md",
+      ".serena/memories/progress_fix_apply_thumbnail_double_scale_20251230.md",
+      ".serena/memories/progress_fix_crop_reflect_custom_solid_and_inspector_preview_20251230.md",
+      ".serena/memories/progress_fix_gemini_retrydelay_429_20251230.md",
+      ".serena/memories/progress_fix_inspector_decor_preview_black_20251230.md",
+      ".serena/memories/progress_fix_inspector_decor_preview_crop_misalignment_20251230.md",
+      ".serena/memories/progress_fix_inspector_flip_handles_not_inverted_20251228.md",
+      ".serena/memories/progress_fix_inspector_tts_text_only_first_slide_20251229.md",
+      ".serena/memories/progress_fix_preview_seek_and_safari_export_audio_20251221.md",
+      ".serena/memories/progress_fix_safari_audio_missing_20251220.md",
+      ".serena/memories/progress_fix_slide_select_thumbnail_regen_20251228.md",
+      ".serena/memories/progress_fix_slide_select_thumbnail_regen_prop_sync_layerorder_20251228.md",
+      ".serena/memories/progress_fix_slide_switch_no_thumbnail_regen_stale_inputs_20251228.md",
+      ".serena/memories/progress_fix_slidegrid_double_image_20251217.md",
+      ".serena/memories/progress_fix_thumbnail_blackbars_png_20251217.md",
+      ".serena/memories/progress_fullscreen_preview_idle_glass_20251222.md",
+      ".serena/memories/progress_glass_bg_image_compress_chrome_20251227.md",
+      ".serena/memories/progress_glass_prefs_add_blur_20251225.md",
+      ".serena/memories/progress_glass_prefs_device_localstorage_20251225.md",
+      ".serena/memories/progress_glass_settings_modal_fix_buttons_and_picker_20251225.md",
+      ".serena/memories/progress_glass_settings_modal_scroll_fix_20251226.md",
+      ".serena/memories/progress_glass_settings_modal_two_column_layout_20251226.md",
+      ".serena/memories/progress_glass_settings_preview_drag_zoom_resets_20251226.md",
+      ".serena/memories/progress_glass_settings_slider_progress_reset_fix_20251225.md",
+      ".serena/memories/progress_idle_background_custom_device_localstorage_20251226.md",
+      ".serena/memories/progress_idle_background_image_fit_position_20251226.md",
+      ".serena/memories/progress_idle_background_image_fit_tile_20251226.md",
+      ".serena/memories/progress_idle_background_image_free_adjust_20251226.md",
+      ".serena/memories/progress_idle_catchcopy_and_manual_update_20251229.md",
+      ".serena/memories/progress_idle_range_progress_and_glow_20251225.md",
+      ".serena/memories/progress_idle_screen_icon_buttons_advanced_settings_20251229.md",
+      ".serena/memories/progress_idle_screen_layout_novice_20251229.md",
+      ".serena/memories/progress_idle_screen_liquid_glass_theme_20251221.md",
+      ".serena/memories/progress_import_images_initial_upload_20260102.md",
+      ".serena/memories/progress_index_refresh_20251212.md",
+      ".serena/memories/progress_index_refresh_20251217.md",
+      ".serena/memories/progress_index_refresh_20251220.md",
+      ".serena/memories/progress_index_refresh_20251222.md",
+      ".serena/memories/progress_index_refresh_20251228.md",
+      ".serena/memories/progress_index_refresh_20260101.md",
+      ".serena/memories/progress_index_refresh_20260102.md",
+      ".serena/memories/progress_insert_slide_segment_selected_plate_20251225.md",
+      ".serena/memories/progress_inspector_apply_only_no_autosave_20251230.md",
+      ".serena/memories/progress_inspector_auto_apply_undo_redo_keep_apply_20251226.md",
+      ".serena/memories/progress_inspector_layer_order_glass_bg_fix_20251222.md",
+      ".serena/memories/progress_inspector_preview_detach_floating_20251227.md",
+      ".serena/memories/progress_inspector_preview_fullscreen_maximize_20251227.md",
+      ".serena/memories/progress_inspector_rotation_presets_udlr_20251226.md",
+      ".serena/memories/progress_inspector_thumbnail_autoupdate_perf_fix_20251226.md",
+      ".serena/memories/progress_inspector_xy_value_size_20251213.md",
+      ".serena/memories/progress_memory_optimize_export_20251212.md",
+      ".serena/memories/progress_optimize_default_idle_bg_image_webp_20260102.md",
+      ".serena/memories/progress_overlay_add_toggle_cancel_by_button_20251225.md",
+      ".serena/memories/progress_overlay_flip_previewplayer_20251226.md",
+      ".serena/memories/progress_preview_background_sample_fix_20260101.md",
+      ".serena/memories/progress_preview_double_audio_seek_fix_20251217.md",
+      ".serena/memories/progress_preview_stage_disable_glass_shine_20260102.md",
+      ".serena/memories/progress_preview_stage_match_bottom_glass_20260102.md",
+      ".serena/memories/progress_processing_progressbar_blue_20251222.md",
+      ".serena/memories/progress_processing_screen_idle_glass_20251222.md",
+      ".serena/memories/progress_project_manager_modal_multi_projects_20251217.md",
+      ".serena/memories/progress_remove_canvas_toggle_always_canvas_mode_20251217.md",
+      ".serena/memories/progress_restore_and_thumbnail_modals_idle_glass_20251222.md",
+      ".serena/memories/progress_safari_completed_video_controls_autohide_20251225.md",
+      ".serena/memories/progress_safari_export_download_20251220.md",
+      ".serena/memories/progress_safari_export_preview_dark_fix_color_metadata_20251225.md",
+      ".serena/memories/progress_semgrep_audit_report_20260103.md",
+      ".serena/memories/progress_semgrep_sca_20260103.md",
+      ".serena/memories/progress_semgrep_security_fix_20260103.md",
+      ".serena/memories/progress_slideInspector_layer_reorder_drag_20251217.md",
+      ".serena/memories/progress_slideInspector_overlay_list_lock_hide_20251217.md",
+      ".serena/memories/progress_slidegrid_canvas_overlay_background_fix_20251217.md",
+      ".serena/memories/progress_slidegrid_coverflow_20260101.md",
+      ".serena/memories/progress_slidegrid_delete_button_clipped_fix_20260102.md",
+      ".serena/memories/progress_slidegrid_download_button_green_20251225.md",
+      ".serena/memories/progress_slidegrid_download_image_20251225.md",
+      ".serena/memories/progress_slidegrid_download_original_slide_no_bg_no_overlay_20260102.md",
+      ".serena/memories/progress_slidegrid_fill_slide_letterbox_with_canvas_bg_20251217.md",
+      ".serena/memories/progress_slidegrid_solid_layout_reflect_and_thumbnail_realtime_20251226.md",
+      ".serena/memories/progress_solid_color_add_button_swatch_20251225.md",
+      ".serena/memories/progress_solid_color_picker_button_swatch_20251225.md",
+      ".serena/memories/progress_tailwind_build_migration_20260103.md",
+      ".serena/memories/progress_timeline_waveform_envelope_20251213.md",
+      ".serena/memories/progress_timeline_waveform_white_zoom_20251213.md",
+      ".serena/memories/progress_top_project_import_20251213.md",
+      ".serena/memories/progress_undo_redo_expand_project_settings_audio_20251226.md",
+      ".serena/memories/progress_undo_redo_include_background_fill_20251226.md",
+      ".serena/memories/progress_update_user_manual_current_app_20251229.md",
+      ".serena/memories/progress_user_manual_coverflow_screenshots_20260102.md",
+      ".serena/memories/progress_user_manual_html_autosync_20251229.md",
+      ".serena/memories/progress_user_manual_html_style_unify_20251229.md",
+      ".serena/memories/progress_user_manual_idle_bg_glass_fix_20251229.md",
+      ".serena/memories/progress_uuid_fix_20251211.md",
+      ".serena/memories/project_overview.md",
+      ".serena/memories/style_conventions.md",
+      ".serena/memories/suggested_commands.md",
+      ".serena/memories/task_completion.md",
+      ".serena/project.yml",
+      "AGENTS.md",
+      "App.tsx",
+      "Doc/IMG_9349_BG.webp",
+      "Doc/PRIVACY_PUBLIC_RELAXED.md",
+      "Doc/TERMS_PUBLIC_RELAXED.md",
+      "Doc/USAGE_ONEPAGE.md",
+      "Doc/manual_images/14_restore_modal.png",
+      "Doc/manual_images/16_slide_card_download_hover.png",
+      "Doc/ガラス表現の再現CSS説明.txt",
+      "README.md",
+      "USER_MANUAL.md",
+      "components/ApiKeyModal.tsx",
+      "components/BgmWaveformEditor.tsx",
+      "components/ColorPickerPopover.tsx",
+      "components/CooldownNotification.tsx",
+      "components/CropModal.tsx",
+      "components/FileUpload.tsx",
+      "components/GlassSettingsModal.tsx",
+      "components/Header.tsx",
+      "components/PreviewPlayer.tsx",
+      "components/ProcessingStep.tsx",
+      "components/ProjectManagerModal.tsx",
+      "components/ProjectSettings.tsx",
+      "components/RestoreModal.tsx",
+      "components/SlideEditor.tsx",
+      "components/SlideInspector.tsx",
+      "components/TimelineEditor.tsx",
+      "components/cropModal/AudioSettingsPanel.tsx",
+      "components/cropModal/ColorSettingsPanel.tsx",
+      "components/cropModal/ImageSettingsPanel.tsx",
+      "components/cropModal/InlineColorPicker.tsx",
+      "components/cropModal/OverlaySettingsPanel.tsx",
+      "components/cropModal/constants.ts",
+      "components/slideEditor/SettingsPanel.tsx",
+      "components/slideEditor/SlideEditorContext.tsx",
+      "components/slideEditor/SlideGrid.tsx",
+      "components/slideEditor/Toolbar.tsx",
+      "docs/fix_api_key_async_issue/implementation_plan.md",
+      "docs/fix_api_key_async_issue/task.md",
+      "docs/fix_api_key_async_issue/walkthrough.md",
+      "index.css",
+      "index.html",
+      "index.tsx",
+      "metadata.json",
+      "package-lock.json",
+      "package.json",
+      "postcss.config.cjs",
+      "public/manual_images/14_restore_modal.png",
+      "public/manual_images/16_slide_card_download_hover.png",
+      "public/privacy.html",
+      "public/terms.html",
+      "public/usage.html",
+      "public/user_manual.html",
+      "scripts/generate-user-manual.mjs",
+      "services/geminiService.ts",
+      "services/pdfVideoService.ts",
+      "services/projectStorage.ts",
+      "services/videoWorkerScript.ts",
+      "services/voicevoxService.ts",
+      "summary_export_flow_20251213.md",
+      "tailwind.config.cjs",
+      "tests/aacAudioSpecificConfig.test.js",
+      "tests/audioSettingsPanelInitialScriptSync.test.js",
+      "tests/canvasSizing.test.js",
+      "tests/completedVideoControlsAutohide.test.js",
+      "tests/cropGuidesAndAspectLock.test.js",
+      "tests/cropOverlayDimmingClip.test.js",
+      "tests/cropPreviewUtils.test.js",
+      "tests/cropReflectInPreviewAndExport.test.js",
+      "tests/duckingSchedule.test.js",
+      "tests/exportButtonsUi.test.js",
+      "tests/exportSupport.test.js",
+      "tests/geminiRetryDelay.test.js",
+      "tests/glassPrefs.test.js",
+      "tests/hiddenOverlaysExport.test.js",
+      "tests/idleGlassTheme.test.js",
+      "tests/idleRangeProgress.test.js",
+      "tests/idleSegmentSelectedPlate.test.js",
+      "tests/inspectorAutoApplyUndoRedo.test.js",
+      "tests/mp4AvcColorPatch.test.js",
+      "tests/narrationScript.test.js",
+      "tests/overlayFlipInspectorHandles.test.js",
+      "tests/overlayFlipPreview.test.js",
+      "tests/overlayUtils.test.js",
+      "tests/pendingAddOverlayToggle.test.js",
+      "tests/previewPlayerAnimatedBackgroundSizing.test.js",
+      "tests/projectFileImport.test.js",
+      "tests/projectMetaUtils.test.js",
+      "tests/publicDocs.test.js",
+      "tests/safariExportAndSeekFix.test.js",
+      "tests/slideAudioBulkShift.test.js",
+      "tests/slideGridCoverflow.test.js",
+      "tests/slideGridDownloadImage.test.js",
+      "tests/solidColorAddButtonSwatch.test.js",
+      "tests/thumbnailExport.test.js",
+      "tests/undoRedoExpandedScope.test.js",
+      "tests/uploadSource.test.js",
+      "tests/waveformEnvelope.test.js",
+      "tsconfig.json",
+      "types/pdfTypes.ts",
+      "types.ts",
+      "utils/aacAudioSpecificConfig.js",
+      "utils/apiKeyStore.ts",
+      "utils/canvasSizing.js",
+      "utils/cropPreviewUtils.js",
+      "utils/duckingSchedule.js",
+      "utils/exportSupport.js",
+      "utils/fileUtils.ts",
+      "utils/geminiRetryDelay.js",
+      "utils/glassPrefs.ts",
+      "utils/mp4AvcColorPatch.js",
+      "utils/narrationScript.js",
+      "utils/overlayUtils.js",
+      "utils/projectFileImport.js",
+      "utils/projectMetaUtils.d.ts",
+      "utils/projectMetaUtils.js",
+      "utils/sanitize.ts",
+      "utils/slideAudioBulkShift.js",
+      "utils/thumbnailExport.js",
+      "utils/uploadSource.js",
+      "utils/uuid.ts",
+      "utils/waveformEnvelope.js",
+      "vite.config.ts"
+    ]
+  },
+  "time": {
+    "rules": [],
+    "rules_parse_time": 6.542780876159668,
+    "profiling_times": {
+      "config_time": 7.573580980300903,
+      "core_time": 27.94686794281006,
+      "ignores_time": 0.001961946487426758,
+      "total_time": 35.53096389770508
+    },
+    "parsing_time": {
+      "total_time": 0.0,
+      "per_file_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.0,
+        "count_ratio": 0.0
+      },
+      "very_slow_files": []
+    },
+    "scanning_time": {
+      "total_time": 83.5136649608612,
+      "per_file_time": {
+        "mean": 0.12209600140476784,
+        "std_dev": 0.7245130185504214
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.7345513788889096,
+        "count_ratio": 0.019005847953216373
+      },
+      "very_slow_files": [
+        {
+          "fpath": "components/BgmWaveformEditor.tsx",
+          "ftime": 2.1708149909973145
+        },
+        {
+          "fpath": "tests/mp4AvcColorPatch.test.js",
+          "ftime": 2.2070329189300537
+        },
+        {
+          "fpath": "components/CropModal.tsx",
+          "ftime": 3.0319559574127197
+        },
+        {
+          "fpath": "components/TimelineEditor.tsx",
+          "ftime": 3.7535269260406494
+        },
+        {
+          "fpath": "components/GlassSettingsModal.tsx",
+          "ftime": 4.043915033340454
+        },
+        {
+          "fpath": "components/PreviewPlayer.tsx",
+          "ftime": 4.698254823684692
+        },
+        {
+          "fpath": "components/slideEditor/SlideGrid.tsx",
+          "ftime": 5.0510029792785645
+        },
+        {
+          "fpath": "services/pdfVideoService.ts",
+          "ftime": 6.286476135253906
+        },
+        {
+          "fpath": "App.tsx",
+          "ftime": 7.963024854660034
+        },
+        {
+          "fpath": "components/SlideInspector.tsx",
+          "ftime": 16.759217977523804
+        }
+      ]
+    },
+    "matching_time": {
+      "total_time": 0.0,
+      "per_file_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.0,
+        "count_ratio": 0.0
+      },
+      "very_slow_rules_on_files": []
+    },
+    "tainting_time": {
+      "total_time": 0.0,
+      "per_def_and_rule_time": {
+        "mean": 0.0,
+        "std_dev": 0.0
+      },
+      "very_slow_stats": {
+        "time_ratio": 0.0,
+        "count_ratio": 0.0
+      },
+      "very_slow_rules_on_defs": []
+    },
+    "fixpoint_timeouts": [
+      {
+        "error_type": "Fixpoint timeout",
+        "severity": "warn",
+        "message": "Fixpoint timeout while performing taint analysis at components/GlassSettingsModal.tsx:1:0 [rules: 1, first: javascript.nestjs.file.sharp-nestjs.sharp-nestjs]",
+        "location": {
+          "path": "components/GlassSettingsModal.tsx",
+          "start": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          }
+        }
+      },
+      {
+        "error_type": "Fixpoint timeout",
+        "severity": "warn",
+        "message": "Fixpoint timeout while performing taint analysis at components/SlideEditor.tsx:1:0 [rules: 1, first: javascript.express.file.fs-extra-express.fs-extra-express]",
+        "location": {
+          "path": "components/SlideEditor.tsx",
+          "start": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          }
+        }
+      },
+      {
+        "error_type": "Fixpoint timeout",
+        "severity": "warn",
+        "message": "Fixpoint timeout while performing taint analysis at components/SlideInspector.tsx:1:0 [rules: 5, first: javascript.nestjs.file.sharp-nestjs.sharp-nestjs]",
+        "location": {
+          "path": "components/SlideInspector.tsx",
+          "start": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          }
+        }
+      },
+      {
+        "error_type": "Fixpoint timeout",
+        "severity": "warn",
+        "message": "Fixpoint timeout while performing taint analysis at components/TimelineEditor.tsx:1:0 [rules: 1, first: javascript.nestjs.os.child-process-nestjs.child-process-nestjs]",
+        "location": {
+          "path": "components/TimelineEditor.tsx",
+          "start": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          },
+          "end": {
+            "line": 1,
+            "col": 1,
+            "offset": 0
+          }
+        }
+      }
+    ],
+    "prefiltering": {
+      "project_level_time": 0.0,
+      "file_level_time": 0.0,
+      "rules_with_project_prefilters_ratio": 0.0,
+      "rules_with_file_prefilters_ratio": 0.9745557085710539,
+      "rules_selected_ratio": 0.06402605635342208,
+      "rules_matched_ratio": 0.06402605635342208
+    },
+    "targets": [],
+    "total_bytes": 0,
+    "max_memory_bytes": 9731067776
+  },
+  "engine_requested": "OSS",
+  "interfile_languages_used": [],
+  "skipped_rules": [],
+  "profiling_results": []
+}
