@@ -822,6 +822,15 @@ export const updateThumbnail = async (
             audioFade: true,
         } as unknown as VideoSettings;
 
+        // slideBorderRadius は「書き出し/全体プレビュー（出力解像度）」基準の px。
+        // サムネ生成（640x360）では、同じ見え方になるように解像度比でスケールする。
+        const baseDims = getVideoDimensions(vs.aspectRatio, vs.resolution);
+        const radiusScale = baseDims.width > 0 ? (canvas.width / baseDims.width) : 1;
+        const thumbSettings: VideoSettings = {
+            ...vs,
+            slideBorderRadius: (vs.slideBorderRadius || 0) * radiusScale,
+        };
+
         if (slideImage) {
             await drawSlideFrame(
                 ctx,
@@ -832,7 +841,7 @@ export const updateThumbnail = async (
                 slide.effectType === 'kenburns' ? getKenBurnsParams(slide.id) : null,
                 0,
                 slide,
-                vs,
+                thumbSettings,
                 0,
                 undefined,
                 !!options?.skipOverlays

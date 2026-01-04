@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Slide, Overlay, OverlayType, TokenUsage } from '../types';
-import { renderPageOverview, updateThumbnail } from '../services/pdfVideoService';
+import { getVideoDimensions, renderPageOverview, updateThumbnail } from '../services/pdfVideoService';
 import { useEditor } from './slideEditor/SlideEditorContext';
 import ColorSettingsPanel from './cropModal/ColorSettingsPanel';
 import AudioSettingsPanel from './cropModal/AudioSettingsPanel';
@@ -1759,13 +1759,32 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                                         }
                                     }}
                                 >
-                                    {(() => {
-                                        const slideRect = getSlideRectPx();
-                                        const canvasRadiusPx = stageSize.width > 0 ? (videoSettings.slideBorderRadius * (stageSize.width / 640)) : videoSettings.slideBorderRadius;
-                                        const overlayById = new Map(overlays.map(o => [o.id, o]));
-                                        const draggingOverlay = (isCanvasMode && isDraggingOverlay && selectedOverlayId) ? overlayById.get(selectedOverlayId) : null;
-                                        const draggingIsSlideSpace = !!draggingOverlay && ((draggingOverlay.space || 'slide') !== 'canvas');
-                                        const slideOverlayIds = layerOrder
+	                                    {(() => {
+	                                        const slideRect = getSlideRectPx();
+	                                        // 角丸は「書き出し/全体プレビュー（出力解像度）」基準の px として扱う。
+	                                        // キャンバス上のスライド表示は、基準（出力）でのスライド矩形に対する比率でスケールする。
+	                                        const baseDims = getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution);
+	                                        const aspect = getSlideAspect();
+	                                        const baseScale = videoSettings.slideScale / 100;
+	                                        let baseRectW = 0;
+	                                        let baseRectH = 0;
+	                                        if (slideLayout && Number.isFinite(slideLayout.x) && Number.isFinite(slideLayout.y) && Number.isFinite(slideLayout.w)) {
+	                                            baseRectW = slideLayout.w * baseDims.width;
+	                                            baseRectH = baseRectW / aspect;
+	                                            if (baseRectH > baseDims.height) { baseRectH = baseDims.height; baseRectW = baseRectH * aspect; }
+	                                        } else {
+	                                            const availableW = baseDims.width * baseScale;
+	                                            const availableH = baseDims.height * baseScale;
+	                                            baseRectW = availableW;
+	                                            baseRectH = baseRectW / aspect;
+	                                            if (baseRectH > availableH) { baseRectH = availableH; baseRectW = baseRectH * aspect; }
+	                                        }
+	                                        const radiusRatio = baseRectW > 0 ? (slideRect.w / baseRectW) : 1;
+	                                        const canvasRadiusPx = videoSettings.slideBorderRadius * radiusRatio;
+	                                        const overlayById = new Map(overlays.map(o => [o.id, o]));
+	                                        const draggingOverlay = (isCanvasMode && isDraggingOverlay && selectedOverlayId) ? overlayById.get(selectedOverlayId) : null;
+	                                        const draggingIsSlideSpace = !!draggingOverlay && ((draggingOverlay.space || 'slide') !== 'canvas');
+	                                        const slideOverlayIds = layerOrder
                                             .filter(id => id !== SLIDE_TOKEN && overlayById.get(id) && ((overlayById.get(id)!.space || 'slide') !== 'canvas') && !overlayById.get(id)!.hidden)
                                             .filter(id => !(draggingIsSlideSpace && id === selectedOverlayId));
 
