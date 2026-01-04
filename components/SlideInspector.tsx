@@ -64,6 +64,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
 
     const [activeTab, setActiveTab] = useState<'crop' | 'overlay' | 'image' | 'color' | 'audio'>('crop');
     const [overviewImage, setOverviewImage] = useState<string>("");
+    const [framePreviewUrl, setFramePreviewUrl] = useState<string | null>(null);
     const [isUpdating, setIsUpdating] = useState(false);
     const [previewDetachedOpen, setPreviewDetachedOpen] = useState(false);
     const [previewFloatRect, setPreviewFloatRect] = useState<{ left: number; top: number; width: number; height: number } | null>(null);
@@ -145,6 +146,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
     const autoApplyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const thumbnailTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const thumbnailJobIdRef = useRef(0);
+    const framePreviewJobIdRef = useRef(0);
     const thumbnailInFlightRef = useRef(false);
     const thumbnailPendingRef = useRef(false);
 
@@ -433,6 +435,32 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
         loadOverview();
     }, [slide.id, sourceFile]);
 
+    // Inspector canvas preview: use the same frame drawing pipeline (without overlays) to match export/preview.
+    useEffect(() => {
+        if (!showCanvasStage) {
+            setFramePreviewUrl(null);
+            return;
+        }
+        let ignore = false;
+        const jobId = ++framePreviewJobIdRef.current;
+        const slideId = slideRef.current.id;
+        (async () => {
+            try {
+                const baseSlide = buildUpdatedSlideForThumbnail();
+                const url = await updateThumbnail(sourceFile, baseSlide, videoSettings, { skipOverlays: true });
+                if (ignore) return;
+                if (jobId !== framePreviewJobIdRef.current) return;
+                if (slideRef.current.id !== slideId) return;
+                setFramePreviewUrl(url);
+            } catch (e) {
+                console.error('Inspector frame preview update failed', e);
+            }
+        })();
+        return () => {
+            ignore = true;
+        };
+    }, [buildUpdatedSlideForThumbnail, sourceFile, showCanvasStage, videoSettings]);
+
     const previewAreaReady = previewDetachedOpen ? previewDetachedPortalReady : true;
 
     // Preview area size tracking (preview fit)
@@ -470,7 +498,17 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
         const el = stageRef.current;
         const update = () => {
             const rect = el.getBoundingClientRect();
-            setStageSize({ width: rect.width, height: rect.height });
+            const cs = window.getComputedStyle(el);
+            const bw = (v: string) => {
+                const n = parseFloat(v);
+                return Number.isFinite(n) ? n : 0;
+            };
+            const borderX = bw(cs.borderLeftWidth) + bw(cs.borderRightWidth);
+            const borderY = bw(cs.borderTopWidth) + bw(cs.borderBottomWidth);
+            setStageSize({
+                width: Math.max(0, rect.width - borderX),
+                height: Math.max(0, rect.height - borderY),
+            });
         };
         update();
         const observer = new ResizeObserver(update);
@@ -855,9 +893,10 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
     const getDefaultSlideRectPx = () => {
         const stageW = stageSize.width;
         const stageH = stageSize.height;
-        // インスペクターではスライドをステージ全体にフィットさせる（スケール100%）
-        const availableW = stageW;
-        const availableH = stageH;
+        // インスペクターでは書き出し/全体プレビューと同じように slideScale を反映してフィットさせる
+        const scale = activeTab === 'crop' ? 1 : (videoSettings.slideScale / 100);
+        const availableW = stageW * scale;
+        const availableH = stageH * scale;
         const aspect = getSlideAspect();
         let w = availableW;
         let h = w / aspect;
@@ -1720,6 +1759,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                                 >
                                     {(() => {
                                         const slideRect = getSlideRectPx();
+                                        const canvasRadiusPx = stageSize.width > 0 ? (videoSettings.slideBorderRadius * (stageSize.width / 640)) : videoSettings.slideBorderRadius;
                                         const overlayById = new Map(overlays.map(o => [o.id, o]));
                                         const draggingOverlay = (isCanvasMode && isDraggingOverlay && selectedOverlayId) ? overlayById.get(selectedOverlayId) : null;
                                         const draggingIsSlideSpace = !!draggingOverlay && ((draggingOverlay.space || 'slide') !== 'canvas');
@@ -1759,19 +1799,6 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
 
                                         const elements = layerOrder.map(id => {
                                             if (id === SLIDE_TOKEN) {
-                                                const cropW = crop?.width ?? slide.crop?.width ?? slide.width ?? 1;
-                                                const cropH = crop?.height ?? slide.crop?.height ?? slide.height ?? 1;
-                                                const cropX = crop?.x ?? slide.crop?.x ?? 0;
-                                                const cropY = crop?.y ?? slide.crop?.y ?? 0;
-                                                const originalW = slide.originalWidth || slide.width || cropW;
-                                                const originalH = slide.originalHeight || slide.height || cropH;
-                                                const cropLayout = getCroppedImageLayoutPx({
-                                                    originalWidth: originalW,
-                                                    originalHeight: originalH,
-                                                    crop: { x: cropX, y: cropY, width: cropW, height: cropH },
-                                                    targetWidth: slideRect.w,
-                                                    targetHeight: slideRect.h,
-                                                });
                                                 return (
                                                     <div
                                                         key={id}
@@ -1781,7 +1808,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                                                             top: slideRect.y,
                                                             width: slideRect.w,
                                                             height: slideRect.h,
-                                                            borderRadius: `${videoSettings.slideBorderRadius}px`,
+                                                            borderRadius: `${canvasRadiusPx}px`,
                                                             overflow: 'hidden',
                                                             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.5)',
                                                             border: selectedLayerId === SLIDE_TOKEN ? '2px solid rgba(16,185,129,0.8)' : '1px solid rgba(255,255,255,0.15)',
@@ -1792,27 +1819,53 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                                                             handleMouseDownSlide(e, 'move');
                                                         }}
                                                     >
-                                                        {overviewImage ? (
+                                                        {framePreviewUrl ? (
                                                             <img
-                                                                src={overviewImage}
+                                                                src={framePreviewUrl}
                                                                 alt="Slide"
                                                                 draggable={false}
                                                                 className="absolute pointer-events-none select-none max-w-none max-h-none"
                                                                 style={{
-                                                                    left: cropLayout.left,
-                                                                    top: cropLayout.top,
-                                                                    width: cropLayout.width,
-                                                                    height: cropLayout.height,
-                                                                    borderRadius: `${videoSettings.slideBorderRadius}px`,
+                                                                    left: -slideRect.x,
+                                                                    top: -slideRect.y,
+                                                                    width: stageSize.width,
+                                                                    height: stageSize.height,
                                                                 }}
                                                             />
-                                                        ) : (
+                                                        ) : overviewImage ? (() => {
+                                                            const cropW = crop?.width ?? slide.crop?.width ?? slide.width ?? 1;
+                                                            const cropH = crop?.height ?? slide.crop?.height ?? slide.height ?? 1;
+                                                            const cropX = crop?.x ?? slide.crop?.x ?? 0;
+                                                            const cropY = crop?.y ?? slide.crop?.y ?? 0;
+                                                            const originalW = slide.originalWidth || slide.width || cropW;
+                                                            const originalH = slide.originalHeight || slide.height || cropH;
+                                                            const cropLayout = getCroppedImageLayoutPx({
+                                                                originalWidth: originalW,
+                                                                originalHeight: originalH,
+                                                                crop: { x: cropX, y: cropY, width: cropW, height: cropH },
+                                                                targetWidth: slideRect.w,
+                                                                targetHeight: slideRect.h,
+                                                            });
+                                                            return (
+                                                                <img
+                                                                src={overviewImage}
+                                                                    alt="Slide"
+                                                                    draggable={false}
+                                                                    className="absolute pointer-events-none select-none max-w-none max-h-none"
+                                                                    style={{
+                                                                        left: cropLayout.left,
+                                                                        top: cropLayout.top,
+                                                                        width: cropLayout.width,
+                                                                        height: cropLayout.height,
+                                                                    }}
+                                                                />
+                                                            );
+                                                        })() : (
                                                             <img
                                                                 src={slide.thumbnailUrl}
                                                                 alt="Slide"
                                                                 draggable={false}
                                                                 className="w-full h-full object-contain pointer-events-none"
-                                                                style={{ borderRadius: `${videoSettings.slideBorderRadius}px` }}
                                                             />
                                                         )}
                                                         <div className="absolute inset-0" style={{ pointerEvents: 'auto' }}>

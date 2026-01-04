@@ -709,7 +709,12 @@ let thumbnailPdfDocPromise: Promise<PDFDocumentProxy> | null = null;
 const THUMBNAIL_PAGE_BITMAP_CACHE_LIMIT = 8;
 const thumbnailPageBitmapCache = new Map<string, ImageBitmap>();
 
-export const updateThumbnail = async (sourceFile: File | null, slide: Slide, settings?: VideoSettings): Promise<string> => {
+export const updateThumbnail = async (
+    sourceFile: File | null,
+    slide: Slide,
+    settings?: VideoSettings,
+    options?: { skipOverlays?: boolean }
+): Promise<string> => {
     // サムネ生成を本番描画パイプラインに寄せて、装飾反映漏れを防ぐ
     const canvas = document.createElement('canvas');
     // 16:9 前提サムネ。少し解像度高めでアウトライン潰れを防止
@@ -830,7 +835,7 @@ export const updateThumbnail = async (sourceFile: File | null, slide: Slide, set
                 vs,
                 0,
                 undefined,
-                false // skipOverlays=false → オーバーレイを描画
+                !!options?.skipOverlays
             );
         } else {
             // bitmap 化に失敗したときのフォールバック：背景を塗ってオーバーレイだけ描画
