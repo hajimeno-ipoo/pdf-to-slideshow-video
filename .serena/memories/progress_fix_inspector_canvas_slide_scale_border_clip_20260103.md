@@ -34,3 +34,37 @@
 ### 追加検証
 - Playwright: `sample/Kling_O1_Unified_Multimodal_Engine.pdf` で装飾タブ表示 → 右下ロゴ（NotebookLM）が欠けない＆PNGフレームが使われていることを確認。
 - `npm test` 実行（173件PASS）。
+
+
+## 2026-01-04 (追加)
+
+### 追加の目的（スライド一覧）
+- スライド一覧（グリッド）も、インポート直後から「書き出しと同じ描き方」の見た目に揃える。
+
+### 追加対応
+- `App.tsx`
+  - PDF/画像のインポート後、各スライドに対して `updateThumbnail()` を実行して `thumbnailUrl` をフレームPNG(640x360)に差し替え。
+  - `thumbnailIsFrame: true` を付与して、一覧側の二重スケールを防止。
+
+### 追加検証
+- Playwright: 一覧の `img[alt="Slide 1"]` が `data:image/png` (640x360) になっていることを確認。
+- `npm test` 実行（174件PASS）。
+
+## 2026-01-04 (追加2)
+
+### 追加の目的（プロジェクト設定のリアルタイム反映）
+- プロジェクト設定（`slideScale` / `slideBorderRadius`）変更時に、スライド一覧（フレームPNGサムネ）にも見た目がリアルタイムで反映されるようにする。
+
+### 原因
+- 一覧サムネをフレームPNGに寄せたことで、`slideScale` / `slideBorderRadius` が「画像に焼き込まれた値」になり、CSSだけでは即時反映できない状態になっていた。
+
+### 対応
+- `components/slideEditor/SlideEditorContext.tsx`
+  - `slideScale` / `slideBorderRadius` 変更を検知して、フレームPNGサムネを再生成する処理を追加。
+  - 連続変更に耐えるため、`inFlight/pending/jobId` で多重実行をガードしつつ、古いジョブはキャンセルする。
+  - サムネは「まとめて」ではなく、生成できたスライドから順次 `onUpdateSlides` で反映（体感のリアルタイム性を上げる）。
+  - 旧プロジェクト互換のため、`thumbnailIsFrame` が無い場合でも 640x360 PNG の dataURL をフレームサムネとして判定して再生成対象に含める。
+
+### 確認
+- Playwright: プロジェクト設定のスライダー操作で、一覧の `img[alt="Slide 1"]` の `src` が短時間で更新されることを確認。
+- `npm test` 実行（174件PASS）。

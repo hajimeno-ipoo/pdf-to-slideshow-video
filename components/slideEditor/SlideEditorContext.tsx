@@ -1,6 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { Slide, VideoSettings, BgmTimeRange, FadeOptions, DuckingOptions, ProjectData, TokenUsage, AspectRatio, Resolution, OutputFormat, BackgroundFill } from '../../types';
+import { updateThumbnail } from '../../services/pdfVideoService';
 import { saveProject } from '../../services/projectStorage';
 
 type UndoRedoSnapshot = {
@@ -199,6 +200,114 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 	      }
 	      onUpdateSlides(newSlides);
 	  }, [createSnapshot, onUpdateSlides, pushHistory]);
+
+    // Keep SlideGrid thumbnails in sync with slideScale/borderRadius (for frame thumbnails).
+    const slidesRef = useRef(slides);
+    slidesRef.current = slides;
+    const sourceFileRef = useRef<File | null>(sourceFile);
+    sourceFileRef.current = sourceFile;
+    const bakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const bakeJobIdRef = useRef(0);
+    const bakeInFlightRef = useRef(false);
+    const bakePendingRef = useRef(false);
+    const scheduleBakeFrameThumbnailsRef = useRef<((delayMs?: number) => void) | null>(null);
+
+    const isPngFrameThumbnailDataUrl = (dataUrl: string) => {
+        const prefix = 'data:image/png;base64,';
+        if (!dataUrl.startsWith(prefix)) return false;
+        if (typeof atob !== 'function') return false;
+        try {
+            const b64 = dataUrl.slice(prefix.length);
+            const head = b64.slice(0, 96);
+            const padded = head.padEnd(Math.ceil(head.length / 4) * 4, '=');
+            const bin = atob(padded);
+            if (bin.length < 24) return false;
+            if (
+                bin.charCodeAt(0) !== 0x89 ||
+                bin.charCodeAt(1) !== 0x50 ||
+                bin.charCodeAt(2) !== 0x4E ||
+                bin.charCodeAt(3) !== 0x47 ||
+                bin.charCodeAt(4) !== 0x0D ||
+                bin.charCodeAt(5) !== 0x0A ||
+                bin.charCodeAt(6) !== 0x1A ||
+                bin.charCodeAt(7) !== 0x0A
+            ) return false;
+            if (bin.slice(12, 16) !== 'IHDR') return false;
+            const readU32 = (offset: number) => (
+                ((bin.charCodeAt(offset) << 24) |
+                    (bin.charCodeAt(offset + 1) << 16) |
+                    (bin.charCodeAt(offset + 2) << 8) |
+                    bin.charCodeAt(offset + 3)) >>> 0
+            );
+            const width = readU32(16);
+            const height = readU32(20);
+            return width === 640 && height === 360;
+        } catch (_) {
+            return false;
+        }
+    };
+
+    const scheduleBakeFrameThumbnails = useCallback((delayMs: number = 80) => {
+        const currentSlides = slidesRef.current;
+        if (!Array.isArray(currentSlides) || currentSlides.length === 0) return;
+        const hasFrameThumb = currentSlides.some((s) => s.thumbnailIsFrame)
+            || currentSlides.some((s) => isPngFrameThumbnailDataUrl(s.thumbnailUrl || ''));
+        if (!hasFrameThumb) return;
+        bakePendingRef.current = true;
+        if (bakeInFlightRef.current) {
+            // Cancel the running job ASAP and queue a new one.
+            bakeJobIdRef.current++;
+            return;
+        }
+        if (bakeTimerRef.current) clearTimeout(bakeTimerRef.current);
+        const jobId = ++bakeJobIdRef.current;
+        bakeTimerRef.current = setTimeout(async () => {
+            bakeTimerRef.current = null;
+            if (!bakePendingRef.current) return;
+            bakePendingRef.current = false;
+            bakeInFlightRef.current = true;
+
+            try {
+                const settings: VideoSettings = { aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration };
+
+                const startSlides = slidesRef.current;
+                for (const s of startSlides) {
+                    if (jobId !== bakeJobIdRef.current) return;
+                    const liveSlide = slidesRef.current.find((x) => x.id === s.id) || s;
+                    const isFrameThumb = !!liveSlide.thumbnailIsFrame || isPngFrameThumbnailDataUrl(liveSlide.thumbnailUrl || '');
+                    if (!isFrameThumb) continue;
+                    try {
+                        const bakedUrl = await updateThumbnail(sourceFileRef.current, liveSlide, settings);
+                        if (jobId !== bakeJobIdRef.current) return;
+
+                        const latestSlides = slidesRef.current;
+                        const merged = latestSlides.map((x) => (
+                            x.id === liveSlide.id ? { ...x, thumbnailUrl: bakedUrl, thumbnailIsFrame: true } : x
+                        ));
+                        slidesRef.current = merged;
+                        onUpdateSlides(merged);
+                    } catch (e) {
+                        console.error('thumbnail bake failed', e);
+                    }
+                }
+            } finally {
+                bakeInFlightRef.current = false;
+                if (bakePendingRef.current) scheduleBakeFrameThumbnailsRef.current?.(80);
+            }
+        }, delayMs);
+    }, [aspectRatio, backgroundFill, backgroundImageFile, format, onUpdateSlides, resolution, slideBorderRadius, slideScale, transitionDuration]);
+
+    scheduleBakeFrameThumbnailsRef.current = scheduleBakeFrameThumbnails;
+
+    useEffect(() => {
+        scheduleBakeFrameThumbnailsRef.current?.(80);
+        return () => {
+            if (bakeTimerRef.current) {
+                clearTimeout(bakeTimerRef.current);
+                bakeTimerRef.current = null;
+            }
+        };
+    }, [slideBorderRadius, slideScale]);
 
 	  const undo = useCallback(() => {
 	      resetHistoryGroup();

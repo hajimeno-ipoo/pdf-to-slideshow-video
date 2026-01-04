@@ -10,7 +10,7 @@ import CooldownNotification from './components/CooldownNotification';
 import ApiKeyModal from './components/ApiKeyModal';
 import GlassSettingsModal from './components/GlassSettingsModal';
 import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions } from './types';
-import { analyzeImages, analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground } from './services/pdfVideoService';
+import { analyzeImages, analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground, updateThumbnail } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
 import { getUserApiKey, setUserApiKey, clearUserApiKey, hasStoredApiKey, hasEncryptedStored, PersistMode } from './utils/apiKeyStore';
@@ -414,6 +414,16 @@ const App: React.FC = () => {
         return;
       }
 
+      const importFrameSettings: VideoSettings = state.settings || {
+        aspectRatio: '16:9',
+        resolution: '1080p',
+        format: 'mp4',
+        backgroundFill: 'black',
+        slideScale: 95,
+        slideBorderRadius: 12,
+        transitionDuration: 1.0,
+      };
+
       if (selection.kind === 'pdf') {
         const file = selection.pdfFile as File;
         setSourceFile(file);
@@ -439,7 +449,25 @@ const App: React.FC = () => {
           customScriptPrompt // Pass custom prompt
         );
 
-        setSlides(analyzedSlides);
+        // 一覧のサムネも「書き出しと同じ描き方」に揃える（インポート直後に一括でフレーム化）
+        const bakedSlides: Slide[] = [];
+        for (let i = 0; i < analyzedSlides.length; i++) {
+          const s = analyzedSlides[i];
+          try {
+            const bakedUrl = await updateThumbnail(file, s, importFrameSettings);
+            bakedSlides.push({ ...s, thumbnailUrl: bakedUrl, thumbnailIsFrame: true });
+          } catch (e) {
+            console.error('import thumbnail bake failed', e);
+            bakedSlides.push(s);
+          } finally {
+            setState(prev => ({
+              ...prev,
+              progress: { current: i + 1, total: analyzedSlides.length }
+            }));
+          }
+        }
+
+        setSlides(bakedSlides);
         setState({ status: AppStatus.EDITING, progress: undefined });
         return;
       }
@@ -468,7 +496,25 @@ const App: React.FC = () => {
         customScriptPrompt
       );
 
-      setSlides(analyzedSlides);
+      // 一覧のサムネも「書き出しと同じ描き方」に揃える（インポート直後に一括でフレーム化）
+      const bakedSlides: Slide[] = [];
+      for (let i = 0; i < analyzedSlides.length; i++) {
+        const s = analyzedSlides[i];
+        try {
+          const bakedUrl = await updateThumbnail(null, s, importFrameSettings);
+          bakedSlides.push({ ...s, thumbnailUrl: bakedUrl, thumbnailIsFrame: true });
+        } catch (e) {
+          console.error('import thumbnail bake failed', e);
+          bakedSlides.push(s);
+        } finally {
+          setState(prev => ({
+            ...prev,
+            progress: { current: i + 1, total: analyzedSlides.length }
+          }));
+        }
+      }
+
+      setSlides(bakedSlides);
       setState({ status: AppStatus.EDITING, progress: undefined });
 
     } catch (error: any) {
