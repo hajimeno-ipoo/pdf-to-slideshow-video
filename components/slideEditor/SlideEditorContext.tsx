@@ -206,6 +206,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     slidesRef.current = slides;
     const sourceFileRef = useRef<File | null>(sourceFile);
     sourceFileRef.current = sourceFile;
+    const bakeSettingsRef = useRef({ aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration });
+    bakeSettingsRef.current = { aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration };
     const bakeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const bakeJobIdRef = useRef(0);
     const bakeInFlightRef = useRef(false);
@@ -254,12 +256,8 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             || currentSlides.some((s) => isPngFrameThumbnailDataUrl(s.thumbnailUrl || ''));
         if (!hasFrameThumb) return;
         bakePendingRef.current = true;
-        if (bakeInFlightRef.current) {
-            // Cancel the running job ASAP and queue a new one.
-            bakeJobIdRef.current++;
-            return;
-        }
-        if (bakeTimerRef.current) clearTimeout(bakeTimerRef.current);
+        if (bakeInFlightRef.current) return;
+        if (bakeTimerRef.current) return;
         const jobId = ++bakeJobIdRef.current;
         bakeTimerRef.current = setTimeout(async () => {
             bakeTimerRef.current = null;
@@ -268,31 +266,31 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
             bakeInFlightRef.current = true;
 
             try {
-                const settings: VideoSettings = { aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration };
-
                 const startSlides = slidesRef.current;
                 for (const s of startSlides) {
                     if (jobId !== bakeJobIdRef.current) return;
                     const liveSlide = slidesRef.current.find((x) => x.id === s.id) || s;
                     const isFrameThumb = !!liveSlide.thumbnailIsFrame || isPngFrameThumbnailDataUrl(liveSlide.thumbnailUrl || '');
                     if (!isFrameThumb) continue;
+                    const settings: VideoSettings = bakeSettingsRef.current;
                     try {
                         const bakedUrl = await updateThumbnail(sourceFileRef.current, liveSlide, settings);
                         if (jobId !== bakeJobIdRef.current) return;
 
                         const latestSlides = slidesRef.current;
                         const merged = latestSlides.map((x) => (
-                            x.id === liveSlide.id ? { ...x, thumbnailUrl: bakedUrl, thumbnailIsFrame: true, thumbnailBakedScale: slideScale, thumbnailBakedBorderRadius: slideBorderRadius } : x
+                            x.id === liveSlide.id ? { ...x, thumbnailUrl: bakedUrl, thumbnailIsFrame: true, thumbnailBakedScale: settings.slideScale, thumbnailBakedBorderRadius: settings.slideBorderRadius } : x
                         ));
                         slidesRef.current = merged;
                         onUpdateSlides(merged);
+                        if (bakePendingRef.current) break;
                     } catch (e) {
                         console.error('thumbnail bake failed', e);
                     }
                 }
             } finally {
                 bakeInFlightRef.current = false;
-                if (bakePendingRef.current) scheduleBakeFrameThumbnailsRef.current?.(80);
+                if (bakePendingRef.current) scheduleBakeFrameThumbnailsRef.current?.(0);
             }
         }, delayMs);
     }, [aspectRatio, backgroundFill, backgroundImageFile, format, onUpdateSlides, resolution, slideBorderRadius, slideScale, transitionDuration]);
@@ -300,14 +298,17 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     scheduleBakeFrameThumbnailsRef.current = scheduleBakeFrameThumbnails;
 
     useEffect(() => {
-        scheduleBakeFrameThumbnailsRef.current?.(200);
+        scheduleBakeFrameThumbnailsRef.current?.(0);
+    }, [slideBorderRadius]);
+
+    useEffect(() => {
         return () => {
             if (bakeTimerRef.current) {
                 clearTimeout(bakeTimerRef.current);
                 bakeTimerRef.current = null;
             }
         };
-    }, [slideBorderRadius]);
+    }, []);
 
 	  const undo = useCallback(() => {
 	      resetHistoryGroup();
