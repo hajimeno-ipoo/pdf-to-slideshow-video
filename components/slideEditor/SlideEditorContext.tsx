@@ -282,7 +282,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 
                         const latestSlides = slidesRef.current;
                         const merged = latestSlides.map((x) => (
-                            x.id === liveSlide.id ? { ...x, thumbnailUrl: bakedUrl, thumbnailIsFrame: true } : x
+                            x.id === liveSlide.id ? { ...x, thumbnailUrl: bakedUrl, thumbnailIsFrame: true, thumbnailBakedScale: slideScale, thumbnailBakedBorderRadius: slideBorderRadius } : x
                         ));
                         slidesRef.current = merged;
                         onUpdateSlides(merged);
@@ -300,14 +300,14 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
     scheduleBakeFrameThumbnailsRef.current = scheduleBakeFrameThumbnails;
 
     useEffect(() => {
-        scheduleBakeFrameThumbnailsRef.current?.(80);
+        scheduleBakeFrameThumbnailsRef.current?.(200);
         return () => {
             if (bakeTimerRef.current) {
                 clearTimeout(bakeTimerRef.current);
                 bakeTimerRef.current = null;
             }
         };
-    }, [slideBorderRadius, slideScale]);
+    }, [slideBorderRadius]);
 
 	  const undo = useCallback(() => {
 	      resetHistoryGroup();

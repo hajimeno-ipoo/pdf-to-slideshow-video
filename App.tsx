@@ -455,7 +455,7 @@ const App: React.FC = () => {
           const s = analyzedSlides[i];
           try {
             const bakedUrl = await updateThumbnail(file, s, importFrameSettings);
-            bakedSlides.push({ ...s, thumbnailUrl: bakedUrl, thumbnailIsFrame: true });
+            bakedSlides.push({ ...s, thumbnailUrl: bakedUrl, thumbnailIsFrame: true, thumbnailBakedScale: importFrameSettings.slideScale, thumbnailBakedBorderRadius: importFrameSettings.slideBorderRadius });
           } catch (e) {
             console.error('import thumbnail bake failed', e);
             bakedSlides.push(s);
@@ -502,7 +502,7 @@ const App: React.FC = () => {
         const s = analyzedSlides[i];
         try {
           const bakedUrl = await updateThumbnail(null, s, importFrameSettings);
-          bakedSlides.push({ ...s, thumbnailUrl: bakedUrl, thumbnailIsFrame: true });
+          bakedSlides.push({ ...s, thumbnailUrl: bakedUrl, thumbnailIsFrame: true, thumbnailBakedScale: importFrameSettings.slideScale, thumbnailBakedBorderRadius: importFrameSettings.slideBorderRadius });
         } catch (e) {
           console.error('import thumbnail bake failed', e);
           bakedSlides.push(s);

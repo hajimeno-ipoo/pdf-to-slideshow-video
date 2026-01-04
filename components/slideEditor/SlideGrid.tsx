@@ -473,6 +473,10 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
         });
         const canvasBgUrl = canvasBgId ? (getOverlayById(canvasBgId)?.imageData || '') : '';
         const isFrameThumb = !!slide.thumbnailIsFrame || isPngFrameThumbnailDataUrl(slide.thumbnailUrl);
+        const bakedScale = Number.isFinite(slide.thumbnailBakedScale) && (slide.thumbnailBakedScale as number) > 0
+          ? (slide.thumbnailBakedScale as number)
+          : videoSettings.slideScale;
+        const displayScale = isFrameThumb ? (videoSettings.slideScale / bakedScale) : (videoSettings.slideScale / 100);
 
 	        return (
 	        <div 
@@ -516,7 +520,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
 	            <div 
 	                className="relative w-full h-full flex items-center justify-center"
 	                style={{ 
-                    transform: isFrameThumb ? 'none' : `scale(${videoSettings.slideScale / 100})`, 
+                    transform: displayScale === 1 ? 'none' : `scale(${displayScale})`, 
 	                    boxShadow: videoSettings.slideScale < 100 ? '0 4px 6px -1px rgba(0, 0, 0, 0.5)' : 'none',
 	                    borderRadius: `${videoSettings.slideBorderRadius * 0.4}px`, // Approximate scaling
 	                    overflow: 'hidden',

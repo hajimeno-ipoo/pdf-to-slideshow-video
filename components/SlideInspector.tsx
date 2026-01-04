@@ -489,7 +489,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
             observer.disconnect();
             window.removeEventListener('resize', update);
         };
-    }, [previewAreaReady]);
+    }, [previewAreaReady, previewDetachedOpen]);
 
     // Stage size tracking (canvas mode)
     useLayoutEffect(() => {
@@ -841,6 +841,8 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
             const newThumb = await updateThumbnail(sourceFile, updatedSlide, videoSettings);
             updatedSlide.thumbnailUrl = newThumb;
             updatedSlide.thumbnailIsFrame = true;
+            updatedSlide.thumbnailBakedScale = videoSettings.slideScale;
+            updatedSlide.thumbnailBakedBorderRadius = videoSettings.slideBorderRadius;
             ignoreNextPropSyncRef.current = true;
             onUpdateRef.current(updatedSlide, true);
         } catch (e) { console.error("Update failed", e); }

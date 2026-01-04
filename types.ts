@@ -155,6 +155,8 @@ export interface Slide {
   pageIndex: number; // -1 for custom image or solid color
   thumbnailUrl: string; // Data URL for preview
   thumbnailIsFrame?: boolean;
+  thumbnailBakedScale?: number; // frame thumbnail bake時の slideScale (%)
+  thumbnailBakedBorderRadius?: number; // frame thumbnail bake時の borderRadius (px)
   duration: number; // seconds
   
   width: number;

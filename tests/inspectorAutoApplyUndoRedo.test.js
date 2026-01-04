@@ -52,5 +52,6 @@ test('SlideEditor: handleUpdateSlide forwards addToHistory to updateSlides', () 
 test('SlideGrid: frame thumbnail does not double-apply slideScale', () => {
   const src = readUtf8('components/slideEditor/SlideGrid.tsx');
   assert.ok(src.includes('const isFrameThumb = !!slide.thumbnailIsFrame'));
-  assert.ok(src.includes("transform: isFrameThumb ? 'none' : `scale(${videoSettings.slideScale / 100})`"));
+  assert.ok(src.includes('thumbnailBakedScale'));
+  assert.ok(src.includes('videoSettings.slideScale / bakedScale'));
 });
