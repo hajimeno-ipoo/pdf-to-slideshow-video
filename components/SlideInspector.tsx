@@ -1296,66 +1296,74 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
 
     const handleMouseUp = () => {
         setIsDraggingCrop(false); setDragModeCrop(null);
-        // Drop: if a slide-space overlay is released outside the slide in canvas mode, promote it to canvas-space.
-        if (activeTab !== 'crop' && isCanvasMode && isDraggingOverlay && selectedOverlayId && stageSize.width > 0 && stageSize.height > 0) {
-            const target = overlays.find(t => t.id === selectedOverlayId);
-            if (target && (target.space || 'slide') !== 'canvas') {
-                const margin = 0.02;
-                const isOutside = (target.x < -margin || target.x > 1 + margin || target.y < -margin || target.y > 1 + margin);
-                if (isOutside) {
-                    const slideRect = getSlideRectPx();
-                    if (slideRect.w > 0 && slideRect.h > 0) {
-                        const absX = slideRect.x + (target.x * slideRect.w);
-                        const absY = slideRect.y + (target.y * slideRect.h);
-                        const xCanvas = Math.min(1, Math.max(0, absX / stageSize.width));
-                        const yCanvas = Math.min(1, Math.max(0, absY / stageSize.height));
-                        const wCanvas = target.width !== undefined ? (target.width * slideRect.w) / stageSize.width : target.width;
-                        const hCanvas = target.height !== undefined ? (target.height * slideRect.h) / stageSize.height : target.height;
-                        const scaleY = slideRect.h / stageSize.height;
-
-                        setOverlays(prev => prev.map(o => {
-                            if (o.id !== selectedOverlayId) return o;
-                            return {
-                                ...o,
-                                space: 'canvas',
-                                x: xCanvas,
-                                y: yCanvas,
-                                width: wCanvas,
-                                height: hCanvas,
-                                fontSize: o.fontSize !== undefined ? o.fontSize * scaleY : o.fontSize,
-                                strokeWidth: o.strokeWidth !== undefined ? o.strokeWidth * scaleY : o.strokeWidth,
-                                shadowBlur: o.shadowBlur !== undefined ? o.shadowBlur * scaleY : o.shadowBlur,
-                                shadowOffsetX: o.shadowOffsetX !== undefined ? o.shadowOffsetX * scaleY : o.shadowOffsetX,
-                                shadowOffsetY: o.shadowOffsetY !== undefined ? o.shadowOffsetY * scaleY : o.shadowOffsetY,
-                                borderRadius: o.borderRadius !== undefined ? o.borderRadius * scaleY : o.borderRadius,
-                            };
-                        }));
-                    }
-                }
-            }
-        }
+	        // Drop: if a slide-space overlay is released outside the slide in canvas mode, promote it to canvas-space.
+	        if (activeTab !== 'crop' && isCanvasMode && isDraggingOverlay && selectedOverlayId && stageSize.width > 0 && stageSize.height > 0) {
+	            // NOTE: Use functional update so we read the latest overlay position (avoid stale `overlays`).
+	            setOverlays(prev => {
+	                const target = prev.find(t => t.id === selectedOverlayId);
+	                if (!target) return prev;
+	                if ((target.space || 'slide') === 'canvas') return prev;
+	
+	                const halfW = (target.width ?? 0) / 2;
+	                const halfH = (target.height ?? 0) / 2;
+	                const minX = target.x - halfW;
+	                const maxX = target.x + halfW;
+	                const minY = target.y - halfH;
+	                const maxY = target.y + halfH;
+	                const isOutside = (minX < 0 || maxX > 1 || minY < 0 || maxY > 1);
+	                if (!isOutside) return prev;
+	
+	                const slideRect = getSlideRectPx();
+	                if (slideRect.w <= 0 || slideRect.h <= 0) return prev;
+	
+	                const absX = slideRect.x + (target.x * slideRect.w);
+	                const absY = slideRect.y + (target.y * slideRect.h);
+	                const xCanvas = Math.min(1, Math.max(0, absX / stageSize.width));
+	                const yCanvas = Math.min(1, Math.max(0, absY / stageSize.height));
+	                const wCanvas = target.width !== undefined ? (target.width * slideRect.w) / stageSize.width : target.width;
+	                const hCanvas = target.height !== undefined ? (target.height * slideRect.h) / stageSize.height : target.height;
+	                const scaleY = slideRect.h / stageSize.height;
+	
+	                return prev.map(o => {
+	                    if (o.id !== selectedOverlayId) return o;
+	                    return {
+	                        ...o,
+	                        space: 'canvas',
+	                        x: xCanvas,
+	                        y: yCanvas,
+	                        width: wCanvas,
+	                        height: hCanvas,
+	                        fontSize: o.fontSize !== undefined ? o.fontSize * scaleY : o.fontSize,
+	                        strokeWidth: o.strokeWidth !== undefined ? o.strokeWidth * scaleY : o.strokeWidth,
+	                        shadowBlur: o.shadowBlur !== undefined ? o.shadowBlur * scaleY : o.shadowBlur,
+	                        shadowOffsetX: o.shadowOffsetX !== undefined ? o.shadowOffsetX * scaleY : o.shadowOffsetX,
+	                        shadowOffsetY: o.shadowOffsetY !== undefined ? o.shadowOffsetY * scaleY : o.shadowOffsetY,
+	                        borderRadius: o.borderRadius !== undefined ? o.borderRadius * scaleY : o.borderRadius,
+	                    };
+	                });
+	            });
+	        }
 
         setIsDraggingOverlay(false); setActiveOverlayTool(null);
         setIsDraggingSlide(false); setSlideDragMode(null);
     };
 
-    const handleAddOverlay = (type: OverlayType, imageData?: string) => {
-        if (type === 'image' && imageData) {
-            const newOverlay: Overlay = {
-                id: safeRandomUUID(),
-                type: 'image',
-                x: 0.5,
-                y: 0.5,
-                rotation: 0,
-                opacity: 1,
-                startTime: 0,
-                duration: localDuration,
-                animationOut: 'fade',
-                imageData: imageData,
-                width: 0.3,
-                height: 0.3,
-                space: isCanvasMode ? 'canvas' : undefined
-            };
+	    const handleAddOverlay = (type: OverlayType, imageData?: string) => {
+	        if (type === 'image' && imageData) {
+	            const newOverlay: Overlay = {
+	                id: safeRandomUUID(),
+	                type: 'image',
+	                x: 0.5,
+	                y: 0.5,
+	                rotation: 0,
+	                opacity: 1,
+	                startTime: 0,
+	                duration: localDuration,
+	                animationOut: 'fade',
+	                imageData: imageData,
+	                width: 0.3,
+	                height: 0.3
+	            };
 
             const img = new Image();
             img.onload = () => {
@@ -2225,7 +2233,7 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                                             const isSelected = isSlide ? (selectedLayerId === SLIDE_TOKEN) : (ov?.id === selectedOverlayId);
                                             const label = isSlide ? 'スライド' : (ov ? getOverlayLabel(ov) : '');
                                             const icon = isSlide ? 'SLD' : (ov?.type === 'text' ? 'T' : ov?.type === 'image' ? 'IMG' : ov?.type === 'line' ? '—' : ov?.type === 'arrow' ? '→' : ov?.type === 'rect' ? '▭' : ov?.type === 'circle' ? '○' : '●');
-                                            const spaceLabel = !isSlide && ov ? ((ov.space || 'slide') === 'canvas' ? '背景' : 'スライド') : '';
+	                                            const spaceLabel = !isSlide && ov ? ((ov.space || 'slide') === 'canvas' ? 'オブジェクト' : 'スライド') : '';
 
                                             return (
                                                 <div

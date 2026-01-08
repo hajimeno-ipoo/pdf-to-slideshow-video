@@ -1,0 +1,17 @@
+## 2026-01-08
+- 要望: インスペクターで追加した画像/装飾を、スライド外に移動しても消えないように（画像3枚目の操作でも表示されること）。canvas-space のラベルを「背景」ではなく「オブジェクト」にしたい。
+- 再現: `sample/アニメ.png` を画像追加 → スライド外へドラッグ → 表示されない（要素一覧でレイヤー移動すると表示される）。
+- 原因:
+  - スライド要素はスライド枠で `overflow:hidden` されるため、枠外に出すと見えなくなる。
+  - 自動昇格（slide→canvas）の外判定が中心点(x,y)のみだったため、見た目が少しはみ出しただけだと昇格しない。
+  - さらに `handleMouseUp` が `overlays` の古い状態を参照しており、ドラッグ直後の最新座標で外判定できず昇格を取りこぼすことがあった（レイヤー操作は `setOverlays(prev => ...)` なので最新状態で変換され、表示が戻る）。
+  - レイヤー並び替えではスライドより後ろに置くと `space:'canvas'` に変換されるため、ラベルが「背景」になっていた。
+- 対応:
+  - `components/SlideInspector.tsx` のドロップ時の外判定を、中心点ではなく幅/高さを含む矩形(min/max)で判定し、少しでもはみ出したら `space:'canvas'` に昇格させる。
+  - 昇格処理を `setOverlays(prev => { ... })` にまとめ、最新の overlay 位置で判定する（stale state対策）。
+  - 要素一覧の `spaceLabel` を `canvas => 'オブジェクト'` に変更。
+- テスト:
+  - `tests/inspector_promote_to_object_when_outside.test.js` 追加/更新（幅/高さ込み外判定＋stale state対策の存在を確認）
+  - `tests/inspector_space_label_object.test.js` 追加（ラベル文言確認）
+  - `tests/inspector_add_image_is_slide_element.test.js` 文言更新（オブジェクト表現）
+  - `npm test` パス
