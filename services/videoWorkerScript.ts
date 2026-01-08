@@ -139,14 +139,23 @@ const drawOverlays = async (ctx, overlays, canvasWidth, canvasHeight, currentTim
   const OFFSET_RATIO = 0.2; 
   const shadowScale = canvasHeight / 500;
 
-  for (const overlay of overlays) {
-    if (overlay.hidden) continue;
-    const startTime = overlay.startTime || 0;
-    const duration = overlay.duration || (slideDuration - startTime);
-    const endTime = startTime + duration;
+	  for (const overlay of overlays) {
+	    if (overlay.hidden) continue;
+	    const startTime = overlay.startTime || 0;
+	    const endTime = Math.min(
+	        slideDuration,
+	        Math.max(
+	            0,
+	            typeof overlay.endTime === 'number'
+	                ? overlay.endTime
+	                : (typeof overlay.duration === 'number' ? startTime + overlay.duration : slideDuration)
+	        )
+	    );
+	    const duration = Math.max(0.001, endTime - startTime);
+	    if (endTime < startTime) continue;
 
-    // Check if visible
-    if (currentTime < startTime || currentTime > endTime) continue;
+	    // Check if visible
+	    if (currentTime < startTime || currentTime > endTime) continue;
 
     const animDuration = (duration < 2.0) ? Math.min(baseDuration, duration / 2) : baseDuration;
     // Local time inside the overlay display period

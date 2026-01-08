@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Overlay, OverlayType, AnimationType } from '../../types';
 import { FONTS, ANIMATION_VALUES, getAnimationLabel, parseColor } from './constants';
 import InlineColorPicker from './InlineColorPicker';
@@ -71,14 +71,24 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
       return (isSelected || isPending) ? "text-white" : "text-slate-300 group-hover:text-emerald-400";
   };
 
-  const getLabelColor = (type: OverlayType) => {
-      const isSelected = selectedOverlay?.type === type;
-      const isPending = pendingAddType === type;
-      return (isSelected || isPending) ? "text-white font-bold" : "text-slate-400 group-hover:text-slate-200";
-  };
+	  const getLabelColor = (type: OverlayType) => {
+	      const isSelected = selectedOverlay?.type === type;
+	      const isPending = pendingAddType === type;
+	      return (isSelected || isPending) ? "text-white font-bold" : "text-slate-400 group-hover:text-slate-200";
+	  };
 
-  return (
-    <div className="w-full p-4 flex flex-col gap-6">
+	  useEffect(() => {
+	      if (!selectedOverlay) return;
+	      if (typeof selectedOverlay.endTime === 'number') return;
+	      const startTime = selectedOverlay.startTime || 0;
+	      const rawEndTime = typeof selectedOverlay.duration === 'number' ? (startTime + selectedOverlay.duration) : slideDuration;
+	      onUpdateOverlay({ endTime: Math.min(slideDuration, Math.max(0, rawEndTime)) });
+	  }, [selectedOverlay?.id]);
+
+	  const endTime = selectedOverlay ? (typeof selectedOverlay.endTime === 'number' ? selectedOverlay.endTime : slideDuration) : slideDuration;
+
+	  return (
+	    <div className="w-full p-4 flex flex-col gap-6">
       {/* 追加エリア */}
       <div className="flex flex-col gap-2">
           <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">装飾を追加 / 選択中</h4>
@@ -142,37 +152,37 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
           {activePropertyTab === 'anim' && (
               <div className="space-y-4">
                   <div className="space-y-3 bg-slate-800/30 p-2 rounded border border-slate-700/50">
-                      <div className="space-y-1">
-                          <label className="text-xs text-slate-400 flex justify-between">
-                              <span>開始時間 (Start Time)</span>
-                              <span>{selectedOverlay.startTime?.toFixed(1) || 0}s</span>
-                          </label>
-                          <input 
-                              type="range" 
-                              min="0" 
-                              max={slideDuration} 
-                              step="0.1" 
-                              value={selectedOverlay.startTime || 0} 
-                              onChange={(e) => onUpdateOverlay({ startTime: parseFloat(e.target.value) })} 
-                              className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
-                          />
-                      </div>
-                      <div className="space-y-1">
-                          <label className="text-xs text-slate-400 flex justify-between">
-                              <span>表示期間 (Duration)</span>
-                              <span>{selectedOverlay.duration ? selectedOverlay.duration.toFixed(1) + 's' : '最後まで'}</span>
-                          </label>
-                          <input 
-                              type="range" 
-                              min="0.5" 
-                              max={Math.max(0.5, slideDuration - (selectedOverlay.startTime || 0))} 
-                              step="0.1" 
-                              value={selectedOverlay.duration || (slideDuration - (selectedOverlay.startTime || 0))} 
-                              onChange={(e) => onUpdateOverlay({ duration: parseFloat(e.target.value) })} 
-                              className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
-                          />
-                      </div>
-                  </div>
+	                      <div className="space-y-1">
+	                          <label className="text-xs text-slate-400 flex justify-between">
+	                              <span>開始時間 (Start Time)</span>
+	                              <span>{selectedOverlay.startTime?.toFixed(1) || 0}s</span>
+	                          </label>
+	                              <input 
+	                                  type="range" 
+	                                  min="0" 
+	                                  max={slideDuration} 
+	                                  step="0.1" 
+	                                  value={selectedOverlay.startTime || 0} 
+	                                  onChange={(e) => onUpdateOverlay({ startTime: parseFloat(e.target.value) })} 
+	                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+	                              />
+	                          </div>
+	                          <div className="space-y-1">
+		                              <label className="text-xs text-slate-400 flex justify-between">
+		                                  <span>終了時間 (End Time)</span>
+		                                  <span>{endTime >= slideDuration - 1e-6 ? '最後まで' : endTime.toFixed(1) + 's'}</span>
+		                              </label>
+		                              <input 
+		                                  type="range" 
+		                                  min="0" 
+		                                  max={slideDuration} 
+		                                  step="0.1" 
+		                                  value={Math.min(Math.max(0, endTime), slideDuration)} 
+		                                  onChange={(e) => onUpdateOverlay({ endTime: parseFloat(e.target.value) })} 
+		                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+		                              />
+		                          </div>
+	                      </div>
 
                   <div className="space-y-1">
                       <label className="text-xs text-slate-400">開始 (イン)</label>

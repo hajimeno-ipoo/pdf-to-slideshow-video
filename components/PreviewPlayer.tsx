@@ -196,16 +196,25 @@ const OverlayLayer = React.memo(({
         return (ov.space || 'slide') !== 'canvas';
     });
 
-    const renderOverlay = (ov: Overlay, baseW: number, baseH: number) => {
-        const startTime = ov.startTime || 0;
-        const duration = ov.duration || (slide.duration - startTime);
-        const endTime = startTime + duration;
-        if (currentTime < startTime || currentTime > endTime) return null;
+	    const renderOverlay = (ov: Overlay, baseW: number, baseH: number) => {
+	        const startTime = ov.startTime || 0;
+	        const endTime = Math.min(
+	            slide.duration,
+	            Math.max(
+	                0,
+	                typeof ov.endTime === 'number'
+	                    ? ov.endTime
+	                    : (typeof ov.duration === 'number' ? startTime + ov.duration : slide.duration)
+	            )
+	        );
+	        if (endTime < startTime) return null;
+	        if (currentTime < startTime || currentTime > endTime) return null;
 
-        const strokeWidthPx = Math.max(1, (ov.strokeWidth || 0) * (baseH / 500));
-        const baseDuration = 1.0;
-        const animDuration = (duration < 2.0) ? Math.min(baseDuration, duration / 2) : baseDuration;
-        const timeInOverlay = currentTime - startTime;
+	        const strokeWidthPx = Math.max(1, (ov.strokeWidth || 0) * (baseH / 500));
+	        const baseDuration = 1.0;
+	        const duration = Math.max(0.001, endTime - startTime);
+	        const animDuration = (duration < 2.0) ? Math.min(baseDuration, duration / 2) : baseDuration;
+	        const timeInOverlay = currentTime - startTime;
 
         let alpha = ov.opacity ?? 1;
         let offsetX = 0;

@@ -40,6 +40,14 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 	  if (isAiLocked) setImageMode('upload');
 	}, [isAiLocked]);
 
+	useEffect(() => {
+	  if (!selectedOverlay) return;
+	  if (typeof selectedOverlay.endTime === 'number') return;
+	  const startTime = selectedOverlay.startTime || 0;
+	  const rawEndTime = typeof selectedOverlay.duration === 'number' ? (startTime + selectedOverlay.duration) : slideDuration;
+	  onUpdateOverlay({ endTime: Math.min(slideDuration, Math.max(0, rawEndTime)) });
+	}, [selectedOverlay?.id]);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => { 
       if (e.target.files && e.target.files.length > 0) { 
           const file = e.target.files[0]; 
@@ -145,38 +153,50 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
                   </div>
                   <div className="space-y-3 pt-2 border-t border-slate-800">
                       <h5 className="text-xs text-slate-400 font-bold">アニメーション</h5>
-                      <div className="space-y-3 bg-slate-800/30 p-2 rounded border border-slate-700/50">
-                          <div className="space-y-1">
-                              <label className="text-xs text-slate-400 flex justify-between">
-                                  <span>開始時間 (Start Time)</span>
-                                  <span>{selectedOverlay.startTime?.toFixed(1) || 0}s</span>
-                              </label>
-                              <input 
-                                  type="range" 
-                                  min="0" 
-                                  max={slideDuration} 
-                                  step="0.1" 
-                                  value={selectedOverlay.startTime || 0} 
-                                  onChange={(e) => onUpdateOverlay({ startTime: parseFloat(e.target.value) })} 
-                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
-                              />
-                          </div>
-                          <div className="space-y-1">
-                              <label className="text-xs text-slate-400 flex justify-between">
-                                  <span>表示期間 (Duration)</span>
-                                  <span>{selectedOverlay.duration ? selectedOverlay.duration.toFixed(1) + 's' : '最後まで'}</span>
-                              </label>
-                              <input 
-                                  type="range" 
-                                  min="0.5" 
-                                  max={Math.max(0.5, slideDuration - (selectedOverlay.startTime || 0))} 
-                                  step="0.1" 
-                                  value={selectedOverlay.duration || (slideDuration - (selectedOverlay.startTime || 0))} 
-                                  onChange={(e) => onUpdateOverlay({ duration: parseFloat(e.target.value) })} 
-                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
-                              />
-                          </div>
-                      </div>
+	                      <div className="space-y-3 bg-slate-800/30 p-2 rounded border border-slate-700/50">
+	                          <div className="space-y-1">
+	                              <label className="text-xs text-slate-400 flex justify-between">
+	                                  <span>開始時間 (Start Time)</span>
+	                                  <span>{selectedOverlay.startTime?.toFixed(1) || 0}s</span>
+	                              </label>
+		                              <input 
+		                                  type="range" 
+		                                  min="0" 
+		                                  max={slideDuration} 
+		                                  step="0.1" 
+		                                  value={selectedOverlay.startTime || 0} 
+		                                  onChange={(e) => onUpdateOverlay({ startTime: parseFloat(e.target.value) })} 
+		                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+		                              />
+	                          </div>
+	                          <div className="space-y-1">
+	                              <label className="text-xs text-slate-400 flex justify-between">
+	                                  <span>終了時間 (End Time)</span>
+	                                  {(() => {
+	                                      const startTime = selectedOverlay.startTime || 0;
+	                                      const endTime = typeof selectedOverlay.endTime === 'number'
+	                                          ? selectedOverlay.endTime
+	                                          : (typeof selectedOverlay.duration === 'number' ? (startTime + selectedOverlay.duration) : slideDuration);
+	                                      return <span>{endTime >= slideDuration - 1e-6 ? '最後まで' : endTime.toFixed(1) + 's'}</span>;
+	                                  })()}
+	                              </label>
+		                              <input 
+		                                  type="range" 
+		                                  min="0" 
+		                                  max={slideDuration} 
+		                                  step="0.1" 
+		                                  value={(() => {
+		                                      const startTime = selectedOverlay.startTime || 0;
+		                                      const endTime = typeof selectedOverlay.endTime === 'number'
+		                                          ? selectedOverlay.endTime
+		                                          : (typeof selectedOverlay.duration === 'number' ? (startTime + selectedOverlay.duration) : slideDuration);
+		                                      return Math.min(Math.max(0, endTime), slideDuration);
+		                                  })()} 
+		                                  onChange={(e) => onUpdateOverlay({ endTime: parseFloat(e.target.value) })} 
+		                                  className="w-full idle-range accent-emerald-500 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer" 
+		                              />
+	                          </div>
+	                      </div>
                       <div className="space-y-1">
                           <label className="text-xs text-slate-400">開始 (イン)</label>
                           <select value={selectedOverlay.animationIn || 'none'} onChange={(e) => onUpdateOverlay({ animationIn: e.target.value as AnimationType })} className="w-full bg-slate-800 border border-slate-600 rounded p-1 text-xs text-white">

@@ -107,6 +107,7 @@ export interface Overlay {
   
   // Timing
   startTime?: number; // seconds from slide start
+  endTime?: number;   // seconds from slide start (if undefined, until slide end)
   duration?: number;  // seconds to display (if undefined, until slide end)
 
   // Text specific
