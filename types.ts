@@ -166,6 +166,8 @@ export interface Slide {
   thumbnailBakedScale?: number; // frame thumbnail bake時の slideScale (%)
   thumbnailBakedBorderRadius?: number; // frame thumbnail bake時の borderRadius (px)
   duration: number; // seconds
+  // When global narration duration-fit is applied, keep the pre-fit duration for restoration.
+  durationBeforeGlobalAudioFit?: number; // seconds
   
   width: number;
   height: number;

@@ -5,6 +5,7 @@ import { updateThumbnail } from '../../services/pdfVideoService';
 import { saveProject } from '../../services/projectStorage';
 import { safeRandomUUID } from '../../utils/uuid';
 import { buildUniqueFontFamily, isSupportedFontFile, normalizeFontDisplayName } from '../../utils/customFontUtils.js';
+import { fitSlidesToGlobalNarrationDuration, restoreSlidesFromGlobalNarrationFit } from '../../utils/globalNarrationFit.js';
 
 type UndoRedoSnapshot = {
   slides: Slide[];
@@ -382,10 +383,51 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 	      setFadeOptionsState(options);
 	  }, []);
 
+    const globalNarrationFitJobIdRef = useRef(0);
+
+    const decodeAudioDurationSeconds = useCallback(async (file: File): Promise<number> => {
+        const AudioCtx = (window.AudioContext || (window as any).webkitAudioContext) as typeof AudioContext | undefined;
+        if (typeof AudioCtx !== 'function') throw new Error('AudioContext が使えないみたい…');
+
+        const ctx = new AudioCtx();
+        try {
+            const ab = await file.arrayBuffer();
+            const buf = await ctx.decodeAudioData(ab);
+            return typeof buf?.duration === 'number' ? buf.duration : 0;
+        } finally {
+            try { await ctx.close(); } catch (e) { /* ignore */ }
+        }
+    }, []);
+
 	  const setGlobalAudioFile = useCallback((file: File | null) => {
 	      if (file !== globalAudioFile) pushHistoryGrouped();
 	      setGlobalAudioFileState(file);
-	  }, [globalAudioFile, pushHistoryGrouped]);
+
+        globalNarrationFitJobIdRef.current += 1;
+        const jobId = globalNarrationFitJobIdRef.current;
+
+        // When removed, restore durations to the pre-fit values.
+        if (!file) {
+            const restored = restoreSlidesFromGlobalNarrationFit(slidesRef.current);
+            updateSlides(restored, false);
+            return;
+        }
+
+        // When set/changed, fit total slide duration to narration duration (ratio preserved).
+        (async () => {
+            try {
+                const targetSeconds = await decodeAudioDurationSeconds(file);
+                if (globalNarrationFitJobIdRef.current !== jobId) return;
+                if (!Number.isFinite(targetSeconds) || targetSeconds <= 0) return;
+
+                const fitted = fitSlidesToGlobalNarrationDuration(slidesRef.current, targetSeconds);
+                updateSlides(fitted, false);
+            } catch (e: any) {
+                console.error('global narration duration fit failed', e);
+                alert('ナレーションの長さが取れなかったから、スライドの長さを合わせられなかったよ…！');
+            }
+        })();
+	  }, [decodeAudioDurationSeconds, globalAudioFile, pushHistoryGrouped, updateSlides]);
 
 	  const setGlobalAudioVolume = useCallback((vol: number) => {
 	      if (vol !== globalAudioVolume) pushHistoryGrouped();
