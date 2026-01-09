@@ -2096,13 +2096,13 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
                     if (!previewFloatRect) return null;
                     const portalRoot = document.querySelector('.screen-idle') ?? document.body;
 
-                    return createPortal(
-                        <div
-                            className="editor-glass glass-strong z-[10000] bg-slate-900/80 border border-slate-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col"
-                            style={{
-                                position: 'fixed',
-                                left: previewFloatRect.left,
-                                top: previewFloatRect.top,
+	                    return createPortal(
+	                        <div
+	                            className="editor-glass editor-glass--strong z-[10000] bg-slate-900/80 border border-slate-800 shadow-2xl rounded-2xl overflow-hidden flex flex-col"
+	                            style={{
+	                                position: 'fixed',
+	                                left: previewFloatRect.left,
+	                                top: previewFloatRect.top,
                                 width: previewFloatRect.width,
                                 height: previewFloatRect.height,
                             }}

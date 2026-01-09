@@ -1201,12 +1201,12 @@ const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS = 1000;
 		                </button>
 		              </div>
 
-		              {thumbnailMode === 'single' ? (
-		                <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-3 space-y-2 glass-thin">
-		                  <label className="text-xs text-slate-200 font-bold block">時間（秒）</label>
-		                  <input
-		                    type="number"
-		                    min="0"
+			              {thumbnailMode === 'single' ? (
+			                <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-3 space-y-2 glass">
+			                  <label className="text-xs text-slate-200 font-bold block">時間（秒）</label>
+			                  <input
+			                    type="number"
+			                    min="0"
 		                    step="0.1"
 		                    value={thumbnailSingleSeconds}
 		                    onChange={(e) => setThumbnailSingleSeconds(e.target.value)}
@@ -1215,11 +1215,11 @@ const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS = 1000;
 		                  />
 		                  <div className="text-[11px] text-slate-400">例: 12.3</div>
 		                </div>
-		              ) : (
-		                <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-3 space-y-2 glass-thin">
-		                  <label className="text-xs text-slate-200 font-bold block">範囲（秒）</label>
-		                  <div className="flex items-center gap-2">
-		                    <input
+			              ) : (
+			                <div className="bg-slate-800/50 border border-slate-800 rounded-xl p-3 space-y-2 glass">
+			                  <label className="text-xs text-slate-200 font-bold block">範囲（秒）</label>
+			                  <div className="flex items-center gap-2">
+			                    <input
 		                      type="number"
 		                      min="0"
 		                      step="0.1"
@@ -1371,10 +1371,10 @@ const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS = 1000;
 	                {/* Result Display */}
 	                {state.status === AppStatus.COMPLETED && state.videoUrl && (
 	                <div className="mt-8 w-full flex flex-col items-center animate-fade-in space-y-6 px-2 idle-sidebar-typography">
-		                    <div 
-		                    className="glass-strong rounded-3xl border border-black/10 p-2 w-full flex justify-center"
-		                    style={{ maxWidth: 'fit-content' }}
-				                    >
+			                    <div 
+			                    className="glass-thin rounded-3xl border border-black/10 p-2 w-full flex justify-center"
+			                    style={{ maxWidth: 'fit-content' }}
+					                    >
 				                        <video 
 				                        ref={completedVideoRef}
 				                        src={state.videoUrl} 

@@ -1235,10 +1235,10 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
               </button>
           </div>
           
-          <div 
-            className="flex-1 flex items-center justify-center bg-slate-900 rounded-lg border border-slate-800 relative overflow-hidden preview-stage glass" 
-            ref={containerRef}
-          >
+	          <div 
+	            className="flex-1 flex items-center justify-center bg-slate-900 rounded-lg border border-slate-800 relative overflow-hidden preview-stage glass-thin" 
+	            ref={containerRef}
+	          >
                {isLoading && (
                    <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/50">
                        <div className="text-emerald-500 font-bold flex items-center gap-2">
@@ -1338,12 +1338,12 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
                )}
           </div>
           
-          <div className="mt-4 bg-slate-900 rounded-xl p-4 border border-slate-800 flex items-center gap-4 glass-thin">
-              <button 
-                onClick={togglePlay}
-                disabled={isLoading}
-                className="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 flex items-center justify-center text-white transition-all shadow-lg shadow-emerald-900/50"
-              >
+	          <div className="mt-4 bg-slate-900 rounded-xl p-4 border border-slate-800 flex items-center gap-4 glass">
+	              <button 
+	                onClick={togglePlay}
+	                disabled={isLoading}
+	                className="w-12 h-12 rounded-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 flex items-center justify-center text-white transition-all shadow-lg shadow-emerald-900/50"
+	              >
                   {isPlayingState ? (
                       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6"><path fillRule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clipRule="evenodd" /></svg>
                   ) : (

@@ -609,16 +609,26 @@ body {
 }
 
 /* 素材（3段階）：thin / normal / strong */
-	.screen-idle .glass-thin,
-	.screen-idle .glass,
-	.screen-idle .glass-strong {
+.screen-idle .glass-thin,
+.screen-idle .glass,
+.screen-idle .glass-strong {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-	  /* “本体は透明”にして、before/afterでガラスを作る（opacityは使わない） */
-	  background: none !important;
+  /* “本体は透明”にして、before/afterでガラスを作る（opacityは使わない） */
+  background: none !important;
 	  box-shadow: var(--idle-glass-shadow);
-	}
+}
+
+/* フラット寄せ：注意書き等の“ぷくっ”を避けたい時用（歪み/ツヤをOFF） */
+.screen-idle .glass-flat::before {
+  content: none;
+  display: none;
+}
+.screen-idle .glass-flat::after {
+  -webkit-filter: none !important;
+  filter: none !important;
+}
 
 /* キーボードで選択された時の枠は、ガラスの邪魔になるので消す */
 .screen-idle .glass-thin:focus,

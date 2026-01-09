@@ -451,10 +451,10 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 		              >
 		                <div className="absolute inset-0 pointer-events-none bg-gradient-to-b from-white/10 via-transparent to-black/10" />
 		                <div className="absolute inset-0 flex items-center justify-center p-4 pointer-events-none">
-		                  <div className="glass rounded-xl px-4 py-3 w-full max-w-[260px]">
-		                    <div className="text-sm font-bold text-slate-200">ガラス</div>
-		                    <div className="text-[10px] text-slate-400">ここで見え方を確認できるよ。</div>
-		                  </div>
+			                  <div className="glass-thin rounded-xl px-4 py-3 w-full max-w-[260px]">
+			                    <div className="text-sm font-bold text-slate-200">ガラス</div>
+			                    <div className="text-[10px] text-slate-400">ここで見え方を確認できるよ。</div>
+			                  </div>
 		                </div>
 		              </div>
 		              <div className="text-[10px] text-slate-400 leading-relaxed">

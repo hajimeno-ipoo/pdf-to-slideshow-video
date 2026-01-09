@@ -101,10 +101,12 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
 		          </div>
 		        </div>
 
-	        <p className="absolute inset-x-0 bottom-4 sm:bottom-5 px-6 text-center text-xs text-red-500 font-bold pointer-events-none">
-	          ※ サーバーにファイルは送信されません。ブラウザ内で安全に変換されます。
-	        </p>
-	      </div>
+		        <div className="absolute inset-x-0 bottom-4 sm:bottom-5 px-6 flex justify-center pointer-events-none">
+		          <div className="rounded-full px-4 py-1.5 text-center text-xs text-red-600 font-bold max-w-[90%] bg-white/70 shadow-sm">
+		            ※ サーバーにファイルは送信されません。ブラウザ内で安全に変換されます。
+		          </div>
+		        </div>
+		      </div>
 
 	      <div className="mt-4 flex items-center justify-center gap-3">
 	        {onOpenProjectManager && (
@@ -142,9 +144,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onFileSelect, status, aiEnabled
 
 	      {/* Settings Area */}
 	      {showAdvancedSettings && (
-	      <div className="mt-6 glass p-4 sm:p-6 rounded-[32px] flex flex-col gap-4 animate-fade-in">
-           <div className="text-xs text-slate-400 font-bold tracking-wide">こだわり設定（あとでOK）</div>
-	         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-between">
+		      <div className="mt-6 glass-strong p-4 sm:p-6 rounded-[32px] flex flex-col gap-4 animate-fade-in">
+	           <div className="text-xs text-slate-400 font-bold tracking-wide">こだわり設定（あとでOK）</div>
+		         <div className="flex flex-col sm:flex-row gap-6 sm:gap-4 justify-between">
 	             {/* Duration Setting */}
 	             <div className="flex flex-col sm:block space-y-2 sm:space-y-0">
 	                <div className="flex items-center justify-between sm:justify-start gap-4">
