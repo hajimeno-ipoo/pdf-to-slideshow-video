@@ -52,11 +52,21 @@ export const serializeProject = async (data: ProjectData): Promise<string> => {
         backgroundImageFile: await serializeFile(data.videoSettings.backgroundImageFile)
     } : undefined;
 
+    const customFonts = data.customFonts ? await Promise.all(
+        data.customFonts.map(async (f) => ({
+            id: f.id,
+            name: f.name,
+            family: f.family,
+            file: await serializeFile(f.file)
+        }))
+    ) : undefined;
+
     const exportData = {
         version: 1,
         timestamp: Date.now(),
         sourceFile: await serializeFile(data.sourceFile),
         slides,
+        customFonts,
         videoSettings: settings,
         bgmFile: await serializeFile(data.bgmFile),
         bgmTimeRange: data.bgmTimeRange,
@@ -78,6 +88,13 @@ export const deserializeProject = async (json: string): Promise<ProjectData> => 
         audioFile: s.audioFile ? await deserializeFile(s.audioFile) : undefined
     })));
 
+    const customFonts = await Promise.all((raw.customFonts || []).map(async (f: any) => ({
+        id: String(f?.id || ''),
+        name: String(f?.name || ''),
+        family: String(f?.family || ''),
+        file: f?.file ? await deserializeFile(f.file) : null
+    })));
+
     const videoSettings: VideoSettings | undefined = raw.videoSettings ? {
         ...raw.videoSettings,
         backgroundImageFile: raw.videoSettings.backgroundImageFile ? await deserializeFile(raw.videoSettings.backgroundImageFile) : undefined
@@ -85,6 +102,7 @@ export const deserializeProject = async (json: string): Promise<ProjectData> => 
 
     return {
         slides,
+        customFonts: customFonts.filter((f: any) => f && f.file && f.family),
         sourceFile: await deserializeFile(raw.sourceFile),
         videoSettings,
         bgmFile: await deserializeFile(raw.bgmFile),

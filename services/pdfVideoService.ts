@@ -1,5 +1,5 @@
 
-import { Slide, AspectRatio, Resolution, VideoSettings, EffectType, Overlay, BgmTimeRange, FadeOptions, TokenUsage, TransitionType, DuckingOptions } from '../types';
+import { Slide, AspectRatio, Resolution, VideoSettings, EffectType, Overlay, BgmTimeRange, FadeOptions, TokenUsage, TransitionType, DuckingOptions, CustomFont } from '../types';
 import { PDFDocumentProxy, PDFPageProxy, PDFJSStatic } from '../types/pdfTypes';
 import { generateSlideScript, wait } from './geminiService';
 import { fileToBase64 } from '../utils/fileUtils';
@@ -888,7 +888,8 @@ export const generateVideoFromSlides = async (
   globalAudioFile: File | null = null,
   globalAudioVolume: number = 1.0,
   onProgress?: (current: number, total: number) => void,
-  duckingOptions?: DuckingOptions
+  duckingOptions?: DuckingOptions,
+  customFonts?: CustomFont[]
 ): Promise<{ url: string, extension: string }> => {
     
     // Prepare assets for Worker
@@ -1139,6 +1140,14 @@ export const generateVideoFromSlides = async (
                 bgMimeType = videoSettings.backgroundImageFile.type;
             }
 
+            const customFontsForWorker = Array.isArray(customFonts) && customFonts.length > 0
+                ? await Promise.all(customFonts.map(async (f) => ({
+                    id: f.id,
+                    family: f.family,
+                    buffer: await f.file.arrayBuffer()
+                })))
+                : null;
+
             const payload = {
                 slides: processedSlides,
                 videoSettings,
@@ -1149,13 +1158,19 @@ export const generateVideoFromSlides = async (
                 duckingOptions,
                 audioChannels: audioDataL ? [audioDataL, audioDataR] : null,
                 bgImageBuffer,
-                bgMimeType
+                bgMimeType,
+                customFonts: customFontsForWorker
             };
 
             const transferables: Transferable[] = processedSlides.map(s => s.bitmap).filter(b => !!b) as unknown as Transferable[];
             if (audioDataL) transferables.push(audioDataL.buffer);
             if (audioDataR && audioDataR !== audioDataL) transferables.push(audioDataR.buffer);
             if (bgImageBuffer) transferables.push(bgImageBuffer);
+            if (customFontsForWorker) {
+                for (const f of customFontsForWorker) {
+                    if (f?.buffer) transferables.push(f.buffer);
+                }
+            }
 
             worker.postMessage({ type: 'init', payload }, transferables);
         };

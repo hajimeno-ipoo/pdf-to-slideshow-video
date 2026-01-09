@@ -12,6 +12,7 @@ test('estimateProjectBytes: sums file sizes and strings', () => {
     sourceFile: { size: 10 },
     bgmFile: { size: 20 },
     globalAudioFile: null,
+    customFonts: [{ file: { size: 11 } }],
     videoSettings: { backgroundImageFile: { size: 5 } },
     slides: [
       {
@@ -24,7 +25,7 @@ test('estimateProjectBytes: sums file sizes and strings', () => {
     ],
   });
 
-  assert.equal(bytes, 10 + 20 + 5 + 7 + 8 + 6 + 2 + 4 + 64);
+  assert.equal(bytes, 10 + 20 + 11 + 5 + 7 + 8 + 6 + 2 + 4 + 64);
 });
 
 test('formatBytes: invalid -> 0B', () => {
@@ -37,4 +38,3 @@ test('formatBytes: units', () => {
   assert.equal(formatBytes(1024), '1.0KB');
   assert.equal(formatBytes(1024 * 1024), '1.0MB');
 });
-

@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
-import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectData, DuckingOptions } from '../types';
+import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectData, DuckingOptions, CustomFont } from '../types';
 import { serializeProject, deserializeProject } from '../utils/fileUtils';
 import { getExportSupportError } from '../utils/exportSupport';
 import { saveNamedProject } from '../services/projectStorage';
@@ -36,6 +36,7 @@ const SlideEditorLayout: React.FC<{
       bgmFile, bgmRange, bgmVolume, fadeOptions,
       globalAudioFile, globalAudioVolume,
       duckingOptions,
+      customFonts,
       sourceFile,
       selectedSlideId, setSelectedSlideId
   } = useEditor();
@@ -108,7 +109,7 @@ const SlideEditorLayout: React.FC<{
       setIsExporting(true);
       try {
           const projectData: ProjectData = {
-              slides, sourceFile, videoSettings, bgmFile, bgmTimeRange: bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, updatedAt: Date.now()
+              slides, customFonts, sourceFile, videoSettings, bgmFile, bgmTimeRange: bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, updatedAt: Date.now()
           };
           const json = await serializeProject(projectData);
           const blob = new Blob([json], { type: 'application/json' });
@@ -133,6 +134,7 @@ const SlideEditorLayout: React.FC<{
       try {
           const projectData: ProjectData = {
               slides,
+              customFonts,
               sourceFile,
               videoSettings,
               bgmFile,
@@ -385,6 +387,8 @@ interface SlideEditorProps {
   aiEnabled: boolean;
   slides: Slide[];
   onUpdateSlides: (slides: Slide[]) => void;
+  customFonts: CustomFont[];
+  onUpdateCustomFonts: (fonts: CustomFont[]) => void;
   onStartConversion: (
     bgmFile: File | null, 
     fadeOptions: FadeOptions,
@@ -416,6 +420,8 @@ const SlideEditor: React.FC<SlideEditorProps> = (props) => {
     <EditorProvider 
       slides={props.slides} 
       onUpdateSlides={props.onUpdateSlides} 
+      customFonts={props.customFonts}
+      onUpdateCustomFonts={props.onUpdateCustomFonts}
       initialSettings={props.initialSettings}
       initialBgmFile={props.initialBgmFile}
       initialFadeOptions={props.initialFadeOptions}

@@ -17,6 +17,9 @@ export const estimateProjectBytes = (projectData) => {
   addFile(projectData.bgmFile);
   addFile(projectData.globalAudioFile);
 
+  const customFonts = Array.isArray(projectData.customFonts) ? projectData.customFonts : [];
+  for (const f of customFonts) addFile(f?.file);
+
   const slides = Array.isArray(projectData.slides) ? projectData.slides : [];
   for (const s of slides) {
     addString(s?.thumbnailUrl);
@@ -41,4 +44,3 @@ export const formatBytes = (bytes) => {
   if (b < 1024 * 1024 * 1024) return `${(b / (1024 * 1024)).toFixed(1)}MB`;
   return `${(b / (1024 * 1024 * 1024)).toFixed(1)}GB`;
 };
-

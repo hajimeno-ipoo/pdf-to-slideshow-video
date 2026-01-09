@@ -9,7 +9,7 @@ import RestoreModal from './components/RestoreModal';
 import CooldownNotification from './components/CooldownNotification';
 import ApiKeyModal from './components/ApiKeyModal';
 import GlassSettingsModal from './components/GlassSettingsModal';
-import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions } from './types';
+import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions, CustomFont } from './types';
 import { analyzeImages, analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground, updateThumbnail } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
@@ -31,6 +31,7 @@ const App: React.FC = () => {
     status: AppStatus.IDLE
   });
   const [slides, setSlides] = useState<Slide[]>([]);
+  const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
 
   const [glassPrefs, setGlassPrefs] = useState<GlassPrefs>(() => loadGlassPrefsFromLocalStorage() ?? DEFAULT_GLASS_PREFS);
@@ -362,6 +363,7 @@ const App: React.FC = () => {
   const handleRestore = () => {
       if (restoreData) {
           setSlides(restoreData.slides);
+          setCustomFonts(restoreData.customFonts || []);
           setSourceFile(restoreData.sourceFile);
           setState({
               status: AppStatus.EDITING, // Restore to editing state
@@ -383,6 +385,7 @@ const App: React.FC = () => {
   
   const handleProjectLoad = (data: ProjectData) => {
       setSlides(data.slides);
+      setCustomFonts(data.customFonts || []);
       setSourceFile(data.sourceFile);
       setState({
           status: AppStatus.EDITING,
@@ -403,6 +406,7 @@ const App: React.FC = () => {
       await clearProject();
       setShowRestoreModal(false);
       setRestoreData(null);
+      setCustomFonts([]);
   };
 
   // Step 1: Upload & Analyze
@@ -578,7 +582,8 @@ const App: React.FC = () => {
 	            progress: { current, total }
 	          }));
 	        },
-	        duckingOptions
+	        duckingOptions,
+	        customFonts
 	      );
 
       setState({ 
@@ -609,6 +614,7 @@ const App: React.FC = () => {
     await clearProject(); // Clear Saved Data
     setState({ status: AppStatus.IDLE });
     setSlides([]);
+    setCustomFonts([]);
     setSourceFile(null);
     setSaveStatus('idle');
     setLastSavedTime(null);
@@ -1291,6 +1297,8 @@ const App: React.FC = () => {
 		                    aiEnabled={aiEnabled}
 		                    slides={slides} 
 		                    onUpdateSlides={setSlides} 
+                        customFonts={customFonts}
+                        onUpdateCustomFonts={setCustomFonts}
 	                    onStartConversion={handleStartConversion}
 	                    isProcessing={false}
 	                    sourceFile={sourceFile}

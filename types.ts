@@ -78,6 +78,13 @@ export interface VideoSettings {
   subtitlesEnabled?: boolean; // 字幕を表示するか
 }
 
+export interface CustomFont {
+  id: string;
+  name: string; // 表示名
+  family: string; // CSS font-family として使う名前
+  file: File; // .woff2/.woff/.ttf/.otf
+}
+
 export type OverlayType = 'text' | 'arrow' | 'rect' | 'circle' | 'image' | 'line';
 export type OverlaySpace = 'slide' | 'canvas';
 export type AnimationType = 
@@ -191,6 +198,7 @@ export interface Slide {
 
 export interface ProjectData {
   slides: Slide[];
+  customFonts?: CustomFont[];
   sourceFile: File | null;
   videoSettings?: VideoSettings;
   bgmFile: File | null;

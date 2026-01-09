@@ -1,8 +1,9 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Overlay, OverlayType, AnimationType } from '../../types';
 import { FONTS, ANIMATION_VALUES, getAnimationLabel, parseColor } from './constants';
 import InlineColorPicker from './InlineColorPicker';
+import { useEditor } from '../slideEditor/SlideEditorContext';
 
 interface OverlaySettingsPanelProps {
   selectedOverlay: Overlay | undefined;
@@ -28,6 +29,9 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
   slideDuration
 }) => {
   const [activePropertyTab, setActivePropertyTab] = useState<'style' | 'outline' | 'shadow' | 'anim'>('style');
+  const { customFonts, addCustomFonts } = useEditor();
+  const fontInputRef = useRef<HTMLInputElement>(null);
+  const [isAddingFont, setIsAddingFont] = useState(false);
 
   const updateBgColorHex = (newHex: string) => { 
       if (!selectedOverlay) return; 
@@ -86,6 +90,31 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
 	  }, [selectedOverlay?.id]);
 
 	  const endTime = selectedOverlay ? (typeof selectedOverlay.endTime === 'number' ? selectedOverlay.endTime : slideDuration) : slideDuration;
+
+    const customFontOptions = (customFonts || []).map((f) => ({ name: f.name, value: f.family }));
+    const selectedFontFamily = (selectedOverlay?.fontFamily || 'Noto Sans JP');
+    const fontOptions = [
+        ...FONTS,
+        ...customFontOptions
+    ];
+    if (selectedFontFamily && !fontOptions.some((f) => f.value === selectedFontFamily)) {
+        fontOptions.unshift({ name: `${selectedFontFamily} (未登録)`, value: selectedFontFamily });
+    }
+
+    const handleFontFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+        setIsAddingFont(true);
+        try {
+            const added = await addCustomFonts(files);
+            if (added.length > 0) {
+                onUpdateOverlay({ fontFamily: added[0].family });
+            }
+        } finally {
+            setIsAddingFont(false);
+            e.target.value = '';
+        }
+    };
 
 	  return (
 	    <div className="w-full p-4 flex flex-col gap-6">
@@ -251,21 +280,33 @@ const OverlaySettingsPanel: React.FC<OverlaySettingsPanelProps> = ({
                          </div>
                       </div>
                   )}
-                  {selectedOverlay.type === 'text' && (
-                    <>
-                        <div className="space-y-1">
-                            <label className="text-xs text-slate-400">背景色</label>
-                            <div className="flex flex-col gap-2">
-                                <InlineColorPicker value={bgColorState.hex} onChange={updateBgColorHex} />
+	                  {selectedOverlay.type === 'text' && (
+	                    <>
+	                        <div className="space-y-1">
+	                            <label className="text-xs text-slate-400">背景色</label>
+	                            <div className="flex flex-col gap-2">
+	                                <InlineColorPicker value={bgColorState.hex} onChange={updateBgColorHex} />
                                 <div className="space-y-1">
                                     <label className="text-[10px] text-slate-400 flex justify-between"><span>透明度</span><span>{Math.round(bgColorState.alpha * 100)}%</span></label>
                                     <input type="range" min="0" max="1" step="0.05" value={bgColorState.alpha} onChange={(e) => updateBgColorAlpha(parseFloat(e.target.value))} className="w-full idle-range accent-emerald-500 h-6 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
-                                </div>
-                            </div>
-                        </div>
-                        <div className="space-y-1"><label className="text-xs text-slate-400">フォント</label><select value={selectedOverlay.fontFamily} onChange={(e) => onUpdateOverlay({ fontFamily: e.target.value })} className="w-full bg-slate-800 border border-slate-600 rounded p-1 text-xs text-white">{FONTS.map(f => <option key={f.value} value={f.value}>{f.name}</option>)}</select></div>
-                    </>
-                  )}
+	                                </div>
+	                            </div>
+	                        </div>
+	                        <div className="space-y-1">
+	                            <label className="text-xs text-slate-400">フォント</label>
+	                            <div className="flex gap-2">
+	                                <select value={selectedFontFamily} onChange={(e) => onUpdateOverlay({ fontFamily: e.target.value })} className="flex-1 bg-slate-800 border border-slate-600 rounded p-1 text-xs text-white">
+	                                    {fontOptions.map(f => <option key={f.value} value={f.value}>{f.name}</option>)}
+	                                </select>
+	                                <input type="file" accept=".woff2,.woff,.ttf,.otf" multiple ref={fontInputRef} onChange={handleFontFiles} className="hidden" />
+	                                <button type="button" onClick={() => fontInputRef.current?.click()} disabled={isAddingFont} className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-xs text-white rounded border border-slate-600 transition-colors disabled:opacity-60 disabled:cursor-not-allowed whitespace-nowrap">
+	                                    {isAddingFont ? '追加中…' : '＋追加'}
+	                                </button>
+	                            </div>
+	                            <div className="text-[10px] text-slate-500">.woff2 / .woff / .ttf / .otf</div>
+	                        </div>
+	                    </>
+	                  )}
                   <div className="space-y-1 pt-2 border-t border-slate-800">
                       <div className="flex justify-between"><label className="text-xs text-slate-400">回転 ({selectedOverlay.rotation || 0}°)</label><button type="button" onClick={() => onUpdateOverlay({ rotation: 0 })} className="text-[10px] text-slate-500">リセット</button></div>
                       <input type="range" min="-180" max="180" step="1" value={selectedOverlay.rotation || 0} onChange={(e) => onUpdateOverlay({ rotation: parseInt(e.target.value) })} className="w-full idle-range accent-emerald-500 h-8" />

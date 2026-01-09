@@ -1,8 +1,10 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { Slide, VideoSettings, BgmTimeRange, FadeOptions, DuckingOptions, ProjectData, TokenUsage, AspectRatio, Resolution, OutputFormat, BackgroundFill } from '../../types';
+import { Slide, VideoSettings, BgmTimeRange, FadeOptions, DuckingOptions, ProjectData, TokenUsage, AspectRatio, Resolution, OutputFormat, BackgroundFill, CustomFont } from '../../types';
 import { updateThumbnail } from '../../services/pdfVideoService';
 import { saveProject } from '../../services/projectStorage';
+import { safeRandomUUID } from '../../utils/uuid';
+import { buildUniqueFontFamily, isSupportedFontFile, normalizeFontDisplayName } from '../../utils/customFontUtils.js';
 
 type UndoRedoSnapshot = {
   slides: Slide[];
@@ -50,6 +52,10 @@ interface EditorContextType {
   
   sourceFile: File | null;
 
+  customFonts: CustomFont[];
+  addCustomFonts: (files: File[]) => Promise<CustomFont[]>;
+  removeCustomFont: (id: string) => void;
+
   saveProjectState: () => Promise<void>;
 }
 
@@ -59,6 +65,8 @@ interface EditorProviderProps {
   children: React.ReactNode;
   slides: Slide[];
   onUpdateSlides: (slides: Slide[]) => void;
+  customFonts: CustomFont[];
+  onUpdateCustomFonts: (fonts: CustomFont[]) => void;
   initialSettings?: VideoSettings;
   initialBgmFile?: File | null;
   initialFadeOptions?: FadeOptions;
@@ -72,7 +80,7 @@ interface EditorProviderProps {
 }
 
 export const EditorProvider: React.FC<EditorProviderProps> = ({ 
-  children, slides, onUpdateSlides, initialSettings, initialBgmFile, initialFadeOptions, initialBgmTimeRange, initialBgmVolume, initialGlobalAudioFile, initialGlobalAudioVolume, initialDuckingOptions, sourceFile, onAutoSave
+  children, slides, onUpdateSlides, customFonts, onUpdateCustomFonts, initialSettings, initialBgmFile, initialFadeOptions, initialBgmTimeRange, initialBgmVolume, initialGlobalAudioFile, initialGlobalAudioVolume, initialDuckingOptions, sourceFile, onAutoSave
 }) => {
   // --- History State ---
   const [history, setHistory] = useState<UndoRedoSnapshot[]>([]);
@@ -388,6 +396,114 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 	      setDuckingOptionsState(options);
 	  }, []);
 
+    // --- Custom Fonts ---
+    const fontFaceByIdRef = useRef<Map<string, FontFace>>(new Map());
+    const fontLoadAttemptedRef = useRef<Set<string>>(new Set());
+
+    const loadFontIntoDocument = useCallback(async (font: CustomFont) => {
+        const id = font?.id;
+        if (!id) return;
+        if (fontLoadAttemptedRef.current.has(id)) return;
+        fontLoadAttemptedRef.current.add(id);
+
+        if (
+            typeof FontFace !== 'function' ||
+            typeof document === 'undefined' ||
+            !document.fonts ||
+            typeof document.fonts.add !== 'function'
+        ) return;
+
+        try {
+            const buffer = await font.file.arrayBuffer();
+            const face = new FontFace(font.family, buffer);
+            await face.load();
+            document.fonts.add(face);
+            fontFaceByIdRef.current.set(id, face);
+        } catch (e) {
+            console.error('font load failed', e);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!Array.isArray(customFonts) || customFonts.length === 0) return;
+        for (const f of customFonts) {
+            if (!f || !f.id || !f.file || !f.family) continue;
+            loadFontIntoDocument(f);
+        }
+    }, [customFonts, loadFontIntoDocument]);
+
+    const addCustomFonts = useCallback(async (files: File[]) => {
+        const list = Array.isArray(files) ? files : Array.from(files || []);
+        const supported = list.filter(isSupportedFontFile);
+        if (supported.length === 0) {
+            alert('フォントファイル（.woff2/.woff/.ttf/.otf）を選んでね。');
+            return [];
+        }
+
+        const existingFamilies = new Set([
+            'Noto Sans JP',
+            'Noto Serif JP',
+            'Kaisei Decol',
+            'Mochiy Pop One',
+            'DotGothic16',
+            'Inter',
+            ...(customFonts || []).map((f) => f.family).filter(Boolean)
+        ]);
+
+        const added: CustomFont[] = [];
+        for (const file of supported) {
+            const name = normalizeFontDisplayName(file.name);
+            const family = buildUniqueFontFamily(existingFamilies, name);
+            existingFamilies.add(family);
+            added.push({ id: safeRandomUUID(), name, family, file });
+        }
+
+        const next = [...(customFonts || []), ...added];
+        onUpdateCustomFonts(next);
+
+        // Best-effort preload for immediate preview.
+        for (const f of added) await loadFontIntoDocument(f);
+
+        return added;
+    }, [customFonts, onUpdateCustomFonts, loadFontIntoDocument]);
+
+	    const removeCustomFont = useCallback((id: string) => {
+	        if (!id) return;
+	        const removed = (customFonts || []).find((f) => f.id === id);
+	        const removedFamily = removed?.family;
+	        if (removedFamily) {
+	            const nextSlides = (slides || []).map((s) => {
+	                const overlays = Array.isArray(s?.overlays) ? s.overlays : [];
+	                if (overlays.length === 0) return s;
+	                let changed = false;
+	                const nextOverlays = overlays.map((ov) => {
+	                    if (ov?.type === 'text' && ov.fontFamily === removedFamily) {
+	                        changed = true;
+	                        return { ...ov, fontFamily: 'Noto Sans JP' };
+	                    }
+	                    return ov;
+	                });
+	                if (!changed) return s;
+	                return { ...s, overlays: nextOverlays };
+	            });
+	            if (nextSlides.some((s, i) => s !== (slides || [])[i])) {
+	                updateSlides(nextSlides, false);
+	            }
+	        }
+	        const face = fontFaceByIdRef.current.get(id);
+	        if (
+	            face &&
+	            typeof document !== 'undefined' &&
+	            document.fonts &&
+            typeof document.fonts.delete === 'function'
+        ) {
+            try { document.fonts.delete(face); } catch (_) {}
+	        }
+	        fontFaceByIdRef.current.delete(id);
+	        fontLoadAttemptedRef.current.delete(id);
+	        onUpdateCustomFonts((customFonts || []).filter((f) => f.id !== id));
+	    }, [customFonts, slides, updateSlides, onUpdateCustomFonts]);
+
 	  // --- Auto Save Logic ---
 	  const saveProjectState = useCallback(async () => {
 	      const currentSettings: VideoSettings = {
@@ -396,6 +512,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
       
 	      const projectData: ProjectData = {
 	          slides,
+	          customFonts,
 	          sourceFile,
 	          videoSettings: currentSettings,
 	          bgmFile,
@@ -409,7 +526,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 	      };
 
 	      await saveProject(projectData);
-	  }, [slides, aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration, bgmFile, bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, sourceFile]);
+	  }, [slides, customFonts, aspectRatio, resolution, format, backgroundFill, backgroundImageFile, slideScale, slideBorderRadius, transitionDuration, bgmFile, bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, sourceFile]);
 
   useEffect(() => {
       if (!onAutoSave || slides.length === 0) return;
@@ -451,6 +568,9 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
 	      duckingOptions, setDuckingOptions,
       
       sourceFile,
+      customFonts,
+      addCustomFonts,
+      removeCustomFont,
       saveProjectState
   };
 

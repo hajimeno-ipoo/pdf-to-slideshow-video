@@ -82,6 +82,114 @@ const getWrappedLines = (ctx, text, maxWidth) => {
     return lines;
 };
 
+// --- WebFont Loader (for OffscreenCanvas export) ---
+
+const GOOGLE_FONTS_CSS_URLS = {
+    inter: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap',
+    jp: 'https://fonts.googleapis.com/css2?family=DotGothic16&family=Kaisei+Decol&family=Mochiy+Pop+One&family=Noto+Sans+JP:wght@400;700&family=Noto+Serif+JP:wght@400;700&display=swap'
+};
+
+const normalizeFontFamily = (value) => {
+    if (!value) return '';
+    return String(value).replace(/^['"]+|['"]+$/g, '').trim();
+};
+
+const collectUsedFontFamilies = (slides) => {
+    const families = new Set();
+    if (!Array.isArray(slides)) return families;
+    for (const slide of slides) {
+        const overlays = Array.isArray(slide?.overlays) ? slide.overlays : [];
+        for (const ov of overlays) {
+            if (!ov || ov.hidden) continue;
+            if (ov.type !== 'text') continue;
+            const family = normalizeFontFamily(ov.fontFamily || 'Noto Sans JP');
+            if (family) families.add(family);
+        }
+    }
+    return families;
+};
+
+const getGoogleFontsCssUrlsForFamilies = (families) => {
+    const urls = new Set();
+    if (!families || families.size === 0) return [];
+
+    if (families.has('Inter')) urls.add(GOOGLE_FONTS_CSS_URLS.inter);
+
+    const jpFamilies = ['DotGothic16', 'Kaisei Decol', 'Mochiy Pop One', 'Noto Sans JP', 'Noto Serif JP'];
+    for (const f of jpFamilies) {
+        if (families.has(f)) { urls.add(GOOGLE_FONTS_CSS_URLS.jp); break; }
+    }
+    return Array.from(urls);
+};
+
+const parseGoogleFontsCssFontFaces = (cssText) => {
+    const results = [];
+    if (!cssText) return results;
+    const blocks = cssText.match(/@font-face\\s*\\{[^}]*\\}/g) || [];
+    for (const block of blocks) {
+        const family = block.match(/font-family:\\s*['"]?([^;'"]+)['"]?\\s*;/)?.[1];
+        const src = block.match(/src:\\s*url\\(([^)]+)\\)/)?.[1];
+        if (!family || !src) continue;
+        const weight = block.match(/font-weight:\\s*([^;]+);/)?.[1]?.trim();
+        const style = block.match(/font-style:\\s*([^;]+);/)?.[1]?.trim();
+        const unicodeRange = block.match(/unicode-range:\\s*([^;]+);/)?.[1]?.trim();
+        const srcUrl = String(src).trim().replace(/^['"]+|['"]+$/g, '');
+        results.push({ family, srcUrl, weight, style, unicodeRange });
+    }
+    return results;
+};
+
+const loadGoogleFontsForFamilies = async (families) => {
+    if (!families || families.size === 0) return;
+    if (typeof FontFace !== 'function' || !self.fonts || typeof self.fonts.add !== 'function') return;
+
+    const urls = getGoogleFontsCssUrlsForFamilies(families);
+    if (urls.length === 0) return;
+
+    for (const url of urls) {
+        let cssText = '';
+        try {
+            const res = await fetch(url);
+            cssText = await res.text();
+        } catch (_) {
+            continue;
+        }
+
+        const faces = parseGoogleFontsCssFontFaces(cssText);
+        for (const face of faces) {
+            if (!families.has(face.family)) continue;
+            try {
+                const font = new FontFace(face.family, 'url(' + face.srcUrl + ')', {
+                    weight: face.weight || '400',
+                    style: face.style || 'normal',
+                    unicodeRange: face.unicodeRange
+                });
+                await font.load();
+                self.fonts.add(font);
+            } catch (_) {}
+        }
+    }
+};
+
+const loadCustomFontAssets = async (fontAssets, usedFamilies) => {
+    if (!Array.isArray(fontAssets) || fontAssets.length === 0) return;
+    if (typeof FontFace !== 'function' || !self.fonts || typeof self.fonts.add !== 'function') return;
+
+    const hasUsedFamilies = usedFamilies && typeof usedFamilies.has === 'function';
+    for (const asset of fontAssets) {
+        const family = normalizeFontFamily(asset?.family);
+        if (!family) continue;
+        if (hasUsedFamilies && !usedFamilies.has(family)) continue;
+        const buf = asset?.buffer;
+        if (!(buf instanceof ArrayBuffer) || buf.byteLength <= 0) continue;
+        try {
+            const font = new FontFace(family, buf);
+            await font.load();
+            self.fonts.add(font);
+        } catch (_) {}
+    }
+};
+
 // Helper to create asset from ArrayBuffer
 const loadAssetFromData = async (buffer, mimeType) => {
     try {
@@ -455,8 +563,15 @@ self.onmessage = async (e) => {
 
     if (type === 'init') {
         try {
-            const { slides, videoSettings, bgmTimeRange, bgmVolume, globalAudioVolume, fadeOptions, duckingOptions, audioChannels, bgImageBuffer, bgMimeType } = payload;
+            const { slides, videoSettings, bgmTimeRange, bgmVolume, globalAudioVolume, fadeOptions, duckingOptions, audioChannels, bgImageBuffer, bgMimeType, customFonts } = payload;
             const { width, height } = getVideoDimensions(videoSettings.aspectRatio, videoSettings.resolution);
+
+            // Load WebFonts used by text overlays in this worker context (best-effort).
+            const usedFontFamilies = collectUsedFontFamilies(slides);
+            const fontsReadyPromise = Promise.all([
+                loadCustomFontAssets(customFonts, usedFontFamilies),
+                loadGoogleFontsForFamilies(usedFontFamilies)
+            ]).catch(() => {});
             
             // 1. Prepare Slide Assets
             const slideAssets = [];
@@ -663,6 +778,8 @@ self.onmessage = async (e) => {
                     }
 
                     await output.start();
+
+	                    await fontsReadyPromise;
 
 	                    if (audioChannels && audioSource) {
 	                        if (typeof AudioEncoder !== 'function') {

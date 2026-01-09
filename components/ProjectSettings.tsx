@@ -5,13 +5,14 @@ import BgmWaveformEditor from './BgmWaveformEditor';
 import { Resolution, OutputFormat, BackgroundFill, AspectRatio } from '../types';
 
 const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
-  const { 
-      videoSettings, setVideoSettings,
-      bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
-      globalAudioFile, setGlobalAudioFile, globalAudioVolume, setGlobalAudioVolume,
-      duckingOptions, setDuckingOptions,
-      slides, updateSlides
-  } = useEditor();
+	  const { 
+	      videoSettings, setVideoSettings,
+	      bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
+	      globalAudioFile, setGlobalAudioFile, globalAudioVolume, setGlobalAudioVolume,
+	      duckingOptions, setDuckingOptions,
+	      slides, updateSlides,
+	      customFonts, removeCustomFont
+	  } = useEditor();
 
   const bgmInputRef = useRef<HTMLInputElement>(null);
   const globalAudioInputRef = useRef<HTMLInputElement>(null);
@@ -52,14 +53,22 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
     if (bgImageInputRef.current) bgImageInputRef.current.value = '';
   };
 
-  const handleFitToAudio = () => {
-    if (!bgmFile || slides.length === 0) return;
-    const duration = bgmRange.end - bgmRange.start;
-    if (duration <= 0) return;
-    const perSlide = Math.max(0.1, Math.floor((duration / slides.length) * 100) / 100);
-    const updated = slides.map(s => ({ ...s, duration: perSlide }));
-    updateSlides(updated, true);
-  };
+	  const handleFitToAudio = () => {
+	    if (!bgmFile || slides.length === 0) return;
+	    const duration = bgmRange.end - bgmRange.start;
+	    if (duration <= 0) return;
+	    const perSlide = Math.max(0.1, Math.floor((duration / slides.length) * 100) / 100);
+	    const updated = slides.map(s => ({ ...s, duration: perSlide }));
+	    updateSlides(updated, true);
+	  };
+
+	  const handleRemoveFont = (id: string) => {
+	    const font = (customFonts || []).find((f) => f.id === id);
+	    if (!font) return;
+	    const ok = window.confirm(`「${font.name}」を削除する？\\n※このフォントを使ってるテキストは標準フォントに戻るかも！`);
+	    if (!ok) return;
+	    removeCustomFont(id);
+	  };
 
   return (
     <div className="flex flex-col h-full bg-transparent text-slate-300 idle-sidebar-typography">
@@ -73,9 +82,9 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
            <h3 className="text-base font-bold text-white uppercase tracking-wider">プロジェクト設定</h3>
        </div>
        
-       <div className="p-4 space-y-6 overflow-y-auto custom-scrollbar flex-1">
-           {/* Video Format */}
-           <div className="space-y-3">
+	       <div className="p-4 space-y-6 overflow-y-auto custom-scrollbar flex-1">
+	           {/* Video Format */}
+	           <div className="space-y-3">
               <h4 className="text-sm font-bold text-emerald-400 uppercase tracking-wider mb-2">動画出力</h4>
               
               <div className="grid grid-cols-2 gap-3">
@@ -129,12 +138,36 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
                     <div className="flex justify-between text-[12px] text-slate-300 uppercase"><label>標準切替時間</label><span>{videoSettings.transitionDuration.toFixed(1)}s</span></div>
                     <input type="range" min="0.1" max="3.0" step="0.1" value={videoSettings.transitionDuration} onChange={(e) => setVideoSettings({ transitionDuration: parseFloat(e.target.value) })} className="w-full idle-range accent-emerald-500 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer" />
                  </div>
-              </div>
-           </div>
+	              </div>
+	           </div>
 
-           {/* Audio Settings */}
+	           {/* Fonts */}
 	           <div className="space-y-3 pt-4 border-t border-slate-800">
-	              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">BGM & オーディオ</h4>
+	              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">フォント（追加分）</h4>
+	              {(!customFonts || customFonts.length === 0) ? (
+	                  <div className="text-xs text-slate-400">
+	                      追加したフォントはここに出るよ。追加はインスペクターの「フォント」からね！
+	                  </div>
+	              ) : (
+	                  <div className="space-y-2">
+	                      {customFonts.map((f) => (
+	                          <div key={f.id} className="flex items-center justify-between gap-2 bg-slate-800/50 border border-slate-700 rounded px-3 py-2">
+	                              <div className="min-w-0">
+	                                  <div className="text-xs text-white truncate">{f.name}</div>
+	                                  <div className="text-[10px] text-slate-400 truncate">{f.file?.name}</div>
+	                              </div>
+	                              <button onClick={() => handleRemoveFont(f.id)} className="px-2 py-1 text-[10px] text-red-300 hover:text-red-200 border border-red-500/40 rounded transition-colors whitespace-nowrap">
+	                                  削除
+	                              </button>
+	                          </div>
+	                      ))}
+	                  </div>
+	              )}
+	           </div>
+
+	           {/* Audio Settings */}
+		           <div className="space-y-3 pt-4 border-t border-slate-800">
+		              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider mb-2">BGM & オーディオ</h4>
               
               {/* BGM Section */}
               <div className="space-y-2">
