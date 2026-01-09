@@ -1678,17 +1678,17 @@ const SlideInspector: React.FC<SlideInspectorProps> = ({ isOpen, slide, onUpdate
     const panel = (
         <div className="idle-sidebar-typography flex flex-col h-full bg-transparent border-l border-white/10">
             {/* 1. Header & Tabs */}
-            <div className="flex-none p-3 border-b border-white/10 bg-transparent z-10 flex flex-col gap-3">
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        {onClose && (
-                            <button onClick={handleCloseInspector} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-xs font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
-                                閉じる
-                            </button>
-                        )}
-                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">スライド編集</h3>
-                    </div>
+	            <div className="editor-glass-pane editor-glass-pane--strong flex-none p-3 border-b border-white/10 bg-transparent z-10 flex flex-col gap-3">
+	                <div className="flex justify-between items-center">
+	                    <div className="flex items-center gap-2">
+	                        {onClose && (
+	                            <button onClick={handleCloseInspector} className="lg:hidden text-slate-400 hover:text-white transition-colors flex items-center text-xs font-bold gap-1 px-1 py-1 rounded hover:bg-slate-800">
+	                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4"><path fillRule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clipRule="evenodd" /></svg>
+	                                閉じる
+	                            </button>
+	                        )}
+	                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">スライド編集</h3>
+	                    </div>
                     <div className="flex items-center gap-2">
                         <button
                             type="button"

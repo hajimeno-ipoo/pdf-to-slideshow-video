@@ -33,11 +33,11 @@ const RestoreModal: React.FC<RestoreModalProps> = ({ isOpen, onRestore, onDiscar
           </div>
         </div>
 
-        <div className="glass-thin rounded-lg p-3 mb-6 border border-slate-800 restore-modal-info">
-          <p className="text-sm text-slate-300 text-center">
-            最終更新: <span className="font-mono text-slate-200 font-bold">{dateStr}</span>
-          </p>
-        </div>
+	        <div className="glass-thin glass-flat rounded-lg p-3 mb-6 border border-slate-800 restore-modal-info">
+	          <p className="text-sm text-slate-300 text-center">
+	            最終更新: <span className="font-mono text-slate-200 font-bold">{dateStr}</span>
+	          </p>
+	        </div>
 
         <div className="flex gap-3">
           <button 

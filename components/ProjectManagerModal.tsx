@@ -142,26 +142,26 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
 	              {statusText}
 	            </div>
 	          )}
-	          {items.length === 0 ? (
-	            <div className="p-8 glass-thin border border-black/10 rounded-xl text-center text-slate-400 text-sm">
-	              まだ保存したプロジェクトが無いよ。<br />
-	              編集画面で「名前をつけて保存」したらここに出るよ〜
-	            </div>
-	          ) : (
+		          {items.length === 0 ? (
+		            <div className="p-8 glass-thin glass-flat border border-black/10 rounded-xl text-center text-slate-400 text-sm">
+		              まだ保存したプロジェクトが無いよ。<br />
+		              編集画面で「名前をつけて保存」したらここに出るよ〜
+		            </div>
+		          ) : (
 	            <>
 	              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
 	                {items.map(p => {
 	                  const selected = p.id === selectedId;
 	                  return (
-	                  <button
-	                      key={p.id}
-	                      type="button"
-	                      onClick={() => { setStatusText(''); setSelectedId(p.id); }}
-	                      onDoubleClick={() => handleLoadById(p.id)}
-	                      className={`text-left border rounded-xl overflow-hidden transition-colors glass-thin ${
-	                        selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-black/10'
-	                      }`}
-	                    >
+		                  <button
+		                      key={p.id}
+		                      type="button"
+		                      onClick={() => { setStatusText(''); setSelectedId(p.id); }}
+		                      onDoubleClick={() => handleLoadById(p.id)}
+		                      className={`text-left border rounded-xl overflow-hidden transition-colors glass-thin glass-flat ${
+		                        selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-black/10'
+		                      }`}
+		                    >
 	                    <div className="relative w-full aspect-video bg-black/10">
 	                        {p.thumbnailUrl ? (
 	                          <img src={p.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />

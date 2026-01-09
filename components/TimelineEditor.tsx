@@ -696,19 +696,19 @@ const TimelineEditor: React.FC<TimelineEditorProps> = ({
                      })}
                  </div>
 
-                 {/* Global Narration Track */}
-	                 <div className="editor-glass-pane editor-glass-pane--strong timeline-row timeline-row--even h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
-	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Global Audio</div>
-                     <canvas ref={globalAudioCanvasRef} className="absolute top-0 left-0 h-full" />
-                     {!globalAudioFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">全体音声なし</div>}
-                 </div>
+	                 {/* Global Narration Track */}
+		                 <div className="editor-glass-pane editor-glass-pane--mid timeline-row timeline-row--even h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+		                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">Global Audio</div>
+	                     <canvas ref={globalAudioCanvasRef} className="absolute top-0 left-0 h-full" />
+	                     {!globalAudioFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">全体音声なし</div>}
+	                 </div>
 
-                 {/* BGM Waveform Track */}
-	                 <div className="editor-glass-pane editor-glass-pane--strong timeline-row timeline-row--odd h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
-	                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">BGM</div>
-                     <canvas ref={canvasRef} className="absolute top-0 left-0 h-full" />
-                     {!bgmFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">BGMなし</div>}
-                 </div>
+	                 {/* BGM Waveform Track */}
+		                 <div className="editor-glass-pane editor-glass-pane--mid timeline-row timeline-row--odd h-[48px] relative w-full bg-transparent border-t border-white/10 flex-shrink-0">
+		                     <div className="absolute top-0.5 left-1 text-[8px] text-slate-500 z-10 pointer-events-none">BGM</div>
+	                     <canvas ref={canvasRef} className="absolute top-0 left-0 h-full" />
+	                     {!bgmFile && <div className="absolute inset-0 flex items-center justify-center text-[8px] text-slate-700 pointer-events-none">BGMなし</div>}
+	                 </div>
              </div>
          </div>
       </div>

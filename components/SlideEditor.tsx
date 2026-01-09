@@ -288,12 +288,12 @@ const SlideEditorLayout: React.FC<{
 	          </div>
 
 		          {/* Card 2: Slide grid */}
-		          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0 idle-sidebar-typography">
-			            <div className="flex items-center justify-end gap-2 px-3 py-2 border-b border-white/10">
-			              <div className="flex items-center gap-2">
-			                <div className="text-[11px] text-slate-300 font-bold tracking-wide">スライド</div>
-			                {slideListViewMode === 'coverflow' ? (
-			                  <div className="text-[10px] font-bold text-sky-400">カバーフロー</div>
+			          <div className="editor-glass editor-glass--thin rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex flex-col flex-1 min-h-0 idle-sidebar-typography">
+				            <div className="editor-glass-pane editor-glass-pane--thin flex items-center justify-end gap-2 px-3 py-2 border-b border-white/10">
+				              <div className="flex items-center gap-2">
+				                <div className="text-[11px] text-slate-300 font-bold tracking-wide">スライド</div>
+				                {slideListViewMode === 'coverflow' ? (
+				                  <div className="text-[10px] font-bold text-sky-400">カバーフロー</div>
 			                ) : (
 			                  <div className="text-[10px] font-bold text-slate-500">グリッド</div>
 			                )}
@@ -317,10 +317,10 @@ const SlideEditorLayout: React.FC<{
 		                />
 		              </button>
 		            </div>
-		            <div className={`flex-1 min-h-0 custom-scrollbar ${slideListViewMode === 'coverflow' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-		              <SlideGrid onSelect={handleSlideSelect} selectedId={selectedSlideId} viewMode={slideListViewMode} />
-		            </div>
-		          </div>
+			            <div className={`editor-glass-pane editor-glass-pane--mid flex-1 min-h-0 custom-scrollbar ${slideListViewMode === 'coverflow' ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+			              <SlideGrid onSelect={handleSlideSelect} selectedId={selectedSlideId} viewMode={slideListViewMode} />
+			            </div>
+			          </div>
 
 	          {/* Card 3: Timeline */}
 	          <div className="editor-glass editor-glass--strong rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none h-[300px] relative idle-sidebar-typography">

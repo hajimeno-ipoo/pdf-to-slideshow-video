@@ -1371,10 +1371,10 @@ const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS = 1000;
 	                {/* Result Display */}
 	                {state.status === AppStatus.COMPLETED && state.videoUrl && (
 	                <div className="mt-8 w-full flex flex-col items-center animate-fade-in space-y-6 px-2 idle-sidebar-typography">
-			                    <div 
-			                    className="glass-thin rounded-3xl border border-black/10 p-2 w-full flex justify-center"
-			                    style={{ maxWidth: 'fit-content' }}
-					                    >
+				                    <div 
+				                    className="glass-thin glass-flat rounded-3xl border border-black/10 p-2 w-full flex justify-center"
+				                    style={{ maxWidth: 'fit-content' }}
+						                    >
 				                        <video 
 				                        ref={completedVideoRef}
 				                        src={state.videoUrl} 
