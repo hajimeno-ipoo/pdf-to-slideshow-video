@@ -19,25 +19,26 @@ interface AudioSettingsPanelProps {
   aiEnabled: boolean;
 }
 
-const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
-  audioFile,
-  audioVolume,
-  audioDuration,
-  audioPreviewUrl,
+	const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
+	  audioFile,
+	  audioVolume,
+	  audioDuration,
+	  audioPreviewUrl,
   onAudioFileChange,
   onVolumeChange,
   imageUrl,
   initialScript,
   onUsageUpdate,
   aiEnabled
-}) => {
-  const [audioMode, setAudioMode] = useState<'upload' | 'record' | 'tts'>('upload');
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
-  const timerRef = useRef<number | null>(null);
-  const audioUploadRef = useRef<HTMLInputElement>(null);
+	}) => {
+	  const [audioMode, setAudioMode] = useState<'upload' | 'record' | 'tts'>('upload');
+	  const [isRecording, setIsRecording] = useState(false);
+	  const [recordingTime, setRecordingTime] = useState(0);
+	  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+	  const audioChunksRef = useRef<Blob[]>([]);
+	  const timerRef = useRef<number | null>(null);
+	  const audioUploadRef = useRef<HTMLInputElement>(null);
+	  const [errorText, setErrorText] = useState('');
 
   const [ttsText, setTtsText] = useState(initialScript || '');
   const [scriptPrompt, setScriptPrompt] = useState(''); 
@@ -88,24 +89,26 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
       tracks?.forEach(track => track.stop());
   };
 
-  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files.length > 0) {
-          const file = e.target.files[0];
-          if (file.type.startsWith('audio/')) {
-              onAudioFileChange(file);
-          } else {
-              alert("音声ファイルを選択してください");
-          }
-      }
-      e.target.value = '';
-  };
+	  const handleAudioUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+	      setErrorText('');
+	      if (e.target.files && e.target.files.length > 0) {
+	          const file = e.target.files[0];
+	          if (file.type.startsWith('audio/')) {
+	              onAudioFileChange(file);
+	          } else {
+	              setErrorText('音声ファイルを選択してください');
+	          }
+	      }
+	      e.target.value = '';
+	  };
 
-  const startRecording = async () => { 
-      try {
-          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorderRef.current = mediaRecorder;
-          audioChunksRef.current = [];
+	  const startRecording = async () => { 
+	      try {
+	          setErrorText('');
+	          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+	          const mediaRecorder = new MediaRecorder(stream);
+	          mediaRecorderRef.current = mediaRecorder;
+	          audioChunksRef.current = [];
           mediaRecorder.ondataavailable = (event) => { if (event.data.size > 0) audioChunksRef.current.push(event.data); };
           mediaRecorder.onstop = () => {
               const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
@@ -119,45 +122,47 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
           timerRef.current = window.setInterval(() => {
               setRecordingTime(prev => prev + 1);
           }, 1000);
-      } catch (err) {
-          console.error(err);
-          alert("マイクへのアクセスに失敗しました。");
-      }
-  };
+	      } catch (err) {
+	          console.error(err);
+	          setErrorText('マイクへのアクセスに失敗しました。');
+	      }
+	  };
 
   const stopRecording = () => {
       setIsRecording(false);
       stopRecordingCleanup();
   };
 
-	  const handleGenerateTts = async () => { 
-	      if (isAiLocked) return;
-	      if (!ttsText) return;
-	      setIsGeneratingTts(true);
-	      try {
-	          const { file, usage } = await generateSpeech(ttsText, ttsVoice, ttsStylePrompt);
-          onAudioFileChange(file);
-          if (onUsageUpdate) onUsageUpdate(usage);
-      } catch (e: any) {
-          alert(e.message);
-      } finally {
-          setIsGeneratingTts(false);
-      }
-  };
+		  const handleGenerateTts = async () => { 
+		      if (isAiLocked) return;
+		      if (!ttsText) return;
+		      setIsGeneratingTts(true);
+		      setErrorText('');
+		      try {
+		          const { file, usage } = await generateSpeech(ttsText, ttsVoice, ttsStylePrompt);
+	          onAudioFileChange(file);
+	          if (onUsageUpdate) onUsageUpdate(usage);
+	      } catch (e: any) {
+	          setErrorText(e?.message || '読み上げに失敗しちゃった…');
+	      } finally {
+	          setIsGeneratingTts(false);
+	      }
+	  };
 
-	  const handleAnalyzeSlide = async () => {
-	      if (isAiLocked) return;
-	      setIsAnalyzingSlide(true);
-	      try {
-	          const result = await generateSlideScript(imageUrl, undefined, scriptPrompt);
-          setTtsText(result.text);
-          if (onUsageUpdate) onUsageUpdate(result.usage);
-      } catch (e: any) {
-          alert(e.message);
-      } finally {
-          setIsAnalyzingSlide(false);
-      }
-  };
+		  const handleAnalyzeSlide = async () => {
+		      if (isAiLocked) return;
+		      setIsAnalyzingSlide(true);
+		      setErrorText('');
+		      try {
+		          const result = await generateSlideScript(imageUrl, undefined, scriptPrompt);
+	          setTtsText(result.text);
+	          if (onUsageUpdate) onUsageUpdate(result.usage);
+	      } catch (e: any) {
+	          setErrorText(e?.message || '解析に失敗しちゃった…');
+	      } finally {
+	          setIsAnalyzingSlide(false);
+	      }
+	  };
 
   const formatTime = (seconds: number) => {
       const m = Math.floor(seconds / 60);
@@ -186,22 +191,27 @@ const AudioSettingsPanel: React.FC<AudioSettingsPanelProps> = ({
         )}
 
         {/* 追加モード切り替え */}
-        <div className="flex flex-col gap-2">
-	             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{audioFile ? '音声を変更' : '音声を追加'}</h4>
-	             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
-	                  <button onClick={() => setAudioMode('upload')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
-	                  <button onClick={() => setAudioMode('record')} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'record' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>録音</button>
-	                  <button
-	                      onClick={() => setAudioMode('tts')}
-	                      disabled={isAiLocked}
-	                      className={`flex-1 py-1.5 text-xs rounded-md disabled:opacity-40 disabled:cursor-not-allowed ${audioMode === 'tts' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white disabled:hover:text-slate-400'}`}
-	                  >
-	                      AI読み上げ
-	                  </button>
-	             </div>
+		        <div className="flex flex-col gap-2">
+		             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">{audioFile ? '音声を変更' : '音声を追加'}</h4>
+		             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
+		                  <button onClick={() => { setErrorText(''); setAudioMode('upload'); }} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
+		                  <button onClick={() => { setErrorText(''); setAudioMode('record'); }} className={`flex-1 py-1.5 text-xs rounded-md ${audioMode === 'record' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>録音</button>
+		                  <button
+		                      onClick={() => { setErrorText(''); setAudioMode('tts'); }}
+		                      disabled={isAiLocked}
+		                      className={`flex-1 py-1.5 text-xs rounded-md disabled:opacity-40 disabled:cursor-not-allowed ${audioMode === 'tts' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white disabled:hover:text-slate-400'}`}
+		                  >
+		                      AI読み上げ
+		                  </button>
+		             </div>
+		             {errorText && (
+		               <div className="bg-red-900/20 border border-red-900/50 text-red-300 text-[11px] rounded-lg px-3 py-2" role="alert">
+		                 {errorText}
+		               </div>
+		             )}
 
-             {/* Upload Mode */}
-             {audioMode === 'upload' && (
+	             {/* Upload Mode */}
+	             {audioMode === 'upload' && (
                  <>
                     <button onClick={() => audioUploadRef.current?.click()} className="w-full flex flex-col items-center justify-center p-6 bg-slate-800 hover:bg-slate-700 rounded-lg text-sm text-white transition-colors border-2 border-dashed border-slate-600 hover:border-emerald-500 group">
                         <span className="flex items-center gap-2 text-slate-400 group-hover:text-white transition-colors">

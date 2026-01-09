@@ -6,8 +6,10 @@ import { createSlideFromImage, createSolidColorSlide } from '../../services/pdfV
 import { TransitionType } from '../../types';
 import { applySlideAudioOffsetDelta } from '../../utils/slideAudioBulkShift';
 import ColorPickerPopover from '../ColorPickerPopover';
+import { useToast } from '../ToastProvider';
 
 export const Toolbar: React.FC = () => {
+  const { pushToast } = useToast();
   const { slides, updateSlides, selectedSlideId, setSelectedSlideId } = useEditor();
   const imageAddInputRef = useRef<HTMLInputElement>(null);
 	  
@@ -62,8 +64,13 @@ export const Toolbar: React.FC = () => {
           newSlides.splice(getInsertIndex(), 0, newSlide);
           updateSlides(newSlides, true);
           setSelectedSlideId(newSlide.id);
-        } catch (error) { console.error("Failed to add image", error); alert("画像の追加に失敗しました。"); }
-      } else { alert("画像ファイル(jpg, png等)を選択してください"); }
+        } catch (error) {
+          console.error("Failed to add image", error);
+          pushToast({ kind: 'error', message: '画像の追加に失敗しました。' });
+        }
+      } else {
+        pushToast({ kind: 'warning', message: '画像ファイル(jpg, png等)を選択してください' });
+      }
     }
     if (imageAddInputRef.current) imageAddInputRef.current.value = '';
   };

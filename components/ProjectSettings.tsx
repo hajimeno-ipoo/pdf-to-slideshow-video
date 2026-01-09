@@ -3,12 +3,14 @@ import React, { useRef, useState } from 'react';
 import { useEditor } from './slideEditor/SlideEditorContext';
 import BgmWaveformEditor from './BgmWaveformEditor';
 import { Resolution, OutputFormat, BackgroundFill, AspectRatio } from '../types';
+import { useToast } from './ToastProvider';
 
 const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
-	  const { 
-	      videoSettings, setVideoSettings,
-	      bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
-	      globalAudioFile, setGlobalAudioFile, globalAudioVolume, setGlobalAudioVolume,
+	  const { pushToast } = useToast();
+		  const { 
+		      videoSettings, setVideoSettings,
+		      bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
+		      globalAudioFile, setGlobalAudioFile, globalAudioVolume, setGlobalAudioVolume,
 	      duckingOptions, setDuckingOptions,
 	      slides, updateSlides,
 	      customFonts, removeCustomFont
@@ -19,34 +21,34 @@ const ProjectSettings: React.FC<{ onClose?: () => void }> = ({ onClose }) => {
   const bgImageInputRef = useRef<HTMLInputElement>(null);
   const [globalAudioRange, setGlobalAudioRange] = useState({ start: 0, end: 0 });
 
-  const handleBgmSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (file.type.startsWith('audio/')) {
-            setBgmFile(file);
-            setBgmRange({ start: 0, end: 0 });
-            setBgmVolume(1.0);
-        } else { alert("音声ファイルを選択してください"); }
-    }
-  };
+	  const handleBgmSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+	    if (e.target.files && e.target.files.length > 0) {
+	        const file = e.target.files[0];
+	        if (file.type.startsWith('audio/')) {
+	            setBgmFile(file);
+	            setBgmRange({ start: 0, end: 0 });
+	            setBgmVolume(1.0);
+	        } else { pushToast({ kind: 'warning', message: '音声ファイルを選択してください' }); }
+	    }
+	  };
 
-  const handleGlobalAudioSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (file.type.startsWith('audio/')) {
-            setGlobalAudioFile(file);
-            setGlobalAudioVolume(1.0);
-        } else { alert("音声ファイルを選択してください"); }
-    }
-  };
+	  const handleGlobalAudioSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+	    if (e.target.files && e.target.files.length > 0) {
+	        const file = e.target.files[0];
+	        if (file.type.startsWith('audio/')) {
+	            setGlobalAudioFile(file);
+	            setGlobalAudioVolume(1.0);
+	        } else { pushToast({ kind: 'warning', message: '音声ファイルを選択してください' }); }
+	    }
+	  };
 
-  const handleBgImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-        const file = e.target.files[0];
-        if (file.type.startsWith('image/')) setVideoSettings({ backgroundImageFile: file });
-        else alert("画像ファイルを選択してください");
-    }
-  };
+	  const handleBgImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+	    if (e.target.files && e.target.files.length > 0) {
+	        const file = e.target.files[0];
+	        if (file.type.startsWith('image/')) setVideoSettings({ backgroundImageFile: file });
+	        else pushToast({ kind: 'warning', message: '画像ファイルを選択してください' });
+	    }
+	  };
 
   const handleBgImageClear = () => {
     setVideoSettings({ backgroundImageFile: undefined, backgroundFill: 'black' });

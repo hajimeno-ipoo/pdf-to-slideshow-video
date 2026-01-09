@@ -8,8 +8,9 @@ import SlideEditor from './components/SlideEditor';
 import RestoreModal from './components/RestoreModal';
 import CooldownNotification from './components/CooldownNotification';
 import ApiKeyModal from './components/ApiKeyModal';
-import GlassSettingsModal from './components/GlassSettingsModal';
-import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions, CustomFont } from './types';
+	import GlassSettingsModal from './components/GlassSettingsModal';
+	import { useToast } from './components/ToastProvider';
+	import { AppStatus, ProcessingState, Slide, VideoSettings, AspectRatio, TransitionType, BgmTimeRange, ApiConnectionStatus, TokenUsage, ProjectData, RequestStats, DuckingOptions, CustomFont } from './types';
 import { analyzeImages, analyzePdf, drawSlideFrame, generateVideoFromSlides, getKenBurnsParams, getVideoDimensions, initPdfJs, renderBackground, updateThumbnail } from './services/pdfVideoService';
 import { checkApiConnection, setApiRequestListener, setApiCooldownListener } from './services/geminiService';
 import { loadProject, saveProject, clearProject } from './services/projectStorage';
@@ -26,13 +27,15 @@ const RPD_KEY = 'pdf_video_creator_rpd_counter';
 const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_MS = 2000;
 const COMPLETED_VIDEO_CONTROLS_HIDE_DELAY_FOCUS_KEY_MS = 1000;
 
-const App: React.FC = () => {
-  const [state, setState] = useState<ProcessingState>({
-    status: AppStatus.IDLE
-  });
-  const [slides, setSlides] = useState<Slide[]>([]);
-  const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
-  const [sourceFile, setSourceFile] = useState<File | null>(null);
+	const App: React.FC = () => {
+	  const { pushToast } = useToast();
+	  const [state, setState] = useState<ProcessingState>({
+	    status: AppStatus.IDLE
+	  });
+	  const [slides, setSlides] = useState<Slide[]>([]);
+	  const [customFonts, setCustomFonts] = useState<CustomFont[]>([]);
+	  const [sourceFile, setSourceFile] = useState<File | null>(null);
+	  const [uploadErrorText, setUploadErrorText] = useState('');
 
   const [glassPrefs, setGlassPrefs] = useState<GlassPrefs>(() => loadGlassPrefsFromLocalStorage() ?? DEFAULT_GLASS_PREFS);
   
@@ -410,13 +413,14 @@ const App: React.FC = () => {
   };
 
   // Step 1: Upload & Analyze
-  const handleFileSelect = async (files: File[], duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => {
-    try {
-      const selection = classifyUploadFiles(files);
-      if (selection.kind === 'error') {
-        alert(selection.message);
-        return;
-      }
+	  const handleFileSelect = async (files: File[], duration: number, transitionType: TransitionType, autoGenerateScript: boolean, customScriptPrompt?: string) => {
+	    try {
+	      const selection = classifyUploadFiles(files);
+	      if (selection.kind === 'error') {
+	        setUploadErrorText(selection.message);
+	        return;
+	      }
+	      setUploadErrorText('');
 
       const importFrameSettings: VideoSettings = state.settings || {
         aspectRatio: '16:9',
@@ -555,10 +559,10 @@ const App: React.FC = () => {
 	        typeof window === 'undefined' ? null : window,
 	        { requireAudio: requiresAudio }
 	      );
-	      if (supportError) {
-	        alert(supportError);
-	        return;
-	      }
+		      if (supportError) {
+		        pushToast({ kind: 'error', message: supportError });
+		        return;
+		      }
 	
 	      setState({ 
 	        status: AppStatus.CONVERTING, 
@@ -1333,8 +1337,8 @@ const App: React.FC = () => {
 			                )}
 
 	                {state.status === AppStatus.IDLE && (
-		                <FileUpload onFileSelect={handleFileSelect} status={state.status} aiEnabled={aiEnabled} onOpenProjectManager={() => setProjectManagerOpen(true)} />
-		                )}
+			                <FileUpload onFileSelect={handleFileSelect} status={state.status} aiEnabled={aiEnabled} onOpenProjectManager={() => setProjectManagerOpen(true)} errorText={uploadErrorText} />
+			                )}
 
 	                {/* Processing Status (Analysis or Conversion) */}
 	                {(state.status === AppStatus.ANALYZING || state.status === AppStatus.CONVERTING) && (

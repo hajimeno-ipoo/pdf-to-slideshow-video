@@ -4,6 +4,7 @@ import { useEditor } from './SlideEditorContext';
 import { TransitionType, Slide } from '../../types';
 import { safeRandomUUID } from '../../utils/uuid';
 import { initPdfJs } from '../../services/pdfVideoService';
+import { useToast } from '../ToastProvider';
 
 declare const pdfjsLib: any;
 
@@ -14,6 +15,7 @@ interface SlideGridProps {
 }
 
 export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, viewMode = 'grid' }) => {
+  const { pushToast } = useToast();
   const { slides, updateSlides, videoSettings, sourceFile } = useEditor();
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   const [downloadingSlideId, setDownloadingSlideId] = useState<string | null>(null);
@@ -77,7 +79,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
 
   const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (slides.length <= 1) { alert("最低1枚のスライドが必要です"); return; }
+    if (slides.length <= 1) { pushToast({ kind: 'warning', message: '最低1枚のスライドが必要です' }); return; }
     updateSlides(slides.filter(s => s.id !== id), true);
     if (selectedId === id) onSelect(null);
   };
@@ -232,7 +234,7 @@ export const SlideGrid: React.FC<SlideGridProps> = ({ onSelect, selectedId, view
       throw new Error('保存できる画像が見つからなかったよ。');
     } catch (err) {
       console.error(err);
-      alert('画像の保存に失敗しちゃった…！');
+      pushToast({ kind: 'error', message: '画像の保存に失敗しちゃった…！' });
     } finally {
       setDownloadingSlideId(null);
     }

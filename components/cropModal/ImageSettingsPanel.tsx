@@ -29,12 +29,13 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
   canMoveBackward,
   slideDuration,
   aiEnabled
-}) => {
-  const [imageMode, setImageMode] = useState<'upload' | 'gen'>('upload');
-  const [imgGenPrompt, setImgGenPrompt] = useState('');
-	const [isGeneratingImg, setIsGeneratingImg] = useState(false);
-	const imageUploadRef = useRef<HTMLInputElement>(null);
-	const isAiLocked = !aiEnabled;
+	}) => {
+	  const [imageMode, setImageMode] = useState<'upload' | 'gen'>('upload');
+	  const [imgGenPrompt, setImgGenPrompt] = useState('');
+		const [isGeneratingImg, setIsGeneratingImg] = useState(false);
+		const imageUploadRef = useRef<HTMLInputElement>(null);
+	  const [errorText, setErrorText] = useState('');
+		const isAiLocked = !aiEnabled;
 
 	useEffect(() => {
 	  if (isAiLocked) setImageMode('upload');
@@ -60,32 +61,35 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
       e.target.value = '';
   };
 
-  const handleGenerateImage = async () => { 
-      if (!imgGenPrompt.trim()) return;
-      setIsGeneratingImg(true);
-      try {
-          const result = await generateImage(imgGenPrompt);
-          onAddImage(result.imageData);
-          setImgGenPrompt(''); 
-          if (onUsageUpdate && result.usage) onUsageUpdate(result.usage);
-      } catch (e: any) { alert("画像生成に失敗しました: " + e.message); } finally { setIsGeneratingImg(false); }
-  };
+	  const handleGenerateImage = async () => { 
+	      if (!imgGenPrompt.trim()) return;
+	      setIsGeneratingImg(true);
+	      setErrorText('');
+	      try {
+	          const result = await generateImage(imgGenPrompt);
+	          onAddImage(result.imageData);
+	          setImgGenPrompt(''); 
+	          if (onUsageUpdate && result.usage) onUsageUpdate(result.usage);
+	      } catch (e: any) {
+	          setErrorText(`画像生成に失敗しました: ${e?.message || ''}`.trim());
+	      } finally { setIsGeneratingImg(false); }
+	  };
 
   return (
     <div className="w-full p-4 flex flex-col gap-6">
          {/* 追加エリア (常時表示) */}
 	         <div className="flex flex-col gap-2">
 	             <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider">画像の追加</h4>
-	             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
-	                  <button onClick={() => setImageMode('upload')} className={`flex-1 py-1.5 text-xs rounded-md ${imageMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
-	                  <button
-	                      onClick={() => setImageMode('gen')}
-	                      disabled={isAiLocked}
-	                      className={`flex-1 py-1.5 text-xs rounded-md disabled:opacity-40 disabled:cursor-not-allowed ${imageMode === 'gen' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white disabled:hover:text-slate-400'}`}
-	                  >
-	                      AIで生成
-	                  </button>
-	             </div>
+		             <div className="flex p-1 bg-slate-800 rounded-lg mb-1">
+		                  <button onClick={() => { setErrorText(''); setImageMode('upload'); }} className={`flex-1 py-1.5 text-xs rounded-md ${imageMode === 'upload' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}>アップロード</button>
+		                  <button
+		                      onClick={() => { setErrorText(''); setImageMode('gen'); }}
+		                      disabled={isAiLocked}
+		                      className={`flex-1 py-1.5 text-xs rounded-md disabled:opacity-40 disabled:cursor-not-allowed ${imageMode === 'gen' ? 'bg-slate-600 text-white shadow' : 'text-slate-400 hover:text-white disabled:hover:text-slate-400'}`}
+		                  >
+		                      AIで生成
+		                  </button>
+		             </div>
              
              {imageMode === 'upload' ? (
                  <>
@@ -108,11 +112,11 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 	                            className="w-full bg-slate-900 border border-slate-600 rounded p-2 text-white text-xs h-20 focus:ring-1 focus:ring-emerald-500 outline-none resize-none disabled:opacity-60 disabled:cursor-not-allowed"
 	                        />
 	                    </div>
-	                    <button 
-	                        onClick={handleGenerateImage} 
-	                        disabled={isAiLocked || isGeneratingImg || !imgGenPrompt.trim()}
-	                        className={`w-full py-1.5 rounded font-medium text-xs transition-all flex items-center justify-center gap-2 ${isAiLocked || isGeneratingImg || !imgGenPrompt.trim() ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg'}`}
-	                    >
+		                    <button 
+		                        onClick={handleGenerateImage} 
+		                        disabled={isAiLocked || isGeneratingImg || !imgGenPrompt.trim()}
+		                        className={`w-full py-1.5 rounded font-medium text-xs transition-all flex items-center justify-center gap-2 ${isAiLocked || isGeneratingImg || !imgGenPrompt.trim() ? 'bg-slate-700 text-slate-500 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 text-white shadow-lg'}`}
+		                    >
 	                        {isGeneratingImg ? (
 	                            <>
 	                                <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
@@ -121,10 +125,15 @@ const ImageSettingsPanel: React.FC<ImageSettingsPanelProps> = ({
 	                        ) : (
 	                            '画像を生成 (無料)'
 	                        )}
-	                    </button>
-	                    {isAiLocked && <div className="text-[11px] text-slate-500">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</div>}
-	                 </div>
-	             )}
+		                    </button>
+		                    {errorText && (
+		                      <div className="text-[11px] text-red-300 bg-red-900/20 border border-red-900/50 rounded-lg px-3 py-2" role="alert">
+		                        {errorText}
+		                      </div>
+		                    )}
+		                    {isAiLocked && <div className="text-[11px] text-slate-500">※ API接続がOKの時だけ使えるよ（上のAPIキーから設定してね）</div>}
+		                 </div>
+		             )}
 	         </div>
 
          {/* 編集エリア (選択時のみ表示) */}

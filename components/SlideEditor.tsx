@@ -12,6 +12,7 @@ import { Toolbar } from './slideEditor/Toolbar';
 import ProjectSettings from './ProjectSettings';
 import SlideInspector from './SlideInspector';
 import { SlideGrid } from './slideEditor/SlideGrid';
+import { useToast } from './ToastProvider';
 
 // Layout Component
 const SlideEditorLayout: React.FC<{
@@ -29,11 +30,12 @@ const SlideEditorLayout: React.FC<{
   onLoadProject?: (data: ProjectData) => void;
   onOpenProjectManager?: () => void;
   aiEnabled: boolean;
-}> = ({ onStartConversion, onUsageUpdate, onLoadProject, onOpenProjectManager, aiEnabled }) => {
-  const { 
-      slides, updateSlides, undo, redo, canUndo, canRedo,
-      videoSettings, 
-      bgmFile, bgmRange, bgmVolume, fadeOptions,
+	}> = ({ onStartConversion, onUsageUpdate, onLoadProject, onOpenProjectManager, aiEnabled }) => {
+	  const { pushToast } = useToast();
+	  const { 
+	      slides, updateSlides, undo, redo, canUndo, canRedo,
+	      videoSettings, 
+	      bgmFile, bgmRange, bgmVolume, fadeOptions,
       globalAudioFile, globalAudioVolume,
       duckingOptions,
       customFonts,
@@ -105,33 +107,36 @@ const SlideEditorLayout: React.FC<{
       }
   };
 
-  const handleExportProject = async () => {
-      setIsExporting(true);
-      try {
+	  const handleExportProject = async () => {
+	      setIsExporting(true);
+	      try {
           const projectData: ProjectData = {
               slides, customFonts, sourceFile, videoSettings, bgmFile, bgmTimeRange: bgmRange, bgmVolume, globalAudioFile, globalAudioVolume, fadeOptions, duckingOptions, updatedAt: Date.now()
           };
           const json = await serializeProject(projectData);
           const blob = new Blob([json], { type: 'application/json' });
           const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = `project_${new Date().toISOString().slice(0,10)}.json`;
-          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      } catch (e) { console.error("Export failed", e); alert("プロジェクトの保存に失敗しました。"); } finally { setIsExporting(false); }
-  };
+	          const a = document.createElement('a');
+	          a.href = url; a.download = `project_${new Date().toISOString().slice(0,10)}.json`;
+	          document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+	      } catch (e) {
+	        console.error("Export failed", e);
+	        pushToast({ kind: 'error', message: 'プロジェクトの保存に失敗しました。' });
+	      } finally { setIsExporting(false); }
+	  };
 
-  const handleSaveNamedProject = async () => {
-      if (!slides || slides.length === 0) {
-          alert('スライドが無いと保存できないよ。');
-          return;
-      }
+	  const handleSaveNamedProject = async () => {
+	      if (!slides || slides.length === 0) {
+	          pushToast({ kind: 'warning', message: 'スライドが無いと保存できないよ。' });
+	          return;
+	      }
 
       const defaultName = `project_${new Date().toISOString().slice(0, 19).replace('T', '_')}`;
       const name = window.prompt('プロジェクト名を入れてね！', defaultName);
       if (!name || !name.trim()) return;
 
       setIsSavingNamed(true);
-      try {
+	      try {
           const projectData: ProjectData = {
               slides,
               customFonts,
@@ -146,51 +151,54 @@ const SlideEditorLayout: React.FC<{
               duckingOptions,
               updatedAt: Date.now()
           };
-          const savedId = await saveNamedProject(name.trim(), projectData);
-          if (!savedId) {
-              alert('保存に失敗しちゃった…');
-              return;
-          }
-          alert('保存できたよ〜！');
-      } catch (e) {
-          console.error('Named save failed', e);
-          alert('保存に失敗しちゃった…');
-      } finally {
-          setIsSavingNamed(false);
-      }
-  };
+	          const savedId = await saveNamedProject(name.trim(), projectData);
+	          if (!savedId) {
+	              pushToast({ kind: 'error', message: '保存に失敗しちゃった…' });
+	              return;
+	          }
+	          pushToast({ kind: 'success', message: '保存できたよ〜！' });
+	      } catch (e) {
+	          console.error('Named save failed', e);
+	          pushToast({ kind: 'error', message: '保存に失敗しちゃった…' });
+	      } finally {
+	          setIsSavingNamed(false);
+	      }
+	  };
 
   const handleImportProject = async (e: React.ChangeEvent<HTMLInputElement>) => {
       if (!e.target.files || e.target.files.length === 0) return;
       const file = e.target.files[0];
       setIsImporting(true);
-      try {
-          const err = getProjectImportError(file);
-          if (err) {
-              alert(err);
-              return;
-          }
-          const text = await file.text();
-          const textErr = getProjectJsonTextError(text);
-          if (textErr) {
-              alert(textErr);
-              return;
-          }
-          const data = await deserializeProject(text);
-          if (onLoadProject) onLoadProject(data);
-      } catch (e) { console.error("Import failed", e); alert("プロジェクトの読み込みに失敗しました。"); } finally { setIsImporting(false); if (projectInputRef.current) projectInputRef.current.value = ''; }
-  };
+	      try {
+	          const err = getProjectImportError(file);
+	          if (err) {
+	              pushToast({ kind: 'error', message: err });
+	              return;
+	          }
+	          const text = await file.text();
+	          const textErr = getProjectJsonTextError(text);
+	          if (textErr) {
+	              pushToast({ kind: 'error', message: textErr });
+	              return;
+	          }
+	          const data = await deserializeProject(text);
+	          if (onLoadProject) onLoadProject(data);
+	      } catch (e) {
+	        console.error("Import failed", e);
+	        pushToast({ kind: 'error', message: 'プロジェクトの読み込みに失敗しました。' });
+	      } finally { setIsImporting(false); if (projectInputRef.current) projectInputRef.current.value = ''; }
+	  };
 
   const handleStartClick = () => {
     const requiresAudio = !!bgmFile || !!globalAudioFile || slides.some(s => s.audioFile);
     const supportError = getExportSupportError(
       typeof window === 'undefined' ? null : window,
       { requireAudio: requiresAudio }
-    );
-    if (supportError) {
-      alert(supportError);
-      return;
-    }
+	    );
+	    if (supportError) {
+	      pushToast({ kind: 'error', message: supportError });
+	      return;
+	    }
 
     onStartConversion(
       bgmFile,

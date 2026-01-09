@@ -26,6 +26,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
   const [items, setItems] = useState<ProjectMeta[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [statusText, setStatusText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const refresh = async () => {
@@ -41,6 +42,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
 
   useEffect(() => {
     if (!isOpen) return;
+    setStatusText('');
     (async () => {
       setBusy(true);
       try {
@@ -58,7 +60,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
     try {
       const data = await loadProjectById(id);
       if (!data) {
-        alert('プロジェクトが見つからなかったよ。');
+        setStatusText('プロジェクトが見つからなかったよ。');
         await refresh();
         return;
       }
@@ -66,7 +68,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
       onClose();
     } catch (e) {
       console.error('Load project failed', e);
-      alert('プロジェクトの読み込みに失敗したよ。');
+      setStatusText('プロジェクトの読み込みに失敗したよ。');
     } finally {
       setBusy(false);
     }
@@ -83,7 +85,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
       await refresh();
     } catch (e) {
       console.error('Delete project failed', e);
-      alert('削除に失敗しちゃった…');
+      setStatusText('削除に失敗しちゃった…');
     } finally {
       setBusy(false);
     }
@@ -95,13 +97,13 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
     try {
       const err = getProjectImportError(file);
       if (err) {
-        alert(err);
+        setStatusText(err);
         return;
       }
       const text = await file.text();
       const textErr = getProjectJsonTextError(text);
       if (textErr) {
-        alert(textErr);
+        setStatusText(textErr);
         return;
       }
       const data = await deserializeProject(text);
@@ -109,7 +111,7 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
       onClose();
     } catch (err) {
       console.error('Project import failed', err);
-      alert('プロジェクトの読み込みに失敗しました。');
+      setStatusText('プロジェクトの読み込みに失敗しました。');
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
@@ -135,6 +137,11 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
         </div>
 
 	        <div className="p-5">
+	          {statusText && (
+	            <div className="mb-3 bg-red-900/20 border border-red-900/50 text-red-300 text-sm rounded-xl px-4 py-3" role="alert">
+	              {statusText}
+	            </div>
+	          )}
 	          {items.length === 0 ? (
 	            <div className="p-8 glass-thin border border-black/10 rounded-xl text-center text-slate-400 text-sm">
 	              まだ保存したプロジェクトが無いよ。<br />
@@ -146,10 +153,10 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
 	                {items.map(p => {
 	                  const selected = p.id === selectedId;
 	                  return (
-	                    <button
+	                  <button
 	                      key={p.id}
 	                      type="button"
-	                      onClick={() => setSelectedId(p.id)}
+	                      onClick={() => { setStatusText(''); setSelectedId(p.id); }}
 	                      onDoubleClick={() => handleLoadById(p.id)}
 	                      className={`text-left border rounded-xl overflow-hidden transition-colors glass-thin ${
 	                        selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-black/10'

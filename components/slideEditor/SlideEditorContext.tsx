@@ -6,6 +6,7 @@ import { saveProject } from '../../services/projectStorage';
 import { safeRandomUUID } from '../../utils/uuid';
 import { buildUniqueFontFamily, isSupportedFontFile, normalizeFontDisplayName } from '../../utils/customFontUtils.js';
 import { fitSlidesToGlobalNarrationDuration, restoreSlidesFromGlobalNarrationFit } from '../../utils/globalNarrationFit.js';
+import { useToast } from '../ToastProvider';
 
 type UndoRedoSnapshot = {
   slides: Slide[];
@@ -83,6 +84,7 @@ interface EditorProviderProps {
 export const EditorProvider: React.FC<EditorProviderProps> = ({ 
   children, slides, onUpdateSlides, customFonts, onUpdateCustomFonts, initialSettings, initialBgmFile, initialFadeOptions, initialBgmTimeRange, initialBgmVolume, initialGlobalAudioFile, initialGlobalAudioVolume, initialDuckingOptions, sourceFile, onAutoSave
 }) => {
+  const { pushToast } = useToast();
   // --- History State ---
   const [history, setHistory] = useState<UndoRedoSnapshot[]>([]);
   const [future, setFuture] = useState<UndoRedoSnapshot[]>([]);
@@ -424,10 +426,10 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
                 updateSlides(fitted, false);
             } catch (e: any) {
                 console.error('global narration duration fit failed', e);
-                alert('ナレーションの長さが取れなかったから、スライドの長さを合わせられなかったよ…！');
+                pushToast({ kind: 'error', message: 'ナレーションの長さが取れなかったから、スライドの長さを合わせられなかったよ…！' });
             }
         })();
-	  }, [decodeAudioDurationSeconds, globalAudioFile, pushHistoryGrouped, updateSlides]);
+		  }, [decodeAudioDurationSeconds, globalAudioFile, pushHistoryGrouped, pushToast, updateSlides]);
 
 	  const setGlobalAudioVolume = useCallback((vol: number) => {
 	      if (vol !== globalAudioVolume) pushHistoryGrouped();
@@ -474,13 +476,13 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         }
     }, [customFonts, loadFontIntoDocument]);
 
-    const addCustomFonts = useCallback(async (files: File[]) => {
-        const list = Array.isArray(files) ? files : Array.from(files || []);
-        const supported = list.filter(isSupportedFontFile);
-        if (supported.length === 0) {
-            alert('フォントファイル（.woff2/.woff/.ttf/.otf）を選んでね。');
-            return [];
-        }
+	    const addCustomFonts = useCallback(async (files: File[]) => {
+	        const list = Array.isArray(files) ? files : Array.from(files || []);
+	        const supported = list.filter(isSupportedFontFile);
+	        if (supported.length === 0) {
+	            pushToast({ kind: 'warning', message: 'フォントファイル（.woff2/.woff/.ttf/.otf）を選んでね。' });
+	            return [];
+	        }
 
         const existingFamilies = new Set([
             'Noto Sans JP',
@@ -507,7 +509,7 @@ export const EditorProvider: React.FC<EditorProviderProps> = ({
         for (const f of added) await loadFontIntoDocument(f);
 
         return added;
-    }, [customFonts, onUpdateCustomFonts, loadFontIntoDocument]);
+	    }, [customFonts, onUpdateCustomFonts, loadFontIntoDocument, pushToast]);
 
 	    const removeCustomFont = useCallback((id: string) => {
 	        if (!id) return;

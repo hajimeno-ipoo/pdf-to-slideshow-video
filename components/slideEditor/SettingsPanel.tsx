@@ -3,8 +3,10 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useEditor } from './SlideEditorContext';
 import BgmWaveformEditor from '../BgmWaveformEditor';
 import { Resolution, OutputFormat, BackgroundFill, AspectRatio } from '../../types';
+import { useToast } from '../ToastProvider';
 
 export const SettingsPanel: React.FC = () => {
+  const { pushToast } = useToast();
   const { 
       videoSettings, setVideoSettings,
       bgmFile, setBgmFile, bgmRange, setBgmRange, bgmVolume, setBgmVolume, fadeOptions, setFadeOptions,
@@ -25,7 +27,7 @@ export const SettingsPanel: React.FC = () => {
             setBgmFile(file);
             setBgmRange({ start: 0, end: 0 });
             setBgmVolume(1.0);
-        } else { alert("音声ファイルを選択してください"); }
+        } else { pushToast({ kind: 'warning', message: '音声ファイルを選択してください' }); }
     }
   };
 
@@ -35,7 +37,7 @@ export const SettingsPanel: React.FC = () => {
         if (file.type.startsWith('audio/')) {
             setGlobalAudioFile(file);
             setGlobalAudioVolume(1.0);
-        } else { alert("音声ファイルを選択してください"); }
+        } else { pushToast({ kind: 'warning', message: '音声ファイルを選択してください' }); }
     }
   };
 
@@ -43,7 +45,7 @@ export const SettingsPanel: React.FC = () => {
     if (e.target.files && e.target.files.length > 0) {
         const file = e.target.files[0];
         if (file.type.startsWith('image/')) setVideoSettings({ backgroundImageFile: file });
-        else alert("画像ファイルを選択してください");
+        else pushToast({ kind: 'warning', message: '画像ファイルを選択してください' });
     }
   };
 
