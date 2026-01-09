@@ -134,53 +134,60 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
           </button>
         </div>
 
-        <div className="p-5">
-          {items.length === 0 ? (
-            <div className="p-8 glass-thin border border-black/10 rounded-xl text-center text-slate-400 text-sm">
-              まだ保存したプロジェクトが無いよ。<br />
-              編集画面で「名前をつけて保存」したらここに出るよ〜
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-              {items.map(p => {
-                const selected = p.id === selectedId;
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => setSelectedId(p.id)}
-                    onDoubleClick={() => handleLoadById(p.id)}
-                    className={`text-left border rounded-xl overflow-hidden transition-colors glass-thin ${
-                      selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-black/10'
-                    }`}
-                  >
-                  <div className="relative w-full aspect-video bg-black/10">
-                      {p.thumbnailUrl ? (
-                        <img src={p.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs">
-                          サムネなし
-                        </div>
-                      )}
-                      <div className="absolute bottom-2 right-2 text-[10px] bg-white/25 text-slate-700 px-2 py-0.5 rounded border border-black/10">
-                        {p.slideCount}枚
-                      </div>
-                    </div>
-                    <div className="p-2">
-                      <div className="text-[13px] text-slate-200 font-bold truncate">{p.name || '（無名）'}</div>
-                      <div className="text-[11px] text-slate-400 mt-1">
-                        更新: {formatDateTime(p.updatedAt)}
-                      </div>
-                      <div className="text-[11px] text-slate-400 mt-1">
-                        容量: {formatBytes(p.approxBytes || 0)}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
+	        <div className="p-5">
+	          {items.length === 0 ? (
+	            <div className="p-8 glass-thin border border-black/10 rounded-xl text-center text-slate-400 text-sm">
+	              まだ保存したプロジェクトが無いよ。<br />
+	              編集画面で「名前をつけて保存」したらここに出るよ〜
+	            </div>
+	          ) : (
+	            <>
+	              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+	                {items.map(p => {
+	                  const selected = p.id === selectedId;
+	                  return (
+	                    <button
+	                      key={p.id}
+	                      type="button"
+	                      onClick={() => setSelectedId(p.id)}
+	                      onDoubleClick={() => handleLoadById(p.id)}
+	                      className={`text-left border rounded-xl overflow-hidden transition-colors glass-thin ${
+	                        selected ? 'border-emerald-500 ring-2 ring-emerald-500/20' : 'border-black/10'
+	                      }`}
+	                    >
+	                    <div className="relative w-full aspect-video bg-black/10">
+	                        {p.thumbnailUrl ? (
+	                          <img src={p.thumbnailUrl} alt="" className="absolute inset-0 w-full h-full object-contain" />
+	                        ) : (
+	                          <div className="absolute inset-0 flex items-center justify-center text-slate-600 text-xs">
+	                            サムネなし
+	                          </div>
+	                        )}
+	                        <div className="absolute bottom-2 right-2 text-[10px] bg-white/25 text-slate-700 px-2 py-0.5 rounded border border-black/10">
+	                          {p.slideCount}枚
+	                        </div>
+	                      </div>
+	                      <div className="p-2">
+	                        <div className="text-[13px] text-slate-200 font-bold truncate">{p.name || '（無名）'}</div>
+	                        <div className="text-[11px] text-slate-400 mt-1">
+	                          更新: {formatDateTime(p.updatedAt)}
+	                        </div>
+	                        <div className="text-[11px] text-slate-400 mt-1">
+	                          容量: {formatBytes(p.approxBytes || 0)}
+	                        </div>
+	                      </div>
+	                    </button>
+	                  );
+	                })}
+	              </div>
+	              {!selectedId && (
+	                <div className="mt-3 text-[11px] text-slate-400 font-medium" role="status" aria-live="polite">
+	                  ヒント：プロジェクトを選択してから「開く」を押してね
+	                </div>
+	              )}
+	            </>
+	          )}
+	        </div>
 
         <div className="px-5 py-4 border-t border-slate-800 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -191,13 +198,13 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
               className="hidden"
               onChange={handleImportJson}
             />
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={busy}
-              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs idle-btn-glass"
-            >
-              JSONから読込
-            </button>
+	            <button
+	              onClick={() => fileInputRef.current?.click()}
+	              disabled={busy}
+	              className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs idle-btn-glass"
+	            >
+	              JSONから開く
+	            </button>
             <button
               onClick={refresh}
               disabled={busy}
@@ -221,15 +228,15 @@ const ProjectManagerModal: React.FC<ProjectManagerModalProps> = ({ isOpen, onClo
             >
               削除
             </button>
-            <button
-              onClick={() => selectedId && handleLoadById(selectedId)}
-              disabled={busy || !selectedId}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-            >
-              読込
-            </button>
-          </div>
-        </div>
+	            <button
+	              onClick={() => selectedId && handleLoadById(selectedId)}
+	              disabled={busy || !selectedId}
+	              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+	            >
+	              開く
+	            </button>
+	          </div>
+	        </div>
       </div>
     </div>
   );
