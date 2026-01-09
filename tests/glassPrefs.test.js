@@ -44,7 +44,7 @@ test('glass prefs: App applies idle glass css vars and mounts modal', () => {
 test('glass prefs: Header has glass settings button hook', () => {
   const src = readUtf8('components/Header.tsx');
   assert.ok(src.includes('onOpenGlassSettings'));
-  assert.ok(src.includes('aria-label="ガラス設定"'));
+  assert.ok(src.includes('aria-label="テーマ設定"'));
 });
 
 test('glass prefs: idle overlay styles exist', () => {

@@ -403,7 +403,7 @@ const GlassSettingsModal: React.FC<Props> = ({ open, prefs, onChange, onReset, o
 	        className="bg-slate-900 border border-slate-800 rounded-xl shadow-2xl w-full max-w-2xl p-5 space-y-4 glass-settings-panel glass-strong idle-sidebar-typography"
 	      >
 	        <div className="flex items-center justify-between">
-	          <h3 className="text-slate-200 font-bold text-lg">ガラス設定</h3>
+	          <h3 className="text-slate-200 font-bold text-lg">テーマ設定</h3>
 	          <button
             onClick={onClose}
             className="rounded-full p-2 border border-white/15 bg-white/10 text-slate-200 hover:bg-white/20 hover:text-white active:bg-white/30 transition-colors"

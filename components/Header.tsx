@@ -163,8 +163,8 @@ const Header: React.FC<HeaderProps> = ({
 	            {onOpenGlassSettings && (
 	              <button
 	                onClick={onOpenGlassSettings}
-	                aria-label="ガラス設定"
-	                title="ガラス設定"
+		                aria-label="テーマ設定"
+		                title="テーマ設定"
 	                className="p-2 rounded-full border transition-colors idle-header-apikey border-slate-700 text-slate-300 bg-slate-800 hover:bg-slate-700"
 	              >
 	                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
