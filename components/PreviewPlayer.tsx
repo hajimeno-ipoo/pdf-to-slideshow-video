@@ -274,15 +274,28 @@ const OverlayLayer = React.memo(({
 	        const scaleX = scale * flipX;
 	        const scaleY = scale * flipY;
 
-	        const baseStyle: React.CSSProperties = {
-	            position: 'absolute',
-	            left: `${ov.x * 100}%`,
-	            top: `${ov.y * 100}%`,
-	            transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`,
-	            opacity: alpha,
-	            clipPath,
-	            pointerEvents: 'none',
-	        };
+		        const baseStyle: React.CSSProperties = {
+		            position: 'absolute',
+		            left: `${ov.x * 100}%`,
+		            top: `${ov.y * 100}%`,
+		            transform: `translate(-50%, -50%) translate(${offsetX}px, ${offsetY}px) rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`,
+		            opacity: alpha,
+		            clipPath,
+		            pointerEvents: 'none',
+		        };
+
+		        if (ov.type === 'image' || ov.type === 'rect' || ov.type === 'circle') {
+		            baseStyle.width = `${(ov.width || 0.2) * baseW}px`;
+		            baseStyle.height = `${(ov.height || 0.2) * baseH}px`;
+		        } else if (ov.type === 'arrow') {
+		            baseStyle.width = `${(ov.width || 0.2) * baseW}px`;
+		            baseStyle.height = `${(ov.height || 0.05) * baseH}px`;
+		        } else if (ov.type === 'line') {
+		            baseStyle.width = `${(ov.width || 0.2) * baseW}px`;
+		            baseStyle.height = `${Math.max(20, strokeWidthPx * 2)}px`;
+		        } else if (ov.type === 'text' && ov.width) {
+		            baseStyle.width = `${ov.width * baseW}px`;
+		        }
 
         const shadowScale = baseH / 500;
 
@@ -318,18 +331,18 @@ const OverlayLayer = React.memo(({
                         {displayText}
                     </div>
                 )}
-                {ov.type === 'image' && ov.imageData && (
-                    <img
-                      src={ov.imageData}
-                      alt="overlay"
-                      style={{
-                          width: `${(ov.width||0.2) * baseW}px`,
-                          height: `${(ov.height||0.2) * baseH}px`,
-                          objectFit: 'contain',
-                          filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`
-                      }}
-                    />
-                )}
+		                {ov.type === 'image' && ov.imageData && (
+		                    <img
+		                      src={ov.imageData}
+		                      alt="overlay"
+		                      style={{
+		                          width: '100%',
+		                          height: '100%',
+		                          objectFit: 'contain',
+		                          filter: `drop-shadow(${(ov.shadowOffsetX||0)*shadowScale}px ${(ov.shadowOffsetY||0)*shadowScale}px ${(ov.shadowBlur||0)*shadowScale}px ${ov.shadowColor||'transparent'})`
+		                      }}
+		                    />
+		                )}
                 {(ov.type === 'rect' || ov.type === 'circle') && (
                     <div style={{
                         width: `${(ov.width||0.2) * baseW}px`,
@@ -1258,18 +1271,19 @@ const PreviewPlayer: React.FC<PreviewPlayerProps> = ({
 
                <canvas ref={canvasRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 shadow-2xl z-1" style={{ maxWidth: '100%', maxHeight: '100%', aspectRatio: videoSettings.aspectRatio.replace(':', '/') }} />
 
-               {currentOverlayData.width > 0 && (
-                   <div 
-                        className="absolute top-1/2 left-1/2"
-                        style={{ 
-                            width: currentOverlayData.width, 
-                            height: currentOverlayData.height,
-                            transform: `translate(-50%, -50%) scale(${scale})`,
-                            transformOrigin: 'center center',
-                            pointerEvents: 'none',
-                            zIndex: 10
-                        }}
-                   >
+	               {currentOverlayData.width > 0 && (
+	                   <div 
+	                        className="absolute top-1/2 left-1/2"
+	                        style={{ 
+	                            width: currentOverlayData.width, 
+	                            height: currentOverlayData.height,
+	                            overflow: 'hidden',
+	                            transform: `translate(-50%, -50%) scale(${scale})`,
+	                            transformOrigin: 'center center',
+	                            pointerEvents: 'none',
+	                            zIndex: 10
+	                        }}
+	                   >
                        {/* Current Slide Container - Keep fully opaque to allow proper cross-dissolve with next slide */}
                        {currentOverlayData.slide && (
                            <div style={{ 

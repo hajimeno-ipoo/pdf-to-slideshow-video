@@ -280,10 +280,10 @@ const drawOverlays = async (ctx, overlays, canvasWidth, canvasHeight, currentTim
         else if(overlay.type==='arrow') { /*arrow path*/ ctx.rect(-w/2,-h/4,w*0.7,h/2); /*simple head*/ ctx.moveTo(w*0.2,-h/2); ctx.lineTo(w/2,0); ctx.lineTo(w*0.2,h/2); }
         if(overlay.backgroundColor) ctx.fill(); if(overlay.strokeWidth) ctx.stroke();
     }
-    else if (overlay.type === 'image' && overlay.imageData) {
-        // Image / Animated Overlay Logic
-        let img = null;
-        let frameToClose = null;
+	    else if (overlay.type === 'image' && overlay.imageData) {
+	        // Image / Animated Overlay Logic
+	        let img = null;
+	        let frameToClose = null;
         
         if (overlayAssets && overlayAssets.has(overlay.id)) {
              const asset = overlayAssets.get(overlay.id);
@@ -302,23 +302,34 @@ const drawOverlays = async (ctx, overlays, canvasWidth, canvasHeight, currentTim
              } else {
                  img = asset.bitmap;
              }
-        }
+	        }
 
-        if (img) {
-            const w = (overlay.width || 0.2) * canvasWidth;
-            const h = (overlay.height || 0.2) * canvasHeight;
-            if (overlay.shadowColor) { 
-                ctx.shadowColor = overlay.shadowColor; 
-                ctx.shadowBlur = (overlay.shadowBlur || 0) * shadowScale; 
-                ctx.shadowOffsetX = (overlay.shadowOffsetX || 0) * shadowScale; 
-                ctx.shadowOffsetY = (overlay.shadowOffsetY || 0) * shadowScale; 
-            }
-            ctx.drawImage(img, -w/2, -h/2, w, h);
-        }
-        if (frameToClose) frameToClose.close();
-    }
-    ctx.restore();
-  }
+	        if (img) {
+	            const targetW = (overlay.width || 0.2) * canvasWidth;
+	            const targetH = (overlay.height || 0.2) * canvasHeight;
+	            const srcW = (typeof img.displayWidth === 'number' ? img.displayWidth : img.width) || 0;
+	            const srcH = (typeof img.displayHeight === 'number' ? img.displayHeight : img.height) || 0;
+	            if (overlay.shadowColor) { 
+	                ctx.shadowColor = overlay.shadowColor; 
+	                ctx.shadowBlur = (overlay.shadowBlur || 0) * shadowScale; 
+	                ctx.shadowOffsetX = (overlay.shadowOffsetX || 0) * shadowScale; 
+	                ctx.shadowOffsetY = (overlay.shadowOffsetY || 0) * shadowScale; 
+	            }
+	            let drawW = targetW;
+	            let drawH = targetH;
+	            if (srcW > 0 && srcH > 0 && targetW > 0 && targetH > 0) {
+	                const scale = Math.min(targetW / srcW, targetH / srcH);
+	                if (Number.isFinite(scale) && scale > 0) {
+	                    drawW = srcW * scale;
+	                    drawH = srcH * scale;
+	                }
+	            }
+	            ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+	        }
+	        if (frameToClose) frameToClose.close();
+	    }
+	    ctx.restore();
+	  }
 };
 
 const renderBackground = async (ctx, width, height, fill, bgAsset, currentTime) => {

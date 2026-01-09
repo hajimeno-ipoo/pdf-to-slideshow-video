@@ -291,9 +291,19 @@ export const drawOverlays = async (ctx: CanvasRenderingContext2D, overlays: Over
         try {
             let img;
             if (imageCache && imageCache.has(overlay.id)) { img = imageCache.get(overlay.id)!; } else { img = await loadImage(overlay.imageData); if (imageCache) imageCache.set(overlay.id, img); }
-            const w = (overlay.width || 0.2) * canvasWidth; const h = (overlay.height || 0.2) * canvasHeight;
+            const targetW = (overlay.width || 0.2) * canvasWidth;
+            const targetH = (overlay.height || 0.2) * canvasHeight;
             if (overlay.shadowColor) { ctx.shadowColor = overlay.shadowColor; ctx.shadowBlur = (overlay.shadowBlur || 0) * shadowScale; ctx.shadowOffsetX = (overlay.shadowOffsetX || 0) * shadowScale; ctx.shadowOffsetY = (overlay.shadowOffsetY || 0) * shadowScale; }
-            ctx.drawImage(img, -w/2, -h/2, w, h);
+            let drawW = targetW;
+            let drawH = targetH;
+            if (img.width > 0 && img.height > 0 && targetW > 0 && targetH > 0) {
+                const scale = Math.min(targetW / img.width, targetH / img.height);
+                if (Number.isFinite(scale) && scale > 0) {
+                    drawW = img.width * scale;
+                    drawH = img.height * scale;
+                }
+            }
+            ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
         } catch (e) { /* ignore */ }
     }
     ctx.restore();
