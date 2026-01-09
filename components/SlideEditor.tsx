@@ -1,5 +1,6 @@
 
 import React, { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { Slide, VideoSettings, BgmTimeRange, FadeOptions, TokenUsage, ProjectData, DuckingOptions, CustomFont } from '../types';
 import { serializeProject, deserializeProject } from '../utils/fileUtils';
 import { getExportSupportError } from '../utils/exportSupport';
@@ -48,8 +49,14 @@ const SlideEditorLayout: React.FC<{
   const [isImporting, setIsImporting] = useState(false);
   const [isSavingNamed, setIsSavingNamed] = useState(false);
   const [isInspectorOpen, setIsInspectorOpen] = useState(true);
+  const [openTopMenu, setOpenTopMenu] = useState<null | 'file' | 'edit'>(null);
+  const [topMenuAnchor, setTopMenuAnchor] = useState<null | { top: number; left: number; bottom: number }>(null);
   const [slideListViewMode, setSlideListViewMode] = useState<'grid' | 'coverflow'>('grid');
   const projectInputRef = useRef<HTMLInputElement>(null);
+  const topMenuRef = useRef<HTMLDivElement>(null);
+  const topMenuPortalRef = useRef<HTMLDivElement>(null);
+  const fileMenuBtnRef = useRef<HTMLButtonElement>(null);
+  const editMenuBtnRef = useRef<HTMLButtonElement>(null);
 
   const selectedSlide = slides.find(s => s.id === selectedSlideId);
 
@@ -63,25 +70,72 @@ const SlideEditorLayout: React.FC<{
       }
   }, []);
 
-  useEffect(() => {
-      const handleKeyDown = (e: KeyboardEvent) => {
-          if (isPreviewOpen) return;
-          const target = e.target as HTMLElement;
-          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
-          if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
-              e.preventDefault();
-              if (e.shiftKey) redo(); else undo();
-          }
-          if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
-      };
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [undo, redo, isPreviewOpen]);
+	  useEffect(() => {
+	      const handleKeyDown = (e: KeyboardEvent) => {
+	          if (isPreviewOpen) return;
+	          const target = e.target as HTMLElement;
+	          if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
+	          if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+	              e.preventDefault();
+	              if (e.shiftKey) redo(); else undo();
+	          }
+	          if ((e.ctrlKey || e.metaKey) && e.key === 'y') { e.preventDefault(); redo(); }
+	      };
+	      window.addEventListener('keydown', handleKeyDown);
+	      return () => window.removeEventListener('keydown', handleKeyDown);
+	  }, [undo, redo, isPreviewOpen]);
 
-  // Open inspector when selection changes to a specific slide
-  useEffect(() => {
-      if (selectedSlideId) {
-          setIsInspectorOpen(true);
+	  // Top menu: close on outside click / ESC
+	  useEffect(() => {
+	      if (!openTopMenu) return;
+
+	      const handlePointerDown = (e: MouseEvent) => {
+	          const target = e.target as Node | null;
+	          if (!target) return;
+	          if (topMenuRef.current && topMenuRef.current.contains(target)) return;
+	          if (topMenuPortalRef.current && topMenuPortalRef.current.contains(target)) return;
+	          setOpenTopMenu(null);
+	      };
+
+	      const handleKeyDown = (e: KeyboardEvent) => {
+	          if (e.key === 'Escape') setOpenTopMenu(null);
+	      };
+
+	      document.addEventListener('mousedown', handlePointerDown);
+	      document.addEventListener('keydown', handleKeyDown);
+	      return () => {
+	          document.removeEventListener('mousedown', handlePointerDown);
+	          document.removeEventListener('keydown', handleKeyDown);
+	      };
+	  }, [openTopMenu]);
+
+	  // Keep the portal menu positioned under the active button
+	  useEffect(() => {
+	      if (!openTopMenu) {
+	          setTopMenuAnchor(null);
+	          return;
+	      }
+	      const btn = openTopMenu === 'file' ? fileMenuBtnRef.current : editMenuBtnRef.current;
+	      if (!btn) return;
+
+	      const update = () => {
+	          const rect = btn.getBoundingClientRect();
+	          setTopMenuAnchor({ top: rect.top, left: rect.left, bottom: rect.bottom });
+	      };
+
+	      update();
+	      window.addEventListener('resize', update);
+	      window.addEventListener('scroll', update, true);
+	      return () => {
+	          window.removeEventListener('resize', update);
+	          window.removeEventListener('scroll', update, true);
+	      };
+	  }, [openTopMenu]);
+
+	  // Open inspector when selection changes to a specific slide
+	  useEffect(() => {
+	      if (selectedSlideId) {
+	          setIsInspectorOpen(true);
       }
   }, [selectedSlideId]);
 
@@ -224,39 +278,149 @@ const SlideEditorLayout: React.FC<{
       setIsInspectorOpen(false);
   };
 
-	  return (
-	    <>
-	      <div className="w-full h-full flex flex-row gap-3 relative">
-	        {/* Left Column: 3 cards (Top controls / Grid / Timeline) */}
-	        <div className="flex-1 flex flex-col min-w-0 h-full gap-3">
-	          {/* Card 1: Buttons + Global settings + Add slide */}
-	          <div className="editor-glass editor-glass--mid rounded-2xl border border-white/10 shadow-2xl overflow-hidden flex-none idle-sidebar-typography">
-	            <div className="editor-glass-pane editor-glass-pane--strong flex-none flex justify-between items-center p-3 border-b border-slate-800 bg-transparent overflow-x-auto gap-4 scrollbar-hide">
-	              <div className="flex items-center gap-2 flex-shrink-0">
-	                <input type="file" ref={projectInputRef} accept=".json" className="hidden" onChange={handleImportProject} />
-	                <button onClick={() => projectInputRef.current?.click()} disabled={isImporting} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap">
-	                  {isImporting ? <span className="animate-spin">↻</span> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path d="M9.25 13.25a.75.75 0 001.5 0V4.636l2.955 3.129a.75.75 0 001.09-1.03l-4.25-4.5a.75.75 0 00-1.09 0l-4.25 4.5a.75.75 0 101.09 1.03L9.25 4.636v8.614z" /><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0118 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" /></svg>} 読込
-	                </button>
-	                <button onClick={handleExportProject} disabled={isExporting} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap">
-	                  {isExporting ? <span className="animate-spin">↻</span> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" /><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" /></svg>} 保存
-	                </button>
-	                <button onClick={handleSaveNamedProject} disabled={isSavingNamed} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap">
-	                  {isSavingNamed ? <span className="animate-spin">↻</span> : <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M4.75 3A1.75 1.75 0 003 4.75v10.5A1.75 1.75 0 004.75 17h10.5A1.75 1.75 0 0017 15.25V7.621a1.75 1.75 0 00-.513-1.237l-2.871-2.871A1.75 1.75 0 0012.379 3H4.75zM6.5 4.5a.75.75 0 01.75-.75h4.5a.75.75 0 010 1.5h-4.5a.75.75 0 01-.75-.75zm0 4a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75zm0 4a.75.75 0 01.75-.75h6.5a.75.75 0 010 1.5h-6.5a.75.75 0 01-.75-.75z" clipRule="evenodd" /></svg>} 名前をつけて保存
-	                </button>
-	                <button onClick={onOpenProjectManager} disabled={!onOpenProjectManager} className="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-xs rounded border border-slate-700 transition-colors flex items-center gap-1 whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
-	                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3"><path fillRule="evenodd" d="M2 4.75A2.75 2.75 0 014.75 2h7.69a2.75 2.75 0 011.944.806l2.81 2.81A2.75 2.75 0 0118 7.56v7.69A2.75 2.75 0 0115.25 18H4.75A2.75 2.75 0 012 15.25V4.75zm2.75-1.25c-.69 0-1.25.56-1.25 1.25v10.5c0 .69.56 1.25 1.25 1.25h10.5c.69 0 1.25-.56 1.25-1.25V7.56c0-.332-.132-.65-.366-.884l-2.81-2.81A1.25 1.25 0 0011.19 3.5H4.75z" clipRule="evenodd" /></svg>
-	                  プロジェクト管理
-	                </button>
+		  return (
+		    <>
+		      {openTopMenu && topMenuAnchor && ReactDOM.createPortal(
+		        <div
+		          ref={topMenuPortalRef}
+		          style={{
+		            position: 'fixed',
+		            top: topMenuAnchor.bottom + 8,
+		            left: Math.min(
+		              window.innerWidth - 240,
+		              Math.max(8, topMenuAnchor.left)
+		            ),
+		            zIndex: 9999
+		          }}
+		        >
+		          {openTopMenu === 'file' ? (
+		            <div role="menu" className="idle-portal-menu w-56 rounded-xl p-1">
+		              <button
+		                type="button"
+		                role="menuitem"
+		                onClick={() => {
+		                  setOpenTopMenu(null);
+		                  projectInputRef.current?.click();
+		                }}
+		                disabled={isImporting}
+		                className="idle-portal-menu-item w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between gap-3"
+		              >
+		                <span className="flex items-center gap-2">{isImporting ? <span className="animate-spin">↻</span> : null}読込</span>
+		                <span className="idle-portal-menu-muted text-[10px]">JSON</span>
+		              </button>
 
-	                <div className="w-px h-5 bg-slate-700 mx-1"></div>
+		              <button
+		                type="button"
+		                role="menuitem"
+		                onClick={() => {
+		                  setOpenTopMenu(null);
+		                  handleExportProject();
+		                }}
+		                disabled={isExporting}
+		                className="idle-portal-menu-item w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between gap-3"
+		              >
+		                <span className="flex items-center gap-2">{isExporting ? <span className="animate-spin">↻</span> : null}保存</span>
+		                <span className="idle-portal-menu-muted text-[10px]">JSON</span>
+		              </button>
 
-	                <button onClick={undo} disabled={!canUndo} className={`p-1.5 rounded border transition-colors ${!canUndo ? 'bg-slate-800 text-slate-600 border-slate-800 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'}`} title="元に戻す (Ctrl+Z)">
-	                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M7.793 2.232a.75.75 0 01-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 010 10.75H10.75a.75.75 0 010-1.5h2.875a3.875 3.875 0 000-7.75H3.622l4.146 3.957a.75.75 0 01-1.036 1.085l-5.5-5.25a.75.75 0 010-1.085l5.5-5.25a.75.75 0 011.06.025z" clipRule="evenodd" /></svg>
-	                </button>
-	                <button onClick={redo} disabled={!canRedo} className={`p-1.5 rounded border transition-colors ${!canRedo ? 'bg-slate-800 text-slate-600 border-slate-800 cursor-not-allowed' : 'bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white border-slate-700'}`} title="やり直し (Ctrl+Y / Ctrl+Shift+Z)">
-	                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5" style={{ transform: 'scaleX(-1)' }}><path fillRule="evenodd" d="M7.793 2.232a.75.75 0 01-.025 1.06L3.622 7.25h10.003a5.375 5.375 0 010 10.75H10.75a.75.75 0 010-1.5h2.875a3.875 3.875 0 000-7.75H3.622l4.146 3.957a.75.75 0 01-1.036 1.085l-5.5-5.25a.75.75 0 010-1.085l5.5-5.25a.75.75 0 011.06.025z" clipRule="evenodd" /></svg>
-	                </button>
-	              </div>
+		              <button
+		                type="button"
+		                role="menuitem"
+		                onClick={() => {
+		                  setOpenTopMenu(null);
+		                  handleSaveNamedProject();
+		                }}
+		                disabled={isSavingNamed}
+		                className="idle-portal-menu-item w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between gap-3"
+		              >
+		                <span className="flex items-center gap-2">{isSavingNamed ? <span className="animate-spin">↻</span> : null}名前をつけて保存</span>
+		                <span className="idle-portal-menu-muted text-[10px]">local</span>
+		              </button>
+
+		              <div className="h-px bg-black/10 my-1" />
+
+		              <button
+		                type="button"
+		                role="menuitem"
+		                onClick={() => {
+		                  setOpenTopMenu(null);
+		                  onOpenProjectManager?.();
+		                }}
+		                disabled={!onOpenProjectManager}
+		                className="idle-portal-menu-item w-full text-left px-3 py-2 text-xs rounded-lg"
+		              >
+		                プロジェクト管理
+		              </button>
+		            </div>
+		          ) : (
+		            <div role="menu" className="idle-portal-menu w-56 rounded-xl p-1">
+		              <button
+		                type="button"
+		                role="menuitem"
+		                onClick={() => {
+		                  setOpenTopMenu(null);
+		                  undo();
+		                }}
+		                disabled={!canUndo}
+		                className="idle-portal-menu-item w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between gap-3"
+		              >
+		                <span>元に戻す</span>
+		                <span className="idle-portal-menu-muted text-[10px]">Ctrl+Z</span>
+		              </button>
+		              <button
+		                type="button"
+		                role="menuitem"
+		                onClick={() => {
+		                  setOpenTopMenu(null);
+		                  redo();
+		                }}
+		                disabled={!canRedo}
+		                className="idle-portal-menu-item w-full text-left px-3 py-2 text-xs rounded-lg flex items-center justify-between gap-3"
+		              >
+		                <span>やり直し</span>
+		                <span className="idle-portal-menu-muted text-[10px]">Ctrl+Y</span>
+		              </button>
+		            </div>
+		          )}
+		        </div>,
+		        document.body
+		      )}
+
+		      <div className="w-full h-full flex flex-row gap-3 relative">
+		        {/* Left Column: 3 cards (Top controls / Grid / Timeline) */}
+			        <div className="flex-1 flex flex-col min-w-0 h-full gap-3">
+			          {/* Card 1: Buttons + Global settings + Add slide */}
+			          <div className="editor-glass editor-glass--mid rounded-2xl border border-white/10 shadow-2xl overflow-visible flex-none idle-sidebar-typography">
+			            <div className="editor-glass-pane editor-glass-pane--strong flex-none flex justify-between items-center p-3 border-b border-slate-800 bg-transparent overflow-x-auto gap-4 scrollbar-hide">
+				              <div ref={topMenuRef} className="flex items-center gap-2 flex-shrink-0">
+				                <input type="file" ref={projectInputRef} accept=".json" className="hidden" onChange={handleImportProject} />
+
+				                <div className="relative">
+			                  <button
+			                    ref={fileMenuBtnRef}
+			                    type="button"
+			                    onClick={() => setOpenTopMenu((v) => (v === 'file' ? null : 'file'))}
+			                    className="px-3 py-1.5 bg-slate-800/70 hover:bg-slate-700/70 text-slate-200 hover:text-white text-xs font-bold rounded border border-white/10 transition-colors flex items-center gap-1 whitespace-nowrap"
+			                    aria-haspopup="menu"
+			                    aria-expanded={openTopMenu === 'file'}
+			                  >
+			                    ファイル <span className="text-[10px] opacity-70">▾</span>
+			                  </button>
+				                </div>
+
+				                <div className="relative">
+			                  <button
+			                    ref={editMenuBtnRef}
+			                    type="button"
+			                    onClick={() => setOpenTopMenu((v) => (v === 'edit' ? null : 'edit'))}
+			                    className="px-3 py-1.5 bg-slate-800/70 hover:bg-slate-700/70 text-slate-200 hover:text-white text-xs font-bold rounded border border-white/10 transition-colors flex items-center gap-1 whitespace-nowrap"
+			                    aria-haspopup="menu"
+			                    aria-expanded={openTopMenu === 'edit'}
+			                  >
+			                    編集 <span className="text-[10px] opacity-70">▾</span>
+			                  </button>
+				                </div>
+				              </div>
 
 	              <div className="flex gap-2 items-center flex-shrink-0">
 	                <button onClick={() => setIsPreviewOpen(true)} className="flex items-center gap-1.5 px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded shadow transition-colors whitespace-nowrap"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5"><path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" /></svg><span className="hidden sm:inline">全画面</span>プレビュー</button>

@@ -67,6 +67,29 @@ body {
   100% { width: 100%; }
 }
 
+/* Portal menus (body直下に出すやつ): IDLEの“白ガラス”と見た目を合わせる */
+.idle-portal-menu {
+  background: rgba(255, 255, 255, 0.26);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+  color: rgba(15, 23, 42, 0.92);
+}
+.idle-portal-menu-item {
+  color: rgba(15, 23, 42, 0.78);
+}
+.idle-portal-menu-item:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: rgba(15, 23, 42, 0.92);
+}
+.idle-portal-menu-item:disabled {
+  color: rgba(15, 23, 42, 0.58);
+}
+.idle-portal-menu-muted {
+  color: rgba(15, 23, 42, 0.5);
+}
+
 /* --- Custom Palette Override (Tailwind utility overrides) ------ */
 /* Base surfaces */
 .bg-slate-950 { background-color: var(--bg-950) !important; }
