@@ -2,10 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
+/* --- Global Theme Tokens -------------------------------------- */
+:root {
+  --bg-950: #0b1220;
+  --bg-900: #0e1a2b;
+  --bg-800: #14233a;
+  --bg-700: #1d2a3d;
+  --border-800: #1f2937;
+  --border-700: #243349;
+  --text-main: #e5e7eb;
+  --text-sub: #9ca3af;
+  --text-muted: #6b7280;
+  --accent-primary: #16a34a;
+  --accent-primary-hover: #22c55e;
+  --accent-ring: #0ea5e9;
+  --accent-info: #0ea5e9;
+  --accent-danger: #ef4444;
+  --accent-danger-border: #b91c1c;
+
+  --theme-shadow-card: 0 10px 25px -12px rgba(0, 0, 0, 0.45);
+
+  --theme-scrollbar-size: 8px;
+  --theme-scrollbar-track: #1e293b;
+  --theme-scrollbar-thumb: #475569;
+  --theme-scrollbar-thumb-hover: #64748b;
+  --theme-scrollbar-radius: 4px;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-900);
+  color: var(--text-main);
+}
+
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+  width: var(--theme-scrollbar-size);
+  height: var(--theme-scrollbar-size);
+}
+::-webkit-scrollbar-track {
+  background: var(--theme-scrollbar-track);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--theme-scrollbar-thumb);
+  border-radius: var(--theme-scrollbar-radius);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--theme-scrollbar-thumb-hover);
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+@keyframes progress {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* --- Custom Palette Override (Tailwind utility overrides) ------ */
+/* Base surfaces */
+.bg-slate-950 { background-color: var(--bg-950) !important; }
+.bg-slate-900 { background-color: var(--bg-900) !important; }
+.bg-slate-800 { background-color: var(--bg-800) !important; }
+.bg-slate-700 { background-color: var(--bg-700) !important; }
+
+/* Borders */
+.border-slate-800 { border-color: var(--border-800) !important; }
+.border-slate-700 { border-color: var(--border-700) !important; }
+
+/* Text */
+.text-slate-100, .text-slate-200 { color: var(--text-main) !important; }
+.text-slate-300 { color: #cbd5e1 !important; }
+.text-slate-400 { color: var(--text-sub) !important; }
+.text-slate-500 { color: var(--text-muted) !important; }
+
+/* Primary (emerald) */
+.bg-emerald-600 { background-color: var(--accent-primary) !important; }
+.bg-emerald-500, .hover\:bg-emerald-500:hover { background-color: var(--accent-primary-hover) !important; }
+.border-emerald-600 { border-color: var(--accent-primary) !important; }
+.text-emerald-400 { color: var(--accent-primary) !important; }
+
+/* Info (blue) */
+.bg-blue-600 { background-color: #2563eb !important; }
+.hover\:bg-blue-500:hover { background-color: #3b82f6 !important; }
+.text-blue-400 { color: #60a5fa !important; }
+
+/* Danger */
+.bg-red-500 { background-color: var(--accent-danger) !important; }
+.hover\:bg-red-500:hover { background-color: #f87171 !important; }
+.border-red-600 { border-color: var(--accent-danger-border) !important; }
+
+/* Rings / focus */
+.focus\:ring-emerald-500:focus { --tw-ring-color: var(--accent-ring) !important; }
+.focus\:ring-blue-500:focus { --tw-ring-color: var(--accent-ring) !important; }
+
+/* Cards shadow subtle tweak */
+.shadow, .shadow-md, .shadow-lg {
+  box-shadow: var(--theme-shadow-card);
+}
+
 /* IDLE（最初の画面）だけ Apple寄せの“ガラス素材”を当てる用
-	   - レイアウトは変えない（見た目だけ）
-	   - Tailwind全体の色上書きはしない（事故防止）
-	*/
+		   - レイアウトは変えない（見た目だけ）
+		   - Tailwind全体の色上書きはしない（事故防止）
+		*/
 
 /* Safariだけ“ゆがみ”をOFF（ちらつき対策） */
 .browser-safari .screen-idle .glass-thin::after,
@@ -16,10 +123,10 @@
   filter: none !important;
 }
 
-.screen-idle {
-  --idle-bg-color: #ffffff;
-  --idle-bg-image: url('/Doc/IMG_9349_BG.webp');
-  --idle-bg-position: center;
+	.screen-idle {
+	  --idle-bg-color: #ffffff;
+	  --idle-bg-image: url('/Doc/IMG_9349_BG.webp');
+	  --idle-bg-position: center;
   --idle-bg-size: cover;
   --idle-bg-repeat: no-repeat;
   background-color: var(--idle-bg-color);
@@ -28,22 +135,25 @@
   background-size: var(--idle-bg-size);
   background-repeat: var(--idle-bg-repeat);
   --idle-text-primary: rgba(15, 23, 42, 0.92);
-  --idle-text-secondary: rgba(15, 23, 42, 0.78);
-  --idle-text-muted: rgba(15, 23, 42, 0.62);
-  --idle-text-faint: rgba(15, 23, 42, 0.5);
-  /* 共通ガラス（白系）: IDLE/編集で同じ値を使う */
-  --idle-glass-sat: 180%;
-  --idle-glass-bg-thin: rgba(255, 255, 255, 0.1);
-  --idle-glass-bg: rgba(255, 255, 255, 0.14);
-  --idle-glass-bg-strong: rgba(255, 255, 255, 0.18);
-  --idle-glass-blur-thin: 6px;
-  --idle-glass-blur: 8px;
-  --idle-glass-blur-strong: 10px;
-  --idle-glass-shine: rgba(255, 255, 255, 0.6);
-  --idle-glass-inner-glow: rgba(255, 255, 255, 1);
+	  --idle-text-secondary: rgba(15, 23, 42, 0.78);
+	  --idle-text-muted: rgba(15, 23, 42, 0.62);
+	  --idle-text-faint: rgba(15, 23, 42, 0.5);
+	  /* 共通ガラス（白系）: IDLE/編集で同じ値を使う */
+	  --idle-glass-sat: 160%;
+	  --idle-glass-bg-thin: rgba(255, 255, 255, 0.12);
+	  --idle-glass-bg: rgba(255, 255, 255, 0.18);
+	  --idle-glass-bg-strong: rgba(255, 255, 255, 0.26);
+	  --idle-glass-blur-thin: 7px;
+	  --idle-glass-blur: 10px;
+	  --idle-glass-blur-strong: 14px;
+	  --idle-glass-shine: rgba(255, 255, 255, 0.48);
+	  --idle-glass-inner-glow: rgba(255, 255, 255, 0.85);
+	  --idle-glass-border: rgba(255, 255, 255, 0.16);
+	  --idle-glass-divider: rgba(255, 255, 255, 0.18);
+	  --idle-glass-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
 
-  color: var(--idle-text-primary);
-}
+	  color: var(--idle-text-primary);
+	}
 
 /* 既存の dark palette override（index.html内）に負けないよう、IDLE範囲だけ文字色を戻す */
 .screen-idle .idle-surface .text-white {
@@ -201,18 +311,18 @@
 }
 
 /* EDITOR（スライド編集）: IDLEと同じ“ガラス素材”構造で当てる（レイアウトは触らない） */
-.screen-idle .editor-glass {
+	.screen-idle .editor-glass {
   /* 3段階：thin / mid / strong（中身が埋もれないように“濃さ”を変える） */
   --editor-glass-bg: var(--idle-glass-bg);
   --editor-glass-blur: var(--idle-glass-blur);
   --editor-glass-sat: var(--idle-glass-sat);
 
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: none !important;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-}
+	  position: relative;
+	  isolation: isolate;
+	  overflow: hidden;
+	  background: none !important;
+	  box-shadow: var(--idle-glass-shadow);
+	}
 .screen-idle .editor-glass.editor-glass--thin {
   --editor-glass-bg: var(--idle-glass-bg-thin);
   --editor-glass-blur: var(--idle-glass-blur-thin);
@@ -294,20 +404,20 @@
 .screen-idle .editor-glass .bg-slate-700.h-px,
 .screen-idle .editor-glass .bg-slate-700\/50.w-px,
 .screen-idle .editor-glass .bg-slate-700\/50.h-px,
-.screen-idle .editor-glass .bg-slate-800.w-px,
-.screen-idle .editor-glass .bg-slate-800.h-px {
-  background: rgba(255, 255, 255, 0.18) !important;
-}
+	.screen-idle .editor-glass .bg-slate-800.w-px,
+	.screen-idle .editor-glass .bg-slate-800.h-px {
+	  background: var(--idle-glass-divider) !important;
+	}
 
 /* 枠線もダークからヘアライン（白うっすら）へ寄せる */
 .screen-idle .editor-glass .border-slate-900,
 .screen-idle .editor-glass .border-slate-800,
 .screen-idle .editor-glass .border-slate-800\/50,
 .screen-idle .editor-glass .border-slate-700,
-.screen-idle .editor-glass .border-slate-700\/50,
-.screen-idle .editor-glass .border-slate-600 {
-  border-color: rgba(255, 255, 255, 0.16) !important;
-}
+	.screen-idle .editor-glass .border-slate-700\/50,
+	.screen-idle .editor-glass .border-slate-600 {
+	  border-color: var(--idle-glass-border) !important;
+	}
 
 /* EDITOR内の“中の面”用ガラス（3段階） */
 .screen-idle .editor-glass .editor-glass-pane {
@@ -499,16 +609,16 @@
 }
 
 /* 素材（3段階）：thin / normal / strong */
-.screen-idle .glass-thin,
-.screen-idle .glass,
-.screen-idle .glass-strong {
+	.screen-idle .glass-thin,
+	.screen-idle .glass,
+	.screen-idle .glass-strong {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  /* “本体は透明”にして、before/afterでガラスを作る（opacityは使わない） */
-  background: none !important;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
-}
+	  /* “本体は透明”にして、before/afterでガラスを作る（opacityは使わない） */
+	  background: none !important;
+	  box-shadow: var(--idle-glass-shadow);
+	}
 
 /* キーボードで選択された時の枠は、ガラスの邪魔になるので消す */
 .screen-idle .glass-thin:focus,
